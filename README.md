@@ -2,7 +2,7 @@
 
 | Student's name | SCIPER |
 | -------------- | ------ |
-| | |
+| Debajyoti Dasgupta | |
 | | |
 | | |
 
