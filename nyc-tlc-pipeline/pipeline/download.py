@@ -1,4 +1,4 @@
-"""Script 1: Download NYC TLC parquet files with async concurrency and resume support."""
+"""Download NYC TLC parquet files with async concurrency and resume support."""
 
 import asyncio
 import json

@@ -63,7 +63,7 @@ async function main() {
     const el = document.getElementById(id);
     if (!el) continue;
     try {
-      init(el, data);
+      await init(el, data);
     } catch (e) {
       console.error(`Failed to init ${id}:`, e);
       el.innerHTML = `<p style="color:var(--text-muted);padding:40px;">Chart failed to render. ${e.message}</p>`;
@@ -73,19 +73,39 @@ async function main() {
 
 function computeTotalTrips(data) {
   if (!data.tripsByMonth || !data.tripsByMonth.length) return 0;
-  return data.tripsByMonth.reduce((sum, d) => sum + (d.trip_count || 0), 0);
+  return data.tripsByMonth
+    .filter(d => isValidYM(d.year_month))
+    .reduce((sum, d) => sum + (d.trip_count || 0), 0);
+}
+
+function isValidYM(ym) {
+  if (!ym || typeof ym !== 'string') return false;
+  const parts = ym.split('-');
+  if (parts.length !== 2) return false;
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  return !isNaN(year) && !isNaN(month)
+    && year >= 2009 && year <= 2030
+    && month >= 1 && month <= 12;
 }
 
 function computeDateRange(data) {
   if (!data.tripsByMonth || !data.tripsByMonth.length) return '—';
-  const months = data.tripsByMonth.map(d => d.year_month).filter(Boolean).sort();
+  const months = data.tripsByMonth
+    .map(d => d.year_month)
+    .filter(isValidYM)
+    .sort();
   if (months.length === 0) return '—';
   return formatYearMonth(months[0]) + ' – ' + formatYearMonth(months[months.length - 1]);
 }
 
 function computeVehicleTypes(data) {
   if (!data.tripsByMonth || !data.tripsByMonth.length) return [];
-  return [...new Set(data.tripsByMonth.map(d => d.vehicle_type))].filter(Boolean).sort();
+  return [...new Set(
+    data.tripsByMonth
+      .filter(d => isValidYM(d.year_month))
+      .map(d => d.vehicle_type)
+  )].filter(Boolean).sort();
 }
 
 main();

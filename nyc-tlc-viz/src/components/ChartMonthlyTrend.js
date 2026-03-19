@@ -7,12 +7,49 @@ import * as d3 from 'd3';
 import { VEHICLE_COLORS, VEHICLE_LABELS } from '../utils/colors.js';
 import { formatYearMonth, formatCompact } from '../utils/format.js';
 
-const MARGIN = { top: 40, right: 120, bottom: 40, left: 80 };
+const MARGIN = { top: 40, right: 120, bottom: 60, left: 80 };
 const CTX_HEIGHT = 80;
 const CTX_MARGIN = { top: 10, right: 120, bottom: 20, left: 80 };
 const GAP = 24;
 const COVID_START = '2020-03';
 const COVID_END = '2020-06';
+
+/**
+ * Build a smart x-axis for the focus chart that adapts tick density to the
+ * visible time range: yearly ticks for multi-year spans, quarterly for
+ * 6-24 months, and monthly for shorter windows.
+ * @param {d3.ScaleTime} scale
+ * @returns {d3.Axis}
+ */
+function buildFocusAxis(scale) {
+  const [t0, t1] = scale.domain();
+  const months = (t1 - t0) / (1000 * 60 * 60 * 24 * 30.5);
+  if (months > 24) {
+    return d3.axisBottom(scale)
+      .ticks(d3.timeYear.every(1))
+      .tickFormat(d3.timeFormat('%Y'));
+  }
+  if (months > 6) {
+    return d3.axisBottom(scale)
+      .ticks(d3.timeMonth.every(3))
+      .tickFormat(d3.timeFormat('%b %Y'));
+  }
+  return d3.axisBottom(scale)
+    .ticks(d3.timeMonth.every(1))
+    .tickFormat(d3.timeFormat('%b %Y'));
+}
+
+/**
+ * Rotate x-axis tick labels 45° to prevent overlap.
+ * @param {d3.Selection} axisG
+ */
+function rotateTicks(axisG) {
+  axisG.selectAll('text')
+    .attr('transform', 'rotate(-40)')
+    .attr('text-anchor', 'end')
+    .attr('dx', '-0.5em')
+    .attr('dy', '0.4em');
+}
 
 /**
  * Parse a "YYYY-MM" string into a Date (first day of that month).
@@ -31,9 +68,30 @@ function parseYM(ym) {
  * @param {Array<Object>} data.tripsByMonth - Rows with vehicle_type,
  *   year_month, trip_count.
  */
+/** Year range covering the full TLC dataset with a small buffer. */
+const VALID_YEAR_MIN = 2009;
+const VALID_YEAR_MAX = 2030;
+
+/**
+ * Return true for a well-formed "YYYY-MM" string within the expected TLC range.
+ * Filters out corrupted timestamps (e.g. "2001-05", "2098-01", "NaT").
+ * @param {string} ym
+ * @returns {boolean}
+ */
+function isValidYM(ym) {
+  if (!ym || typeof ym !== 'string') return false;
+  const parts = ym.split('-');
+  if (parts.length !== 2) return false;
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  return !isNaN(year) && !isNaN(month)
+    && year >= VALID_YEAR_MIN && year <= VALID_YEAR_MAX
+    && month >= 1 && month <= 12;
+}
+
 export function init(containerEl, data) {
-  const raw = data.tripsByMonth;
-  if (!raw || !raw.length) return;
+  const raw = (data.tripsByMonth || []).filter(d => isValidYM(d.year_month));
+  if (!raw.length) return;
 
   const vehicleTypes = [...new Set(raw.map(d => d.vehicle_type))];
   const allMonths = [...new Set(raw.map(d => d.year_month))].sort();
@@ -147,12 +205,8 @@ export function init(containerEl, data) {
   const xAxisFocus = focus
     .append('g')
     .attr('transform', `translate(0,${innerFocusH})`)
-    .call(
-      d3
-        .axisBottom(xFocus)
-        .ticks(d3.timeMonth.every(Math.max(1, Math.round(allMonths.length / 12))))
-        .tickFormat(d3.timeFormat('%b %Y'))
-    );
+    .call(buildFocusAxis(xFocus))
+    .call(rotateTicks);
 
   const yAxisFocus = focus.append('g').call(
     d3.axisLeft(yFocus).ticks(6).tickFormat(formatCompact)
@@ -245,10 +299,9 @@ export function init(containerEl, data) {
     .append('g')
     .attr('transform', `translate(0,${innerCtxH})`)
     .call(
-      d3
-        .axisBottom(xContext)
-        .ticks(d3.timeMonth.every(Math.max(1, Math.round(allMonths.length / 8))))
-        .tickFormat(d3.timeFormat('%b %y'))
+      d3.axisBottom(xContext)
+        .ticks(d3.timeYear.every(2))
+        .tickFormat(d3.timeFormat('%Y'))
     );
 
   const brush = d3
@@ -283,12 +336,7 @@ export function init(containerEl, data) {
         .attr('x', (xFocus(covidStart) + xFocus(covidEnd)) / 2);
     }
 
-    xAxisFocus.call(
-      d3
-        .axisBottom(xFocus)
-        .ticks(d3.timeMonth.every(Math.max(1, Math.round(allMonths.length / 12))))
-        .tickFormat(d3.timeFormat('%b %Y'))
-    );
+    xAxisFocus.call(buildFocusAxis(xFocus)).call(rotateTicks);
   }
 
   const legendG = svg

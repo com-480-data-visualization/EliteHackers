@@ -1,6 +1,10 @@
-# NYC TLC Trip Record Data — Pipeline & Exploratory Dashboard
+# NYC TLC Trip Record Data — Data download, cleaning, preprocessing pipeline & Exploratory Dashboard
 
-A two-part project for analyzing New York City taxi and for-hire vehicle trip records: (1) a Python data pipeline that downloads, validates, cleans, profiles, and exports TLC trip data, and (2) a lightweight interactive web dashboard built with D3.js that renders exploratory data analysis visualizations from the pipeline's output.
+This directory contains:
+(1) a Python data pipeline that downloads, validates, cleans, profiles, and exports TLC trip data, and 
+(2) a lightweight interactive web dashboard built with D3.js that renders exploratory data analysis visualizations from the pipeline's output. 
+
+The data is available at the [NYC TLC Trip Record Data Portal](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
 
 ## Architecture Overview
 
@@ -24,18 +28,17 @@ TLC Data Portal (CDN)
        │
        ▼
   Dashboard (nyc-tlc-viz/)
-  ├── D3.js charts (9 EDA visualizations)
-  └── Reads CSV files via fetch()
+  └── Preliminary D3.js charts for EDA
 ```
 
 ## Prerequisites
 
 - **Python 3.11+** with pip
 - **Node.js 18+** with npm
-- **~10–15 GB disk space** for raw + processed data (depends on date range)
+- **~60 GB disk space** for raw + processed data (for 2015-2025 range)
 - **Mapbox token** (optional, for enhanced map styling)
 
-## Part 1: Pipeline Setup and Usage
+## Part 1: Data Download, Validation, Cleaning, Preprocessing & Export
 
 ```bash
 cd nyc-tlc-pipeline
@@ -45,12 +48,13 @@ pip install -r requirements.txt
 
 # Edit config.py to set your desired date range and vehicle types
 # Default: 2015-01 to 2025-11, vehicle types: yellow, green, fhv
+# We ignore FHVHV data (Uber/Lyft) by default due to its large size (~460 MB/month, 20M+ rows/month).
 
 # Run the full pipeline
 ./run_pipeline.sh
 
 # Or run individual scripts
-python pipeline/download.py      # Download parquet files
+python pipeline/download.py      # Download parquet files (might need to run multiple times to avoid overloading the request rate limit)
 python pipeline/validate.py      # Schema validation
 python pipeline/preprocess.py    # Cleaning + feature engineering
 python pipeline/profile.py       # Statistical profiling
@@ -60,12 +64,12 @@ python pipeline/export.py        # Export CSVs for dashboard
 **Output locations:**
 - `data/raw/` — Downloaded parquet files + manifest.json
 - `data/processed/` — Cleaned parquet files (snappy-compressed)
-- `data/exports/` — 11 aggregated CSV files for the dashboard
+- `data/exports/` — 11 aggregated CSV files for the EDA Dashboard
 - `reports/stats/` — Per-file validation JSON, profile markdown, dataset overview
 
-## Part 2: Dashboard Setup and Usage
+## Part 2: EDA Dashboard Setup and Usage
 
-> The pipeline must be run first — the dashboard reads from `data/exports/`.
+> The pipeline must be run first — the EDA Dashboard reads from `data/exports/`.
 
 ```bash
 cd nyc-tlc-viz
@@ -124,9 +128,9 @@ The dashboard will open at `http://localhost:3000`. Ensure the `nyc-tlc-pipeline
 
 1. **Hourly Trip Demand** — Multi-line chart showing when during the day people take taxis. Reveals distinct morning and evening peaks, with yellow taxis peaking during evening rush while FHV demand stays steadier.
 
-2. **Day of Week Distribution** — Grouped bar chart comparing ridership across the week. Weekend patterns differ strikingly from weekdays, with Saturday nights driving higher rideshare volumes.
+2. **Day of Week Distribution** — Grouped bar chart comparing ridership across the week. Similar patterns exist across vehicle types.
 
-3. **Monthly Trip Volume Trend** — Stacked area chart showing ridership over time. The COVID-19 impact (if data spans 2020) appears as a dramatic cliff. Recovery patterns differ by vehicle type.
+3. **Monthly Trip Volume Trend** — Stacked area chart showing ridership over time. The COVID-19 impact appears as a dramatic cliff.
 
 4. **Average Fare by Hour** — Combo chart with bars for fare and a line for tip percentage. Late-night rides tend to be most expensive; tipping patterns shift with time of day.
 
@@ -168,8 +172,4 @@ The dashboard will open at `http://localhost:3000`. Ensure the `nyc-tlc-pipeline
 - **FHV has less fare data:** For-hire vehicle records include only pickup/dropoff locations and times, not fare or tip information. Fare-related charts show only yellow and green taxis.
 - **Passenger count nulls:** Newer yellow/green taxi data (2019+) has significantly higher null rates in the `passenger_count` field due to privacy changes.
 - **CORS:** If serving the dashboard and CSV files from different origins, configure CORS headers appropriately. The default Vite dev server serves everything from the same origin.
-- **Memory:** The export step uses an incremental aggregation approach to avoid OOM, but profiling still loads one file at a time. Individual FHVHV files (if enabled) can exceed available memory.
 
-## License
-
-MIT

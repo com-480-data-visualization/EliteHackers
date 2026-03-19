@@ -1,7 +1,6 @@
 # === Data files (multi-GB parquet, CSV exports, shapefiles) ===
 nyc-tlc-pipeline/data/raw/
 nyc-tlc-pipeline/data/processed/
-nyc-tlc-pipeline/data/exports/
 
 # === Generated reports ===
 nyc-tlc-pipeline/reports/
@@ -9,6 +8,7 @@ nyc-tlc-pipeline/reports/
 # === Visualization dashboard ===
 nyc-tlc-viz/node_modules/
 nyc-tlc-viz/dist/
+nyc-tlc-viz/.env
 
 # === Python ===
 __pycache__/
@@ -21,6 +21,7 @@ build/
 .venv/
 venv/
 env/
+nyc-tlc-pipeline/push_to_hf.py
 
 # === OS files ===
 .DS_Store

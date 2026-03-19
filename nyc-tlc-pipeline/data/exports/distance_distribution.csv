@@ -1,0 +1,13 @@
+vehicle_type,distance_bucket,trip_count
+green,0-1 mi,14349573
+green,1-2 mi,19988287
+green,10-20 mi,2530286
+green,2-5 mi,21449520
+green,20+ mi,286799
+green,5-10 mi,8272923
+yellow,0-1 mi,183637583
+yellow,1-2 mi,262357706
+yellow,10-20 mi,44650585
+yellow,2-5 mi,220714143
+yellow,20+ mi,5618287
+yellow,5-10 mi,68592230

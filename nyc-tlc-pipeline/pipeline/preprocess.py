@@ -1,4 +1,4 @@
-"""Script 3: Clean raw parquet files and engineer features."""
+"""Clean raw parquet files and engineer features."""
 
 import os
 import sys

@@ -4,7 +4,7 @@
 | -------------- | ------ |
 | Debajyoti Dasgupta | |
 | Paola Biocchi | 340437 |
-| | |
+| Siba Smarak Panigrahi| 352339 |
 
 [Milestone 1](#milestone-1) • [Milestone 2](#milestone-2) • [Milestone 3](#milestone-3)
 
@@ -53,8 +53,12 @@ The target audience includes students, data enthusiasts, and individuals interes
 
 ### Exploratory Data Analysis
 
-> Pre-processing of the data set you chose
-> - Show some basic statistics and get insights about the data
+We write an automated pipeline to download, validate, clean, preprocess, and export the data from the [NYC TLC Trip Record Data Portal](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). We focus on a ten-year time period from Jan 2015 to Nov 2025 (with the main goals of capturing temporal data patterns across years as well observe interesting patterns during COVID-19 pandemic). Further, we use three taxi types: Yellow Taxi, Green Taxi, and For-Hire Vehicles (FHV). We ignore the For-Hire Vehicles Heavy Vehicles (FHVHV) due to its large size (~460 MB/month, 20M+ rows/month). Our pipeline is in the [nyc-tlc-pipeline](nyc-tlc-pipeline) directory. Overall, we automatically download the monthly Parquet files (which requires repeated runs with varying time intervals to avoid rate limits) and validate the raw schema. Next, we perform some basic cleaning of null values and preprocessing of the datetime and column names across different taxi types. This processed data is aggregated into CSV files for initial EDA explorations.
+
+The dataset contains about 1.37 billion trips and covering 123 taxi zones across a ten-year time period. Yellow taxis account for the largest share (786 M trips), followed by FHV (520 M) and green taxis (67 M). Monthly trip counts show strong pre‑COVID volumes through 2019, a dramatic collapse in 2020 (especially April–June), and a gradual recovery from 2021 onwards. Overall data quality is high but not perfect: some key fields have non‑trivial missing values, for example, shared ride information is null in about 22.81% of records, pickup and dropoff zone IDs are missing in 9.6% and 3.4% of trips respectively, along with 2.4% entries missing airport fee fields. These statistics highlight both the scale of NYC taxi usage over time and where analysts need to be cautious about gaps or changing coverage in specific columns.
+
+> Note: We observe a significant jump in the number of trips from June 2016 onwards due to the Errata about trip records (as mentioned on the official webpage), also reflected in the size of FHV-related parquet files.
+
 
 ### Related work
 

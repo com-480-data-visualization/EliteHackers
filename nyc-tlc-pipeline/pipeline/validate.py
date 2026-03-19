@@ -1,4 +1,4 @@
-"""Script 2: Schema validation and data integrity checks on downloaded parquet files."""
+"""Schema validation and data integrity checks on downloaded parquet files."""
 
 import json
 import os

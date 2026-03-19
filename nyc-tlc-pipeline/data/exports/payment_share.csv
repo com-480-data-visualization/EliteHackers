@@ -1,0 +1,12 @@
+vehicle_type,payment_type,trip_count,payment_label,share_pct
+green,1,33427817,Credit card,51.44
+green,2,31278587,Cash,48.13
+green,3,151623,No charge,0.23
+green,4,122070,Dispute,0.19
+green,5,2315,Unknown,0.0
+yellow,0,17614719,Other,2.24
+yellow,1,541459291,Credit card,68.93
+yellow,2,221723688,Cash,28.22
+yellow,3,2818064,No charge,0.36
+yellow,4,1954717,Dispute,0.25
+yellow,5,55,Unknown,0.0

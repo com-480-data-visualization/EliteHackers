@@ -1,0 +1,148 @@
+PU_borough,DO_borough,vehicle_type,trip_count
+Bronx,Bronx,fhv,25249099
+Bronx,Bronx,green,2660074
+Bronx,Bronx,yellow,661516
+Bronx,Brooklyn,fhv,519997
+Bronx,Brooklyn,green,75844
+Bronx,Brooklyn,yellow,85400
+Bronx,EWR,fhv,17272
+Bronx,EWR,green,320
+Bronx,EWR,yellow,328
+Bronx,Manhattan,fhv,6374690
+Bronx,Manhattan,green,842994
+Bronx,Manhattan,yellow,540373
+Bronx,Queens,fhv,1191619
+Bronx,Queens,green,99183
+Bronx,Queens,yellow,98853
+Bronx,Staten Island,fhv,20019
+Bronx,Staten Island,green,1490
+Bronx,Staten Island,yellow,1838
+Bronx,Unknown,fhv,794
+Bronx,Unknown,green,2609
+Bronx,Unknown,yellow,1767
+Brooklyn,Bronx,fhv,564135
+Brooklyn,Bronx,green,89460
+Brooklyn,Bronx,yellow,112484
+Brooklyn,Brooklyn,fhv,70402597
+Brooklyn,Brooklyn,green,17925553
+Brooklyn,Brooklyn,yellow,7378852
+Brooklyn,EWR,fhv,227293
+Brooklyn,EWR,green,13039
+Brooklyn,EWR,yellow,10732
+Brooklyn,Manhattan,fhv,12597697
+Brooklyn,Manhattan,green,3655157
+Brooklyn,Manhattan,yellow,3513021
+Brooklyn,Queens,fhv,8827759
+Brooklyn,Queens,green,1292107
+Brooklyn,Queens,yellow,941894
+Brooklyn,Staten Island,fhv,300959
+Brooklyn,Staten Island,green,15412
+Brooklyn,Staten Island,yellow,12735
+Brooklyn,Unknown,fhv,42154
+Brooklyn,Unknown,green,12629
+Brooklyn,Unknown,yellow,8234
+EWR,Bronx,fhv,411
+EWR,Bronx,green,4
+EWR,Bronx,yellow,16
+EWR,Brooklyn,fhv,9646
+EWR,Brooklyn,green,18
+EWR,Brooklyn,yellow,129
+EWR,EWR,fhv,621
+EWR,EWR,green,349
+EWR,EWR,yellow,21269
+EWR,Manhattan,fhv,68678
+EWR,Manhattan,green,44
+EWR,Manhattan,yellow,1273
+EWR,Queens,fhv,2853
+EWR,Queens,green,10
+EWR,Queens,yellow,323
+EWR,Staten Island,fhv,7060
+EWR,Staten Island,green,4
+EWR,Staten Island,yellow,67
+EWR,Unknown,fhv,97
+EWR,Unknown,green,3
+EWR,Unknown,yellow,473
+Manhattan,Bronx,fhv,7220809
+Manhattan,Bronx,green,1733284
+Manhattan,Bronx,yellow,3654657
+Manhattan,Brooklyn,fhv,14349490
+Manhattan,Brooklyn,green,192574
+Manhattan,Brooklyn,yellow,21563661
+Manhattan,EWR,fhv,1775959
+Manhattan,EWR,green,11019
+Manhattan,EWR,yellow,1423378
+Manhattan,Manhattan,fhv,120276822
+Manhattan,Manhattan,green,18797502
+Manhattan,Manhattan,yellow,657037516
+Manhattan,Queens,fhv,14080124
+Manhattan,Queens,green,578286
+Manhattan,Queens,yellow,25236157
+Manhattan,Staten Island,fhv,235181
+Manhattan,Staten Island,green,1695
+Manhattan,Staten Island,yellow,108286
+Manhattan,Unknown,fhv,43104
+Manhattan,Unknown,green,10401
+Manhattan,Unknown,yellow,498245
+Queens,Bronx,fhv,1129014
+Queens,Bronx,green,120056
+Queens,Bronx,yellow,983858
+Queens,Brooklyn,fhv,7501664
+Queens,Brooklyn,green,821789
+Queens,Brooklyn,yellow,7485261
+Queens,EWR,fhv,63077
+Queens,EWR,green,2270
+Queens,EWR,yellow,49755
+Queens,Manhattan,fhv,10511768
+Queens,Manhattan,green,1403774
+Queens,Manhattan,yellow,29582528
+Queens,Queens,fhv,39549287
+Queens,Queens,green,16269108
+Queens,Queens,yellow,13193305
+Queens,Staten Island,fhv,51730
+Queens,Staten Island,green,3112
+Queens,Staten Island,yellow,59915
+Queens,Unknown,fhv,20989
+Queens,Unknown,green,9317
+Queens,Unknown,yellow,59827
+Staten Island,Bronx,fhv,19890
+Staten Island,Bronx,green,768
+Staten Island,Bronx,yellow,1431
+Staten Island,Brooklyn,fhv,317127
+Staten Island,Brooklyn,green,4113
+Staten Island,Brooklyn,yellow,6982
+Staten Island,EWR,fhv,59865
+Staten Island,EWR,green,53
+Staten Island,EWR,yellow,150
+Staten Island,Manhattan,fhv,142976
+Staten Island,Manhattan,green,1271
+Staten Island,Manhattan,yellow,5049
+Staten Island,Queens,fhv,54531
+Staten Island,Queens,green,1651
+Staten Island,Queens,yellow,3821
+Staten Island,Staten Island,fhv,5122057
+Staten Island,Staten Island,green,7638
+Staten Island,Staten Island,yellow,13661
+Staten Island,Unknown,fhv,1324
+Staten Island,Unknown,green,32
+Staten Island,Unknown,yellow,74
+Unknown,Bronx,fhv,4311736
+Unknown,Bronx,green,1822
+Unknown,Bronx,yellow,15837
+Unknown,Brooklyn,fhv,3155509
+Unknown,Brooklyn,green,9275
+Unknown,Brooklyn,yellow,101114
+Unknown,EWR,fhv,22734
+Unknown,EWR,green,10
+Unknown,EWR,yellow,6368
+Unknown,Manhattan,fhv,1545032
+Unknown,Manhattan,green,8839
+Unknown,Manhattan,yellow,1476766
+Unknown,Queens,fhv,1763785
+Unknown,Queens,green,7216
+Unknown,Queens,yellow,137468
+Unknown,Staten Island,fhv,35833
+Unknown,Staten Island,green,30
+Unknown,Staten Island,yellow,614
+Unknown,Unknown,fhv,5583492
+Unknown,Unknown,green,20141
+Unknown,Unknown,yellow,7256709

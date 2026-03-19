@@ -1,0 +1,60 @@
+{
+  "generated_at": "2026-03-19T06:35:47.678467+00:00",
+  "exports": [
+    {
+      "filename": "trips_by_hour.csv",
+      "rows": 72,
+      "size_bytes": 1991
+    },
+    {
+      "filename": "trips_by_dow.csv",
+      "rows": 21,
+      "size_bytes": 568
+    },
+    {
+      "filename": "trips_by_month.csv",
+      "rows": 425,
+      "size_bytes": 8861
+    },
+    {
+      "filename": "trips_by_borough_od.csv",
+      "rows": 147,
+      "size_bytes": 4222
+    },
+    {
+      "filename": "top_pickup_zones.csv",
+      "rows": 50,
+      "size_bytes": 2017
+    },
+    {
+      "filename": "top_od_pairs.csv",
+      "rows": 100,
+      "size_bytes": 4339
+    },
+    {
+      "filename": "fare_by_hour.csv",
+      "rows": 48,
+      "size_bytes": 1280
+    },
+    {
+      "filename": "speed_by_hour.csv",
+      "rows": 48,
+      "size_bytes": 1033
+    },
+    {
+      "filename": "payment_share.csv",
+      "rows": 11,
+      "size_bytes": 389
+    },
+    {
+      "filename": "distance_distribution.csv",
+      "rows": 12,
+      "size_bytes": 314
+    },
+    {
+      "filename": "zone_trip_counts.csv",
+      "rows": 265,
+      "size_bytes": 11797
+    }
+  ]
+}

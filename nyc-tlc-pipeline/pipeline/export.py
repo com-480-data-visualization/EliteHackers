@@ -1,4 +1,4 @@
-"""Script 5: Export aggregated CSVs for the visualization dashboard.
+"""Export aggregated CSVs for the visualization dashboard.
 
 Uses an incremental/streaming approach — processes one parquet file at a time
 and accumulates lightweight aggregations, avoiding loading all data into memory.

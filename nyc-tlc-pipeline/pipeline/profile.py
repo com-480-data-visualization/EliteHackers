@@ -1,4 +1,4 @@
-"""Script 4: Statistical profiling and markdown report generation for processed files."""
+"""Statistical profiling and markdown report generation for processed files."""
 
 import os
 import sys
