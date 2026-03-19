@@ -22,6 +22,7 @@ build/
 venv/
 env/
 nyc-tlc-pipeline/push_to_hf.py
+nyc-tlc-pipeline/inspect_processed_parquet.py
 
 # === OS files ===
 .DS_Store
