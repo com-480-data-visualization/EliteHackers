@@ -1,0 +1,33 @@
+# === Data files (multi-GB parquet, CSV exports, shapefiles) ===
+nyc-tlc-pipeline/data/raw/
+nyc-tlc-pipeline/data/processed/
+nyc-tlc-pipeline/data/exports/
+
+# === Generated reports ===
+nyc-tlc-pipeline/reports/
+
+# === Visualization dashboard ===
+nyc-tlc-viz/node_modules/
+nyc-tlc-viz/dist/
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# === OS files ===
+.DS_Store
+Thumbs.db
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo

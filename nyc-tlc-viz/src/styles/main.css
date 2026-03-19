@@ -1,0 +1,317 @@
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-primary: #1a1a2e;
+  --text-secondary: #555;
+  --text-muted: #999;
+  --border-color: #e0e0e0;
+  --accent: #3498db;
+  --accent-hover: #2980b9;
+  --nav-bg: #1a1a2e;
+  --nav-text: #ffffff;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  --section-number: #e8e8ec;
+  --tooltip-bg: rgba(26, 26, 46, 0.95);
+  --tooltip-text: #ffffff;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-card: #1c2128;
+    --text-primary: #e6edf3;
+    --text-secondary: #9ea7b3;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --card-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    --section-number: #21262d;
+    --tooltip-bg: rgba(13, 17, 23, 0.95);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* Navigation */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--nav-bg);
+  color: var(--nav-text);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+
+.nav__title {
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+  margin-right: 24px;
+}
+
+.nav__links {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  flex: 1;
+  scrollbar-width: none;
+}
+
+.nav__links::-webkit-scrollbar { display: none; }
+
+.nav__link {
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav__link:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.nav__badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin-left: auto;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.nav__loading {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Data loaded banner */
+.data-banner {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 24px;
+  display: none;
+  align-items: center;
+  gap: 24px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.data-banner.visible { display: flex; }
+
+.data-banner__stat {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.data-banner__value {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+/* Main content */
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+/* Section cards */
+.viz-section {
+  margin-bottom: 48px;
+}
+
+.viz-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.viz-card__number {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--section-number);
+  line-height: 1;
+  pointer-events: none;
+  font-family: var(--font-mono);
+}
+
+.viz-card__header {
+  margin-left: 60px;
+  margin-bottom: 20px;
+}
+
+.viz-card__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.viz-card__desc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.viz-card__chart {
+  width: 100%;
+  min-height: 400px;
+  position: relative;
+}
+
+/* Controls */
+.viz-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.viz-controls label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.viz-controls select {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.viz-controls button {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.viz-controls button:hover {
+  background: var(--bg-secondary);
+}
+
+.viz-controls button.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* Tooltip shared styles */
+.chart-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--tooltip-bg);
+  color: var(--tooltip-text);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  z-index: 100;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.chart-tooltip.visible { opacity: 1; }
+
+/* SVG common styles */
+svg text {
+  fill: var(--text-secondary);
+  font-family: var(--font-sans);
+}
+
+svg .axis line,
+svg .axis path {
+  stroke: var(--border-color);
+}
+
+svg .axis text {
+  fill: var(--text-secondary);
+  font-size: 11px;
+}
+
+svg .grid line {
+  stroke: var(--border-color);
+  stroke-opacity: 0.5;
+  stroke-dasharray: 2,2;
+}
+
+svg .grid path { display: none; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav__title { font-size: 0.85rem; margin-right: 12px; }
+  .nav__links { gap: 2px; }
+  .nav__link { font-size: 0.7rem; padding: 4px 6px; }
+  .content { padding: 16px 12px 48px; }
+  .viz-card { padding: 20px 16px; }
+  .viz-card__number { font-size: 2rem; }
+  .viz-card__header { margin-left: 40px; }
+  .data-banner { flex-wrap: wrap; gap: 12px; }
+}
+
+@media (max-width: 375px) {
+  .viz-card__chart { min-height: 300px; }
+  .nav { padding: 0 12px; }
+}

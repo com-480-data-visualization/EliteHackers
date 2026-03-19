@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NYC TLC Trip Data — Exploratory Analysis</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet" />
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <span class="nav__title">NYC TLC Trip Data — Exploratory Analysis</span>
+    <div class="nav__links">
+      <a class="nav__link" href="#viz-1">01 Hourly</a>
+      <a class="nav__link" href="#viz-2">02 Day of Week</a>
+      <a class="nav__link" href="#viz-3">03 Monthly</a>
+      <a class="nav__link" href="#viz-4">04 Fares</a>
+      <a class="nav__link" href="#viz-5">05 Distance</a>
+      <a class="nav__link" href="#viz-6">06 Payments</a>
+      <a class="nav__link" href="#viz-7">07 Map</a>
+      <a class="nav__link" href="#viz-8">08 Borough OD</a>
+      <a class="nav__link" href="#viz-9">09 Speed</a>
+    </div>
+    <div class="nav__loading" id="loading-indicator">
+      <div class="nav__spinner"></div>
+      Loading data…
+    </div>
+    <span class="nav__badge" id="nav-badge" style="display:none;"></span>
+  </nav>
+
+  <div class="data-banner" id="data-banner">
+    <div class="data-banner__stat">
+      <span>Total trips:</span>
+      <span class="data-banner__value" id="banner-trips">—</span>
+    </div>
+    <div class="data-banner__stat">
+      <span>Date range:</span>
+      <span class="data-banner__value" id="banner-dates">—</span>
+    </div>
+    <div class="data-banner__stat">
+      <span>Vehicle types:</span>
+      <span class="data-banner__value" id="banner-types">—</span>
+    </div>
+  </div>
+
+  <main class="content">
+
+    <section class="viz-section" id="viz-1">
+      <div class="viz-card">
+        <div class="viz-card__number">01</div>
+        <div class="viz-card__header">
+          <h2 class="viz-card__title">Trip demand by hour of day</h2>
+          <p class="viz-card__desc">When during the day do people take taxis and rideshares? This line chart reveals the distinct demand curves for each vehicle type, with clear morning and evening peaks reflecting commuting patterns.</p>
+        </div>
+        <div class="viz-card__chart" id="chart-hourly"></div>
+      </div>
+    </section>
+
+    <section class="viz-section" id="viz-2">
+      <div class="viz-card">
+        <div class="viz-card__number">02</div>
+        <div class="viz-card__header">
+          <h2 class="viz-card__title">Day of week distribution</h2>
+          <p class="viz-card__desc">How does ridership vary across the week, and does the pattern differ by vehicle type? Look for weekend surges in rideshare demand versus weekday dominance of yellow taxis.</p>
+        </div>
+        <div class="viz-card__chart" id="chart-dow"></div>
+      </div>
+    </section>
+
+    <section class="viz-section" id="viz-3">
+      <div class="viz-card">
+        <div class="viz-card__number">03</div>
+        <div class="viz-card__header">
+          <h2 class="viz-card__title">Monthly trip volume trend</h2>
+          <p class="viz-card__desc">How has overall ridership changed over time? This stacked area chart shows the contribution of each vehicle type to total monthly trip volume. Use the brush below to zoom into any time window.</p>
+        </div>
+        <div class="viz-card__chart" id="chart-monthly"></div>
+      </div>
+    </section>
+
+    <section class="viz-section" id="viz-4">
+      <div class="viz-card">
+        <div class="viz-card__number">04</div>
+        <div class="viz-card__header">
+          <h2 class="viz-card__title">Average fare by hour of day</h2>
+          <p class="viz-card__desc">When are rides most expensive, and does tipping vary by time of day? Bars show average fare and the overlaid line tracks tip percentage — watch for late-night fare spikes and generous evening tippers.</p>
+        </div>
+        <div class="viz-card__chart" id="chart-fare"></div>
+      </div>
+    </section>
+
+    <section class="viz-section" id="viz-5">
+      <div class="viz-card">
+        <div class="viz-card__number">05</div>
+        <div class="viz-card__header">
+          <h2 class="viz-card__title">Trip distance distribution</h2>
+          <p class="viz-card__desc">What does a "typical" NYC trip look like? Most trips are short hops under 5 miles, but the log-scale view reveals a significant long tail of airport runs and outer-borough journeys.</p>
+        </div>
+        <div class="viz-card__chart" id="chart-distance"></div>
+      </div>
+    </section>
+
+    <section class="viz-section" id="viz-6">
+      <div class="viz-card">
+        <div class="viz-card__number">06</div>
+        <div class="viz-card__header">
+          <h2 class="viz-card__title">Payment method breakdown</h2>
+          <p class="viz-card__desc">How do riders pay, and has cash use declined? Credit cards dominate across all vehicle types, but the split varies — look for higher cash usage in green taxis serving outer boroughs.</p>
+        </div>
+        <div class="viz-card__chart" id="chart-payment"></div>
+      </div>
+    </section>
+
+    <section class="viz-section" id="viz-7">
+      <div class="viz-card">
+        <div class="viz-card__number">07</div>
+        <div class="viz-card__header">
+          <h2 class="viz-card__title">Pickup demand choropleth</h2>
+          <p class="viz-card__desc">Which parts of New York City generate the most taxi and rideshare demand? Midtown and Lower Manhattan dominate, but airport zones (JFK, LaGuardia) stand out as intense hotspots.</p>
+        </div>
+        <div class="viz-card__chart" id="chart-map" style="min-height:500px;"></div>
+      </div>
+    </section>
+
+    <section class="viz-section" id="viz-8">
+      <div class="viz-card">
+        <div class="viz-card__number">08</div>
+        <div class="viz-card__header">
+          <h2 class="viz-card__title">Borough origin-destination heatmap</h2>
+          <p class="viz-card__desc">Which borough pairs generate the most cross-borough trips? The diagonal shows intra-borough trips dominate, but Manhattan↔Brooklyn and Manhattan↔Queens corridors carry heavy cross-borough traffic.</p>
+        </div>
+        <div class="viz-card__chart" id="chart-borough"></div>
+      </div>
+    </section>
+
+    <section class="viz-section" id="viz-9">
+      <div class="viz-card">
+        <div class="viz-card__number">09</div>
+        <div class="viz-card__header">
+          <h2 class="viz-card__title">Average trip speed by hour</h2>
+          <p class="viz-card__desc">When is NYC traffic worst, as revealed by taxi speeds? The shaded band between average and median speed highlights the spread, with overnight hours showing the fastest travel and midday the slowest.</p>
+        </div>
+        <div class="viz-card__chart" id="chart-speed"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
