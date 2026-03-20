@@ -83,38 +83,32 @@ To serve this audience effectively, the project emphasizes clarity, interpretabi
 > Pre-processing of the data set you chose
 > - Show some basic statistics and get insights about the data
 
-To enable scalable analysis, we developed a data pipeline to automatically download and preprocess records from the [NYC TLC Trip Record Data Portal](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). The goal of this stage is to extract high-level patterns and validate data consistency before moving to more advanced visualizations.
+To enable scalable analysis, we developed a data pipeline to automatically download and preprocess the [NYC TLC Trip Record Data Portal](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). The goal of this stage is to extract high-level patterns and validate data consistency before moving to more advanced visualizations.
 
-Our analysis focuses on **three taxi categories**: Yellow Taxis, Green Taxis, and For-Hire Vehicles (FHVs). High-Volume FHVs were excluded due to their significantly larger storage footprint (_≈450 MB_ per file per month), which would substantially increase computational overhead.
+The analysis focuses on Yellow, Green, and FHV taxis, excluding High-Volume FHV due to computational constraints (High-Volume FHVs≈450 MB_ per file per month).
 
 **Data Pipeline and Preprocessing:** The pipeline ([nyc-tlc-pipeline](nyc-tlc-pipeline)) performs the following steps:
 1. Automated ingestion of monthly Parquet files
 2. Schema validation to ensure consistency across time
-3. Data cleaning, including handling of null values and removal of clearly invalid records
-4. Schema harmonization across taxi types. For example, aligning different datetime fields (`tpep_pickup_datetime`, `lpep_pickup_datetime`) into a unified `pickup_datetime`
-5. Standardization of column names and formats for downstream analysis
+3. Data cleaning (removal of null and invalid records)
+4. Schema harmonization across taxi types (e.g., unifying pickup timestamps and standardizing column names)
 
 A preview of the cleaned data is available for [Yellow Taxi (Jan 2015)](nyc-tlc-pipeline/data/preview/yellow_tripdata_2015-01_clean_preview.csv), and the full processed dataset is publicly hosted on [HuggingFace](https://huggingface.co/datasets/sibasmarakp/nyc-tlc-processed/tree/main/data).
 
-**Aggregation Strategy:** Given the scale of the dataset, we perform aggregation-based EDA to make exploration tractable. The processed data is summarized into CSV files, capturing key dimensions:
-* _Temporal aggregations_: trips by hour of day, day of week, and month
-* _Economic indicators_: fare and tip statistics over time
-* _Trip characteristics_: distribution of trip distances
-* _Behavioral signals_: payment method usage
-* _Spatial activity_: pickup and dropoff counts across taxi zones
+**Aggregation Strategy:** Given the scale of the dataset, we perform aggregation-based EDA to make exploration tractable. The processed data is summarized into CSV files, capturing key dimensions: trips over time (hour, day, month), fare and tip statistics, trip distance distributions, payment methods, and spatial activity across taxi zones.
 
 These aggregated views for EDA are visualized using interactive dashboards built with `D3.js` ([nyc-tlc-viz](nyc-tlc-viz)).
 
-**Key Observations:** The dataset spans approximately 1.37 billion trips over 10 years and covers 123 taxi zones. The distribution across taxi types includes 786M trips for _Yellow taxis_, 520M trips for _FHV_, and 67M trips for _Green taxis_.
+**Key Observations:** The dataset spans approximately 1.37 billion trips over 10 years and covers 123 taxi zones, with 786M _Yellow taxis_ trips, 520M _FHV_ trips, and 67M _Green taxis_ trips.
 
 Several high-level patterns emerge:
 * _Strong temporal seasonality_, with consistent peaks in pre-2020 years.
 * _A sharp and sustained decline_ in trip volume corresponding to the COVID-19 pandemic, pronounced between April and June 2020.
-* _Clear daily and weekly usage cycles_, indicating commuting and leisure-driven mobility patterns.
+* _Clear daily and weekly usage cycles_, indicating commuting and leisure behaviors.
 
 > Note: EDA visualizations are available in the [dashboard](nyc-tlc-viz/dashboard.md).
 
-**Data Quality Insights:** While overall data quality is high, several limitations must be accounted for. Missing values in key fields include 22.8% for shared ride indicators, 9.6% for pickup zone IDs, 3.4% for dropoff zone IDs, and 2.4% for airport fees. These gaps are not uniformly distributed and may introduce bias in specific analyses (e.g., spatial or shared mobility trends). As a result, careful filtering or imputation strategies are required depending on the task.
+**Data Quality Insights:** Missing values in key fields (e.g., 22.8% for shared ride indicators) which may bias some analyses (e.g., spatial or shared mobility trends). As a result, careful filtering or imputation strategies are required.
 
 **Limitations and Next Steps:** A notable issue arises with FHV data before June 2017: a substantial number of records are dropped during preprocessing. This aligns with known inconsistencies documented in the TLC data errata. To address this in future stages, we consider two possible directions:
 * Restrict analysis to post-2017 data for FHV, or
