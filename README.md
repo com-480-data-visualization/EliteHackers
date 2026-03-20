@@ -108,13 +108,7 @@ Several high-level patterns emerge:
 
 > Note: EDA visualizations are available in the [dashboard](nyc-tlc-viz/dashboard.md).
 
-**Data Quality Insights:** Missing values in key fields (e.g., 22.8% for shared ride indicators) which may bias some analyses (e.g., spatial or shared mobility trends). As a result, careful filtering or imputation strategies are required.
-
-**Limitations and Next Steps:** A notable issue arises with FHV data before June 2017: a substantial number of records are dropped during preprocessing. This aligns with known inconsistencies documented in the TLC data errata. To address this in future stages, we consider two possible directions:
-* Restrict analysis to post-2017 data for FHV, or
-* Focus primarily on the Yellow and Green taxi datasets, which exhibit higher consistency over time   
-
-For this initial milestone, we retain the full 10-year range to capture global trends, while acknowledging these limitations.
+**Data Quality Insights:** Missing values in key fields (e.g., 22.8% for shared ride indicators) which may bias some analyses (e.g., spatial or shared mobility trends). As a result, careful filtering or imputation strategies are required. Additionally, inconsistencies in FHV data before mid-2017 lead to data loss during preprocessing. To address this in future stages, we can restrict analysis to post-2017 data for FHV, or focus primarily on the Yellow and Green taxi datasets.
 
 
 ### Related work
