@@ -118,31 +118,24 @@ Several high-level patterns emerge:
 > - In case you are using a dataset that you have already explored in another context (ML or ADA course, semester project...), you are required to share the report of that work to outline the differences with the submission for this class.
 
 The NYC TLC dataset is used in both academic research and industry for analyzing urban mobility, demand forecasting, and transportation efficiency. Prior work typically falls into three main categories:
-* **Descriptive analytics and dashboards:** Platforms such as NYC Taxi & Limousine Commission reports and public dashboards provide aggregated statistics on trip volumes, revenue, and geographic distribution. These are often static or limited in interactivity.
-* **Predictive modeling and machine learning**: Some studies use this dataset for tasks such as demand prediction, travel time estimation, and surge-pricing modeling. These works focus on model performance rather than interpretability or visualization.
-* **Mobility and urban science research:** Academic works analyze spatial-temporal patterns, congestion, and human mobility behavior, often using clustering or network-based methods. However, these analyses are typically presented through static figures and lack interactive exploration.
-  
-In addition, several data journalism platforms (e.g., FiveThirtyEight) have explored subsets of the dataset, often focusing on specific questions such as tipping behavior or airport traffic.
+* **Descriptive analytics and dashboards:** They provide aggregated statistics (such as trip volumes, or revenues).
+* **Predictive modeling approaches**: They focus on model performance rather than interpretability (e.g. for demand prediction).
+* **Mobility and urban science research:** Academic works analyze spatial-temporal patterns.
+In addition, Data journalism platforms have also explored specific aspects like tipping behavior or airport traffic.
 
-**Limitations of Existing Work:** Despite the richness of prior analyses, most existing approaches exhibit at least one of the following limitations:
+Despite the richness of prior analyses, most existing approaches exhibit **at least one of the following limitations**:
 * Limited interactivity, restricting user-driven exploration
 * Narrow scope, focusing on isolated variables rather than integrated patterns
-* Lack of multi-scale analysis, failing to connect hourly, daily, and yearly trends
-* Minimal focus on anomalies or disruptions, such as the impact of COVID-19
+* Lack of multi-scale analysis
+* Minimal focus on anomalies or disruptions
 
-**Our Approach and Originality**: This project takes a visual analytics perspective, aiming to bridge the gap between large-scale data and intuitive understanding. The key distinguishing aspects are:
+This project takes a visual analytics perspective, aiming to bridge the gap between large-scale data and intuitive understanding. The key aspects are:
 * Multi-scale temporal analysis: We simultaneously explore patterns across hours, days, months, and years, enabling a unified view of mobility dynamics.
-* Integrated feature relationships: Rather than analyzing variables in isolation, we examine how trip distance, fare, passenger count, and time interact to shape behavior.
+* Integrated feature relationships: Rather than analyzing isolated variables, we examine how trip distance, fare, passenger count, and time interact to shape behavior.
 * Focus on anomalies and global events: We explicitly highlight disruptions such as the COVID-19 pandemic, treating them as first-class analytical features rather than noise.
-* Interactive, user-driven exploration: Our D3.js dashboards enable users to navigate among temporal, spatial, and economic dimensions seamlessly.
+* Interactive, user-driven exploration: Our D3.js dashboards enable users to navigate among temporal, spatial, and economic dimensions.
 
-**Sources of Inspiration:** The design of our visualizations draws inspiration from high-quality data storytelling and interactive visualization platforms, including:
-* The New York Times interactive graphics are known for their clarity and narrative-driven design
-* Observable notebooks, which emphasize interactivity and exploratory workflows
-* FiveThirtyEight, particularly for combining statistical rigor with accessible storytelling
-These sources influenced our focus on clean design, progressive disclosure of information, and intuitive user interaction.
-
-**Prior Work with This Dataset:** We have not used this dataset in prior coursework or projects. Therefore, this work is developed specifically for this visualization project, with a focus on exploratory analysis and interactive design rather than predictive modeling.
+The design is inspired by data storytelling platforms such as The New York Times and FiveThirtyEight, as well as Observable notebooks, which emphasize clarity, interactivity, narrative-driven designs, and progressive exploration.
 
 ## Milestone 2 (17th April, 5pm)
 
