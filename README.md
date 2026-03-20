@@ -83,32 +83,31 @@ To serve this audience effectively, the project emphasizes clarity, interpretabi
 > Pre-processing of the data set you chose
 > - Show some basic statistics and get insights about the data
 
-To enable scalable analysis, we developed a data pipeline to automatically download and preprocess the [NYC TLC Trip Record Data Portal](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). The goal of this stage is to extract high-level patterns and validate data consistency before moving to more advanced visualizations.
+To enable scalable analysis, we developed a pipeline to automatically download and preprocess the [NYC TLC Trip Record Data Portal](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). The goal is to extract high-level patterns and validate data consistency.
 
-The analysis focuses on Yellow, Green, and FHV taxis, excluding High-Volume FHV due to computational constraints (High-Volume FHVs≈450 MB_ per file per month).
+The analysis focuses on Yellow, Green, and FHV taxis, excluding High-Volume FHV due to computational constraints.
 
 **Data Pipeline and Preprocessing:** The pipeline ([nyc-tlc-pipeline](nyc-tlc-pipeline)) performs the following steps:
-1. Automated ingestion of monthly Parquet files
-2. Schema validation to ensure consistency across time
-3. Data cleaning (removal of null and invalid records)
-4. Schema harmonization across taxi types (e.g., unifying pickup timestamps and standardizing column names)
+1. Automated ingestion of Parquet files
+2. Schema validation to ensure time consistency
+3. Data cleaning
+4. Schema harmonization across taxi types (e.g., unifying pickup timestamps)
 
 A preview of the cleaned data is available for [Yellow Taxi (Jan 2015)](nyc-tlc-pipeline/data/preview/yellow_tripdata_2015-01_clean_preview.csv), and the full processed dataset is publicly hosted on [HuggingFace](https://huggingface.co/datasets/sibasmarakp/nyc-tlc-processed/tree/main/data).
 
-**Aggregation Strategy:** Given the scale of the dataset, we perform aggregation-based EDA to make exploration tractable. The processed data is summarized into CSV files, capturing key dimensions: trips over time (hour, day, month), fare and tip statistics, trip distance distributions, payment methods, and spatial activity across taxi zones.
+**Aggregation Strategy:** Given the scale of the dataset, we perform aggregation-based EDA to make exploration tractable. The processed data is summarized into CSV files, capturing key dimensions: trips over time, fare and tip statistics, trip distance distributions, payment methods, spatial activity across taxi zones.
 
-These aggregated views for EDA are visualized using interactive dashboards built with `D3.js` ([nyc-tlc-viz](nyc-tlc-viz)).
+These aggregated views are visualized using interactive dashboards built with `D3.js` ([nyc-tlc-viz](nyc-tlc-viz)).
 
-**Key Observations:** The dataset spans approximately 1.37 billion trips over 10 years and covers 123 taxi zones, with 786M _Yellow taxis_ trips, 520M _FHV_ trips, and 67M _Green taxis_ trips.
-
+**Key Observations:** The dataset spans approximately 1.37 billion trips over 10 years and covers 123 taxi zones (786M _Yellow taxis_ trips, 520M _FHV_ trips, and 67M _Green taxis_ trips).
 Several high-level patterns emerge:
-* _Strong temporal seasonality_, with consistent peaks in pre-2020 years.
-* _A sharp and sustained decline_ in trip volume corresponding to the COVID-19 pandemic, pronounced between April and June 2020.
+* _Strong temporal seasonality_ (consistent peaks in pre-2020 years)
+* _A sharp and sustained decline_ in trip volume corresponding to the COVID-19 pandemic
 * _Clear daily and weekly usage cycles_, indicating commuting and leisure behaviors.
 
 > Note: EDA visualizations are available in the [dashboard](nyc-tlc-viz/dashboard.md).
 
-**Data Quality Insights:** Missing values in key fields (e.g., 22.8% for shared ride indicators) which may bias some analyses (e.g., spatial or shared mobility trends). As a result, careful filtering or imputation strategies are required. Additionally, inconsistencies in FHV data before mid-2017 lead to data loss during preprocessing. To address this in future stages, we can restrict analysis to post-2017 data for FHV, or focus primarily on the Yellow and Green taxi datasets.
+**Data Quality Insights:** Missing values in key fields which may bias some analyses. As a result, careful filtering or imputation strategies are required. Additionally, inconsistencies in FHV data before mid-2017 lead to data loss during preprocessing : we can restrict analysis to post-2017 data for FHV, or focus on the Yellow and Green taxi datasets.
 
 
 ### Related work
