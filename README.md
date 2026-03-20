@@ -23,7 +23,7 @@ Please, fill the following sections about your project.
 >
 > Hint: some good pointers for finding quality publicly available datasets ([Google dataset search](https://datasetsearch.research.google.com/), [Kaggle](https://www.kaggle.com/datasets), [OpenSwissData](https://opendata.swiss/en/), [SNAP](https://snap.stanford.edu/data/) and [FiveThirtyEight](https://data.fivethirtyeight.com/)).
 
-The dataset selected for this project is the **New York City Taxi and Limousine Commission (TLC) Trip Record Data**, publicly available at: [NYC TLC Trips Data](https://home4.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
+The dataset selected for this project is the **New York City Taxi and Limousine Commission (TLC) Trip Record Data**, publicly available at [NYC TLC Trips Data](https://home4.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
 
 This dataset contains detailed trip-level records of taxi activity in New York City, including Yellow Taxis, Green Taxis, and For-Hire Vehicles (FHV). Each row corresponds to a single trip and captures temporal, spatial, and economic attributes, such as pickup and dropoff timestamps, trip distance, passenger count, geographic location identifiers, fare components, and total payment amount.
 
@@ -33,17 +33,17 @@ The data is distributed as monthly Parquet files, each containing millions of re
 * Consistent schema across time, with ~20 well-defined variables
 * Standardized data types (timestamps, numeric values, categorical location IDs)
 * High temporal granularity, enabling fine-grained analysis
-* Comprehensive coverage of a major metropolitan transportation system
+* Comprehensive coverage of a major metropolitan transportation system. 
 These characteristics make the dataset particularly suitable for visualization tasks involving temporal trends, spatial distributions, and demand fluctuations.
 
-**Preprocessing and Cleaning Requirements**: Despite its overall quality, the dataset requires non-trivial preprocessing to ensure analytical validity:
-* Missing values: Certain fields (e.g., passenger count or location IDs) may be incomplete
-* Invalid or unrealistic entries:
+**Preprocessing and Cleaning Requirements**: Despite its overall quality, it requires non-trivial preprocessing to ensure analytical validity:
+* **Missing values**: Certain fields (e.g., passenger count, location IDs, airport fees) may be incomplete
+* **Invalid or unrealistic entries**:
   * Zero or negative trip distances
   * Implausible passenger counts (e.g., 0 or excessively large values)
   * Fare amounts that are zero, negative, or inconsistent with the distance
-* Outliers: Extreme values may arise from sensor errors, data entry issues, or rare edge-case trips
-* Temporal inconsistencies: Occasional anomalies such as dropoff times preceding pickup times
+* **Outliers**: Extreme values may arise from sensor errors, data entry issues, or rare edge-case trips
+* **Temporal inconsistencies**: Occasional anomalies such as dropoff times preceding pickup times
 
 To address these issues, the preprocessing pipeline will include:
 * Filtering invalid or implausible records
@@ -67,6 +67,7 @@ To address this, the visualization will explore three main axes:
 * **Temporal dynamics**: how demand fluctuates across hours of the day, days of the week, and months of the year
 * **Trip characteristics**: relationships between distance, fare, and passenger count
 * **Behavioral patterns**: identifying typical vs. anomalous trips and detecting irregular spikes or drops in activity
+
 Additionally, the project will investigate traffic-driven insights, including peak congestion hours, commuting patterns, and differences in weekday and weekend mobility.
 
 **Motivation**: Urban transportation systems are a critical component of modern cities. Understanding how people move when, where, and under what conditions can provide valuable insights for improving infrastructure, optimizing traffic flow, and enhancing user experience. By leveraging a large-scale, real-world dataset, this project aims to bridge the gap between raw mobility data and actionable insights, highlighting patterns that are often hidden in high-dimensional data.
@@ -75,23 +76,27 @@ Additionally, the project will investigate traffic-driven insights, including pe
 * Urban planners and transportation analysts are interested in demand patterns and system efficiency
 * Policy makers and city stakeholders, who rely on data-driven insights for infrastructure and regulation decisions
 * Mobility and logistics professionals (e.g., ride-hailing, traffic management), seeking to understand usage trends and peak demand
-* Students and data practitioners, looking to explore real-world, large-scale data through intuitive visual interfaces
+* Students and data practitioners, looking to explore real-world, large-scale data through intuitive visual interfaces 
+
 To serve this audience effectively, the project emphasizes clarity, interpretability, and interactive exploration, enabling users to derive insights without requiring deep technical expertise.
 
 
 ### Exploratory Data Analysis (EDA)
+> Pre-processing of the data set you chose
+> - Show some basic statistics and get insights about the data
 
 To enable scalable analysis, we developed a data pipeline to automatically download and preprocess records from the [NYC TLC Trip Record Data Portal](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). The goal of this stage is to extract high-level patterns and validate data consistency before moving to more advanced visualizations.
 
-Our analysis focuses on **three taxi categories**: Yellow Taxis, Green Taxis, and For-Hire Vehicles (FHVs). High-Volume FHVs were excluded due to their significantly larger storage footprint (_≈450 MB_ per file per month), which would substantially increase computational overhead at this stage.
+Our analysis focuses on **three taxi categories**: Yellow Taxis, Green Taxis, and For-Hire Vehicles (FHVs). High-Volume FHVs were excluded due to their significantly larger storage footprint (_≈450 MB_ per file per month), which would substantially increase computational overhead.
 
-**Data Pipeline and Preprocessing:** The pipeline (nyc-tlc-pipeline) performs the following steps:
+**Data Pipeline and Preprocessing:** The pipeline ([nyc-tlc-pipeline](nyc-tlc-pipeline)) performs the following steps:
 1. Automated ingestion of monthly Parquet files
 2. Schema validation to ensure consistency across time
 3. Data cleaning, including handling of null values and removal of clearly invalid records
 4. Schema harmonization across taxi types. For example, aligning different datetime fields (`tpep_pickup_datetime`, `lpep_pickup_datetime`) into a unified `pickup_datetime`
 5. Standardization of column names and formats for downstream analysis
-A preview of the cleaned data is available for [Yellow Taxi (2015-01)](nyc-tlc-pipeline/data/preview/yellow_tripdata_2015-01_clean_preview.csv), and the full processed dataset is hosted on [HuggingFace](https://huggingface.co/datasets/sibasmarakp/nyc-tlc-processed/tree/main/data).
+
+A preview of the cleaned data is available for [Yellow Taxi (Jan 2015)](nyc-tlc-pipeline/data/preview/yellow_tripdata_2015-01_clean_preview.csv), and the full processed dataset is publicly hosted on [HuggingFace](https://huggingface.co/datasets/sibasmarakp/nyc-tlc-processed/tree/main/data).
 
 **Aggregation Strategy:** Given the scale of the dataset, we perform aggregation-based EDA to make exploration tractable. The processed data is summarized into CSV files, capturing key dimensions:
 * _Temporal aggregations_: trips by hour of day, day of week, and month
@@ -99,30 +104,25 @@ A preview of the cleaned data is available for [Yellow Taxi (2015-01)](nyc-tlc-p
 * _Trip characteristics_: distribution of trip distances
 * _Behavioral signals_: payment method usage
 * _Spatial activity_: pickup and dropoff counts across taxi zones
-These aggregated views are visualized using interactive dashboards built with D3.js, enabling efficient exploration of temporal and spatial trends.
 
-**Key Observations:** The dataset spans approximately 1.37 billion trips over 10 years and covers 123 taxi zones. The distribution across taxi types is as follows:
-* _Yellow taxis_: 786M trips
-* _For-Hire Vehicles (FHV)_: 520M trips
-* _Green taxis_: 67M trips
+These aggregated views for EDA are visualized using interactive dashboards built with `D3.js` ([nyc-tlc-viz](nyc-tlc-viz)).
+
+**Key Observations:** The dataset spans approximately 1.37 billion trips over 10 years and covers 123 taxi zones. The distribution across taxi types includes 786M trips for _Yellow taxis_, 520M trips for _FHV_, and 67M trips for _Green taxis_.
 
 Several high-level patterns emerge:
-* _Strong temporal seasonality_, with consistent peaks in pre-2020 years
-* _A sharp and sustained decline_ in trip volume during early 2020, corresponding to the COVID-19 pandemic (most pronounced between April and June)
-* _Clear daily and weekly usage cycles_, indicating commuting and leisure-driven mobility patterns
+* _Strong temporal seasonality_, with consistent peaks in pre-2020 years.
+* _A sharp and sustained decline_ in trip volume corresponding to the COVID-19 pandemic, pronounced between April and June 2020.
+* _Clear daily and weekly usage cycles_, indicating commuting and leisure-driven mobility patterns.
 
-**Data Quality Insights:** While overall data quality is high, several limitations must be accounted for:
-Missing values in key fields:
-* Shared ride indicators: ~22.8% missing.
-* Pickup zone IDs: ~9.6% missing.
-* Dropoff zone IDs: ~3.4% missing.
-* Airport fees: ~2.4% missing.
-These gaps are not uniformly distributed and may introduce bias in specific analyses (e.g., spatial or shared mobility trends). As a result, careful filtering or imputation strategies are required depending on the task.
+> Note: EDA visualizations are available in the [dashboard](nyc-tlc-viz/dashboard.md).
 
-**Limitations and Next Steps:** A notable issue arises with FHV data before June 2016: a substantial number of records are dropped during preprocessing. This aligns with known inconsistencies documented in the TLC data errata. To address this in future stages, we consider two possible directions:
-* Restrict analysis to post-2016 data for FHV, or
-* Focus primarily on the Yellow and Green taxi datasets, which exhibit higher consistency over time
-* For this initial milestone, we retain the full 10-year range to capture global trends, while acknowledging these limitations.
+**Data Quality Insights:** While overall data quality is high, several limitations must be accounted for. Missing values in key fields include 22.8% for shared ride indicators, 9.6% for pickup zone IDs, 3.4% for dropoff zone IDs, and 2.4% for airport fees. These gaps are not uniformly distributed and may introduce bias in specific analyses (e.g., spatial or shared mobility trends). As a result, careful filtering or imputation strategies are required depending on the task.
+
+**Limitations and Next Steps:** A notable issue arises with FHV data before June 2017: a substantial number of records are dropped during preprocessing. This aligns with known inconsistencies documented in the TLC data errata. To address this in future stages, we consider two possible directions:
+* Restrict analysis to post-2017 data for FHV, or
+* Focus primarily on the Yellow and Green taxi datasets, which exhibit higher consistency over time   
+
+For this initial milestone, we retain the full 10-year range to capture global trends, while acknowledging these limitations.
 
 
 ### Related work

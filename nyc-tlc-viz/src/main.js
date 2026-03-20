@@ -53,11 +53,23 @@ async function main() {
     { id: 'chart-monthly', init: initMonthly },
     { id: 'chart-fare', init: initFare },
     { id: 'chart-distance', init: initDistance },
-    { id: 'chart-payment', init: initPayment },
     { id: 'chart-map', init: initMap },
     { id: 'chart-borough', init: initBorough },
-    { id: 'chart-speed', init: initSpeed },
   ];
+
+  // If the export is empty, hide the corresponding viz card so the UI
+  // doesn't show blank "null" plots.
+  if (data.paymentShare && data.paymentShare.length > 0) {
+    vizConfigs.push({ id: 'chart-payment', init: initPayment });
+  } else {
+    document.getElementById('viz-6')?.style && (document.getElementById('viz-6').style.display = 'none');
+  }
+
+  if (data.speedByHour && data.speedByHour.length > 0) {
+    vizConfigs.push({ id: 'chart-speed', init: initSpeed });
+  } else {
+    document.getElementById('viz-9')?.style && (document.getElementById('viz-9').style.display = 'none');
+  }
 
   for (const { id, init } of vizConfigs) {
     const el = document.getElementById(id);

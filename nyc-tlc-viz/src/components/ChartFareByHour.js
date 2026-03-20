@@ -8,7 +8,9 @@ import { VEHICLE_LABELS, TIME_COLORS, getTimeCategory } from '../utils/colors.js
 import { formatUSD, formatPct, formatHour } from '../utils/format.js';
 
 const MARGIN = { top: 40, right: 60, bottom: 50, left: 60 };
-const VEHICLE_OPTIONS = ['yellow', 'green', 'fhvhv'];
+// `fhv` is the aggregated For-Hire Vehicle category present in the default pipeline dataset.
+// `fhvhv` (high-volume FHV) may be excluded upstream due to size.
+const VEHICLE_OPTIONS = ['yellow', 'green', 'fhv'];
 
 /**
  * Initialize the fare-by-hour combo chart inside the given container.
@@ -195,11 +197,17 @@ export function init(containerEl, data) {
     ];
 
     const legend = g.append('g')
-      .attr('transform', `translate(${innerW - 180}, -25)`);
+      // Move legend slightly left and adjust row/column spacing to avoid
+      // collisions with the right y-axis tick labels.
+      .attr('transform', `translate(${innerW - 290}, -25)`);
 
+    const colW = 130;
+    const rowH = 18;
     legendData.forEach((item, i) => {
+      const col = i % 2;
+      const row = Math.floor(i / 2);
       const lg = legend.append('g')
-        .attr('transform', `translate(${i < 2 ? 0 : 110}, ${(i % 2 === 0 ? 0 : 14) + (i >= 4 ? 14 : 0)})`);
+        .attr('transform', `translate(${col * colW}, ${row * rowH})`);
       if (item.isLine) {
         lg.append('line')
           .attr('x1', 0).attr('x2', 16).attr('y1', 5).attr('y2', 5)

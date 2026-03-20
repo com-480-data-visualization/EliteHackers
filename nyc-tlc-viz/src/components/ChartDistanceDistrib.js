@@ -9,7 +9,9 @@ import { formatNumber, formatPct } from '../utils/format.js';
 
 const MARGIN = { top: 40, right: 90, bottom: 50, left: 100 };
 const BUCKET_ORDER = ['0-1 mi', '1-2 mi', '2-5 mi', '5-10 mi', '10-20 mi', '20+ mi'];
-const VEHICLE_TYPES = ['yellow', 'green', 'fhvhv'];
+// `fhv` is the aggregated For-Hire Vehicle category present in the default pipeline dataset.
+// `fhvhv` (high-volume FHV) may be excluded upstream due to size.
+const VEHICLE_TYPES = ['yellow', 'green', 'fhv'];
 
 /**
  * Initialize the trip-distance distribution chart inside the given container.
@@ -40,19 +42,6 @@ export function init(containerEl, data) {
   toggleBtn.addEventListener('mouseenter', () => { toggleBtn.style.background = '#e0e0e0'; });
   toggleBtn.addEventListener('mouseleave', () => { toggleBtn.style.background = '#f5f5f5'; });
   controls.appendChild(toggleBtn);
-
-  const legendContainer = document.createElement('div');
-  legendContainer.style.cssText = 'display:flex;gap:12px;margin-left:auto;';
-  VEHICLE_TYPES.forEach(v => {
-    const item = document.createElement('span');
-    item.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:12px;';
-    const swatch = document.createElement('span');
-    swatch.style.cssText = `width:12px;height:12px;border-radius:2px;background:${VEHICLE_COLORS[v]};display:inline-block;`;
-    item.appendChild(swatch);
-    item.appendChild(document.createTextNode(VEHICLE_LABELS[v]));
-    legendContainer.appendChild(item);
-  });
-  controls.appendChild(legendContainer);
   wrapper.appendChild(controls);
 
   const svgContainer = document.createElement('div');
@@ -70,6 +59,21 @@ export function init(containerEl, data) {
   vehicleTypesInData.forEach(v => {
     totalByVehicle[v] = d3.sum(rows.filter(d => d.vehicle_type === v), d => d.trip_count);
   });
+
+  // Legend should reflect what's actually present in the export data.
+  // This avoids showing FHV when there are no bars for it.
+  const legendContainer = document.createElement('div');
+  legendContainer.style.cssText = 'display:flex;gap:12px;margin-left:auto;';
+  vehicleTypesInData.forEach(v => {
+    const item = document.createElement('span');
+    item.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:12px;';
+    const swatch = document.createElement('span');
+    swatch.style.cssText = `width:12px;height:12px;border-radius:2px;background:${VEHICLE_COLORS[v]};display:inline-block;`;
+    item.appendChild(swatch);
+    item.appendChild(document.createTextNode(VEHICLE_LABELS[v] || v));
+    legendContainer.appendChild(item);
+  });
+  controls.appendChild(legendContainer);
 
   function render() {
     svgContainer.innerHTML = '';

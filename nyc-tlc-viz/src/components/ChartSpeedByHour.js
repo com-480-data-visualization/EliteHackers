@@ -7,8 +7,8 @@ import * as d3 from 'd3';
 import { VEHICLE_COLORS, VEHICLE_LABELS } from '../utils/colors.js';
 import { formatHour } from '../utils/format.js';
 
-const VEHICLE_KEYS = ['yellow', 'green', 'fhvhv'];
-const MARGIN = { top: 30, right: 30, bottom: 46, left: 52 };
+const PREFERRED_VEHICLE_ORDER = ['yellow', 'green', 'fhv'];
+const MARGIN = { top: 30, right: 30, bottom: 46, left: 72 };
 const CONGESTED_SPEED = 15;
 const TOOLTIP_BG = 'rgba(30,30,30,0.92)';
 
@@ -21,6 +21,23 @@ export function init(containerEl, data) {
   const rows = data.speedByHour || [];
   containerEl.innerHTML = '';
   containerEl.style.position = 'relative';
+
+  if (rows.length === 0) {
+    containerEl.textContent = 'No speed-by-hour data available.';
+    return;
+  }
+
+  const availableVehicleTypes = [...new Set(rows.map(r => r.vehicle_type))]
+    .filter(Boolean);
+  const VEHICLE_KEYS = PREFERRED_VEHICLE_ORDER
+    .filter(v => availableVehicleTypes.includes(v));
+  if (VEHICLE_KEYS.length === 0) {
+    VEHICLE_KEYS.push(...availableVehicleTypes);
+  }
+  if (VEHICLE_KEYS.length === 0) {
+    containerEl.textContent = 'No speed-by-hour vehicle data available.';
+    return;
+  }
 
   const visible = {};
   for (const vt of VEHICLE_KEYS) visible[vt] = true;
@@ -141,7 +158,8 @@ export function init(containerEl, data) {
       .text('Hour of Day');
 
     g.append('text')
-      .attr('transform', `translate(-38,${innerH / 2}) rotate(-90)`)
+      // Push label further left to avoid overlap with y-axis tick labels.
+      .attr('transform', `translate(-58,${innerH / 2}) rotate(-90)`)
       .attr('text-anchor', 'middle')
       .attr('font-size', '12px')
       .attr('fill', '#666')

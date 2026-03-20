@@ -7,7 +7,7 @@ import * as d3 from 'd3';
 import { VEHICLE_LABELS, PAYMENT_COLORS } from '../utils/colors.js';
 import { formatNumber, formatPct, formatCompact } from '../utils/format.js';
 
-const VEHICLE_OPTIONS = ['yellow', 'green', 'fhvhv'];
+const PREFERRED_VEHICLE_ORDER = ['yellow', 'green', 'fhv'];
 
 /**
  * Initialize the payment-split donut chart and table inside the given container.
@@ -19,6 +19,17 @@ export function init(containerEl, data) {
   if (!rows || rows.length === 0) {
     containerEl.textContent = 'No payment share data available.';
     return;
+  }
+
+  const availableVehicleTypes = [...new Set(rows.map(d => d.vehicle_type))]
+    .filter(Boolean);
+  const VEHICLE_OPTIONS = PREFERRED_VEHICLE_ORDER
+    .filter(v => availableVehicleTypes.includes(v));
+  if (VEHICLE_OPTIONS.length === 0) {
+    // Fallback to whatever exists in the dataset.
+    // This prevents "empty plot" failures when the export only contains
+    // a subset of vehicle types.
+    VEHICLE_OPTIONS.push(...availableVehicleTypes);
   }
 
   let activeVehicle = VEHICLE_OPTIONS[0];
@@ -78,7 +89,15 @@ export function init(containerEl, data) {
     tableContainer.innerHTML = '';
 
     const filtered = filterData(activeVehicle);
-    if (filtered.length === 0) return;
+    if (filtered.length === 0) {
+      // Prevent a "blank plot" state when the selected vehicle type
+      // doesn't exist in the export.
+      svgContainer.innerHTML =
+        '<div style="color:var(--text-muted);padding:40px;">' +
+        'No payment data for the selected vehicle type.' +
+        '</div>';
+      return;
+    }
 
     const totalTrips = d3.sum(filtered, d => d.trip_count);
     const size = Math.min(containerEl.clientWidth * 0.45, 340);
