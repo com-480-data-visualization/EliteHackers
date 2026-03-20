@@ -23,33 +23,33 @@ Please, fill the following sections about your project.
 >
 > Hint: some good pointers for finding quality publicly available datasets ([Google dataset search](https://datasetsearch.research.google.com/), [Kaggle](https://www.kaggle.com/datasets), [OpenSwissData](https://opendata.swiss/en/), [SNAP](https://snap.stanford.edu/data/) and [FiveThirtyEight](https://data.fivethirtyeight.com/)).
 
-The dataset selected for this project is the **New York City Taxi and Limousine Commission (TLC) Trip Record Data**, available at [NYC TLC Trips Data](https://home4.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
+The selected dataset is the **NYC Taxi and Limousine Commission (TLC) Trip Record Data**, available at [NYC TLC Trips Data](https://home4.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
 
-This dataset contains detailed trip-level records of taxi activity in New York City, including Yellow Taxis, Green Taxis, and For-Hire Vehicles (FHV). Each row represents a trip with temporal, spatial, and economic attributes (such as pickup and dropoff timestamps, distance, passengers count, locations, fares, etc).
+This dataset contains detailed trip-level records of taxi activity in NYC, including Yellow Taxis, Green Taxis, and For-Hire Vehicles (FHV). Each row represents a trip with temporal, spatial, and economic attributes (such as pickup and dropoff timestamps, distance, passengers count, fares).
 
 The data is distributed as monthly Parquet files, each containing millions of records (e.g., ~40M trips in 2025), making it a large-scale, high-resolution dataset well-suited for analyzing urban mobility patterns, demand dynamics, and transportation economics.
 
-**Data Quality Assessment**: Overall, the dataset is of high quality and reliability, reflecting its origin from an official municipal authority and its widespread use in academic and industry research. Key strengths include:
+**Data Quality Assessment**: Overall, the dataset is of high quality and reliability (reflecting its official municipal authority origin). Key strengths include:
 * Consistent schema across time, with ~20 well-defined variables
-* Standardized data types (timestamps, numeric values, categorical location IDs)
-* High temporal granularity, enabling fine-grained analysis
+* Standardized data types (e.g. categorical location IDs)
+* High temporal granularity
 * Comprehensive coverage of a major metropolitan transportation system. 
-These characteristics make the dataset particularly suitable for visualization tasks involving temporal trends, spatial distributions, and demand fluctuations.
+These characteristics make the dataset suitable for visualization tasks involving temporal trends, spatial distributions, and demand fluctuations.
 
-**Preprocessing and Cleaning Requirements**: Despite its overall quality, preprocessing is required to ensure analytical validity:
+**Preprocessing and Cleaning Requirements**: Despite its quality, preprocessing is required to ensure analytical validity:
 * **Missing values**: Certain fields (e.g., passenger count, location IDs) may be incomplete
 * **Invalid or unrealistic entries**:
   * Zero or negative trip distances
-  * Implausible passenger counts (e.g., 0 or excessively large values)
+  * Implausible passenger counts (0 or excessively large values)
   * Fare amounts that are zero, negative, or inconsistent with distance
+  * Occasional anomalies such as dropoff times preceding pickup times
 * **Outliers**: Extreme values may arise from sensor errors, or data entry issues
-* **Temporal inconsistencies**: Occasional anomalies such as dropoff times preceding pickup times
 
 To address these issues, the preprocessing pipeline will include:
-* Filtering invalid records
-* Handling missing values (removal or imputation where appropriate)
-* Outlier detection using statistical thresholds or domain-informed rules
 * Validation of temporal and spatial consistency
+* Filtering invalid records
+* Handling missing values
+* Outlier detection using statistical thresholds or domain-informed rules
 
 
 ### Problematic
