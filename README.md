@@ -36,12 +36,12 @@ The data is distributed as monthly Parquet files, each containing millions of re
 * Comprehensive coverage of a major metropolitan transportation system. 
 These characteristics make the dataset particularly suitable for visualization tasks involving temporal trends, spatial distributions, and demand fluctuations.
 
-**Preprocessing and Cleaning Requirements**: Despite its overall quality, it requires non-trivial preprocessing to ensure analytical validity:
-* **Missing values**: Certain fields (e.g., passenger count, location IDs, airport fees) may be incomplete
+**Preprocessing and Cleaning Requirements**: Despite its overall quality, preprocessing is required to ensure analytical validity:
+* **Missing values**: Certain fields (e.g., passenger count, location IDs) may be incomplete
 * **Invalid or unrealistic entries**:
   * Zero or negative trip distances
   * Implausible passenger counts (e.g., 0 or excessively large values)
-  * Fare amounts that are zero, negative, or inconsistent with the distance
+  * Fare amounts that are zero, negative, or inconsistent with distance
 * **Outliers**: Extreme values may arise from sensor errors, or data entry issues
 * **Temporal inconsistencies**: Occasional anomalies such as dropoff times preceding pickup times
 
@@ -58,25 +58,23 @@ To address these issues, the preprocessing pipeline will include:
 > - What am I trying to show with my visualization?
 > - Think of an overview for the project, your motivation, and the target audience.
 
-This project focuses on analyzing and visualizing **urban mobility patterns in New York City using large-scale taxi trip data**. 
+This project focuses on analyzing and visualizing **urban mobility patterns in NYC**. 
 The primary objective is to uncover how taxi usage evolves and how key factors such as trip distance, fare amount, passenger count, and time of day interact to shape mobility behavior.
 
 At its core, the project is guided by the following question:
 **How do taxi usage patterns vary across time, and what underlying factors drive these variations?**
 To address this, the visualization will explore three main axes:
-* **Temporal dynamics**: how demand fluctuates across hours of the day, days of the week, and months of the year
+* **Temporal dynamics**: how demand fluctuates across hours of day, days of the week, and months of the year
 * **Trip characteristics**: relationships between distance, fare, and passenger count
 * **Behavioral patterns**: identifying typical vs. anomalous trips and detecting irregular spikes or drops in activity
-
-Additionally, the project will investigate traffic-driven insights, including peak congestion hours, commuting patterns, and differences in weekday and weekend mobility.
 
 **Motivation**: Urban transportation systems are a critical component of modern cities. Understanding how people move when, where, and under what conditions can provide valuable insights for improving infrastructure, optimizing traffic flow, and enhancing user experience. By leveraging a large-scale, real-world dataset, this project aims to bridge the gap between raw mobility data and actionable insights, highlighting patterns that are often hidden in high-dimensional data.
 
 **Target Audience**: The visualizations are designed for a broad but relevant audience, including:
-* Urban planners and transportation analysts are interested in demand patterns and system efficiency
+* Urban planners and transportation analysts interested in demand patterns and system efficiency
 * Policy makers and city stakeholders, who rely on data-driven insights for infrastructure and regulation decisions
-* Mobility and logistics professionals (e.g., ride-hailing, traffic management), seeking to understand usage trends and peak demand
-* Students and data practitioners, looking to explore real-world, large-scale data through intuitive visual interfaces 
+* Mobility and logistics professionals (e.g., ride-hailing, traffic management), to understand usage trends and peak demand
+* Students and data practitioners, to explore real-world large-scale data through intuitive visual interfaces 
 
 To serve this audience effectively, the project emphasizes clarity, interpretability, and interactive exploration, enabling users to derive insights without requiring deep technical expertise.
 
