@@ -23,11 +23,11 @@ Please, fill the following sections about your project.
 >
 > Hint: some good pointers for finding quality publicly available datasets ([Google dataset search](https://datasetsearch.research.google.com/), [Kaggle](https://www.kaggle.com/datasets), [OpenSwissData](https://opendata.swiss/en/), [SNAP](https://snap.stanford.edu/data/) and [FiveThirtyEight](https://data.fivethirtyeight.com/)).
 
-The dataset selected for this project is the **New York City Taxi and Limousine Commission (TLC) Trip Record Data**, publicly available at [NYC TLC Trips Data](https://home4.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
+The dataset selected for this project is the **New York City Taxi and Limousine Commission (TLC) Trip Record Data**, available at [NYC TLC Trips Data](https://home4.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
 
-This dataset contains detailed trip-level records of taxi activity in New York City, including Yellow Taxis, Green Taxis, and For-Hire Vehicles (FHV). Each row corresponds to a single trip and captures temporal, spatial, and economic attributes, such as pickup and dropoff timestamps, trip distance, passenger count, geographic location identifiers, fare components, and total payment amount.
+This dataset contains detailed trip-level records of taxi activity in New York City, including Yellow Taxis, Green Taxis, and For-Hire Vehicles (FHV). Each row represents a trip with temporal, spatial, and economic attributes (such as pickup and dropoff timestamps, distance, passengers count, locations, fares, etc).
 
-The data is distributed as monthly Parquet files, each containing millions of records. For example, the 2025 dataset alone comprises over 40 million trips across 11 months, making it a large-scale, high-resolution dataset well-suited for analyzing urban mobility patterns, demand dynamics, and transportation economics.
+The data is distributed as monthly Parquet files, each containing millions of records (e.g., ~40M trips in 2025), making it a large-scale, high-resolution dataset well-suited for analyzing urban mobility patterns, demand dynamics, and transportation economics.
 
 **Data Quality Assessment**: Overall, the dataset is of high quality and reliability, reflecting its origin from an official municipal authority and its widespread use in academic and industry research. Key strengths include:
 * Consistent schema across time, with ~20 well-defined variables
@@ -42,11 +42,11 @@ These characteristics make the dataset particularly suitable for visualization t
   * Zero or negative trip distances
   * Implausible passenger counts (e.g., 0 or excessively large values)
   * Fare amounts that are zero, negative, or inconsistent with the distance
-* **Outliers**: Extreme values may arise from sensor errors, data entry issues, or rare edge-case trips
+* **Outliers**: Extreme values may arise from sensor errors, or data entry issues
 * **Temporal inconsistencies**: Occasional anomalies such as dropoff times preceding pickup times
 
 To address these issues, the preprocessing pipeline will include:
-* Filtering invalid or implausible records
+* Filtering invalid records
 * Handling missing values (removal or imputation where appropriate)
 * Outlier detection using statistical thresholds or domain-informed rules
 * Validation of temporal and spatial consistency
