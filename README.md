@@ -119,9 +119,9 @@ Several high-level patterns emerge:
 
 The NYC TLC dataset is used in both academic research and industry for analyzing urban mobility, demand forecasting, and transportation efficiency. Prior work typically falls into three main categories:
 * **Descriptive analytics and dashboards:** They provide aggregated statistics (such as trip volumes, or revenues).
-* **Predictive modeling approaches**: They focus on model performance rather than interpretability (e.g. for demand prediction).
+* **Predictive modeling approaches**: They focus on model performance rather than interpretability (e.g. New York City Taxi Trip Duration Prediction Kaggle Competition : https://www.kaggle.com/competitions/nyc-taxi-trip-duration).
 * **Mobility and urban science research:** Academic works analyze spatial-temporal patterns.
-In addition, Data journalism platforms have also explored specific aspects like tipping behavior or airport traffic.
+In addition, Data journalism platforms have also explored specific aspects like tipping behavior or airport traffic (e.g. Uber Is Serving New York’s Outer Boroughs More Than Taxis Are – FiveThirtyEight : https://fivethirtyeight.com/features/uber-is-serving-new-yorks-outer-boroughs-more-than-taxis-are/).
 
 Despite the richness of prior analyses, most existing approaches exhibit **at least one of the following limitations**:
 * Limited interactivity, restricting user-driven exploration
