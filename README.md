@@ -118,7 +118,7 @@ Several high-level patterns emerge:
 > - In case you are using a dataset that you have already explored in another context (ML or ADA course, semester project...), you are required to share the report of that work to outline the differences with the submission for this class.
 
 The dataset is used in both academic research and industry for analyzing urban mobility, demand forecasting, and transportation efficiency. Prior work falls into 3 main categories:
-* **Descriptive analytics:** They provide aggregated statistics (e.g. [Interactive Dashboard of NYC TLC Trip Data](https://app.powerbigov.us/view?r=eyJrIjoiMzlhMzA3NTItM2VkZS00NGM4LTgxYTQtNjRlMDc3MTkxMDkzIiwidCI6IjMyZjU2ZmM3LTVmODEtNGUyMi1hOTViLTE1ZGE2NjUxM2JlZiJ9)).
+* **Descriptive analytics:** They provide aggregated statistics (e.g. [Interactive Dashboard of NYC TLC Trip Data (Power BI)](https://app.powerbigov.us/view?r=eyJrIjoiMzlhMzA3NTItM2VkZS00NGM4LTgxYTQtNjRlMDc3MTkxMDkzIiwidCI6IjMyZjU2ZmM3LTVmODEtNGUyMi1hOTViLTE1ZGE2NjUxM2JlZiJ9)).
 * **Predictive modeling approaches**: They focus on model performance (e.g. [New York City Taxi Trip Duration Prediction Kaggle Competition](https://www.kaggle.com/competitions/nyc-taxi-trip-duration)).
 * **Mobility and urban science research:** Academic works analyze spatial-temporal patterns.
 In addition, Data journalism platforms have also explored specific aspects like tipping behavior or airport traffic (e.g. [Uber Is Serving New York’s Outer Boroughs More Than Taxis Are – FiveThirtyEight](https://fivethirtyeight.com/features/uber-is-serving-new-yorks-outer-boroughs-more-than-taxis-are/)).
