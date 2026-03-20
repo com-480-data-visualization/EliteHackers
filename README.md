@@ -117,22 +117,22 @@ Several high-level patterns emerge:
 > - What source of inspiration do you take? Visualizations that you found on other websites or magazines (might be unrelated to your data).
 > - In case you are using a dataset that you have already explored in another context (ML or ADA course, semester project...), you are required to share the report of that work to outline the differences with the submission for this class.
 
-The NYC TLC dataset is used in both academic research and industry for analyzing urban mobility, demand forecasting, and transportation efficiency. Prior work typically falls into three main categories:
-* **Descriptive analytics and dashboards:** They provide aggregated statistics (such as trip volumes, or revenues).
-* **Predictive modeling approaches**: They focus on model performance rather than interpretability (e.g. New York City Taxi Trip Duration Prediction Kaggle Competition : https://www.kaggle.com/competitions/nyc-taxi-trip-duration).
+The dataset is used in both academic research and industry for analyzing urban mobility, demand forecasting, and transportation efficiency. Prior work falls into 3 main categories:
+* **Descriptive analytics:** They provide aggregated statistics (e.g. [Interactive Dashboard of NYC TLC Trip Data](https://app.powerbigov.us/view?r=eyJrIjoiMzlhMzA3NTItM2VkZS00NGM4LTgxYTQtNjRlMDc3MTkxMDkzIiwidCI6IjMyZjU2ZmM3LTVmODEtNGUyMi1hOTViLTE1ZGE2NjUxM2JlZiJ9)).
+* **Predictive modeling approaches**: They focus on model performance (e.g. [New York City Taxi Trip Duration Prediction Kaggle Competition](https://www.kaggle.com/competitions/nyc-taxi-trip-duration)).
 * **Mobility and urban science research:** Academic works analyze spatial-temporal patterns.
-In addition, Data journalism platforms have also explored specific aspects like tipping behavior or airport traffic (e.g. Uber Is Serving New York’s Outer Boroughs More Than Taxis Are – FiveThirtyEight : https://fivethirtyeight.com/features/uber-is-serving-new-yorks-outer-boroughs-more-than-taxis-are/).
+In addition, Data journalism platforms have also explored specific aspects like tipping behavior or airport traffic (e.g. [Uber Is Serving New York’s Outer Boroughs More Than Taxis Are – FiveThirtyEight](https://fivethirtyeight.com/features/uber-is-serving-new-yorks-outer-boroughs-more-than-taxis-are/)).
 
 Despite the richness of prior analyses, most existing approaches exhibit **at least one of the following limitations**:
 * Limited interactivity, restricting user-driven exploration
-* Narrow scope, focusing on isolated variables rather than integrated patterns
+* Narrow scope, focusing on isolated variables
 * Lack of multi-scale analysis
-* Minimal focus on anomalies or disruptions
+* Minimal focus on anomalies
 
-This project takes a visual analytics perspective, aiming to bridge the gap between large-scale data and intuitive understanding. The key aspects are:
-* Multi-scale temporal analysis: We simultaneously explore patterns across hours, days, months, and years, enabling a unified view of mobility dynamics.
-* Integrated feature relationships: Rather than analyzing isolated variables, we examine how trip distance, fare, passenger count, and time interact to shape behavior.
-* Focus on anomalies and global events: We explicitly highlight disruptions such as the COVID-19 pandemic, treating them as first-class analytical features rather than noise.
+This project aims to bridge the gap between large-scale data and intuitive understanding. The key aspects are:
+* Multi-scale temporal analysis: We simultaneously explore patterns across hours, days, and years, enabling a unified view of mobility dynamics.
+* Integrated feature relationships: We examine how trip distance, fare, passenger count, and time interact to shape behavior.
+* Focus on anomalies and global events: We explicitly highlight disruptions such as the COVID-19 pandemic, treating them as analytical features rather than noise.
 * Interactive, user-driven exploration: Our D3.js dashboards enable users to navigate among temporal, spatial, and economic dimensions.
 
 The design is inspired by data storytelling platforms such as The New York Times and FiveThirtyEight, as well as Observable notebooks, which emphasize clarity, interactivity, narrative-driven designs, and progressive exploration.
