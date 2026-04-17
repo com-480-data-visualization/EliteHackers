@@ -163,6 +163,35 @@ These sources influenced our focus on clean design, progressive disclosure of in
 
 **10% of the final grade**
 
+### Functional Prototype — NYC Taxi Mobility Dashboard
+
+**Live deploy:** https://elitehackers-six.vercel.app
+
+**Source:** [`web/`](web/) — Vite + D3.js + Scrollama
+
+#### What's implemented
+
+| View | Status |
+|------|--------|
+| V1 Trip Volume — stacked area chart (monthly, 2015–2024) | **Functional** — brush sets global date filter |
+| V5 Event Timeline — daily line + annotated markers | **Partial** — markers clickable, sets filter |
+| V2 Weekly Pulse Heatmap | Placeholder (Milestone 3) |
+| V3 NYC Zone Choropleth | Placeholder (Milestone 3) |
+| V4 Trip Anatomy Scatter | Placeholder (Milestone 3) |
+| 3-step Scrollama narrative (NYC scale → weekly rhythm → COVID collapse) | **Functional** |
+| Global filter bus (pub/sub, shared state) | **Functional** |
+| Taxi-type toggle + year slider + reset button | **Functional** |
+
+#### Data aggregations
+
+Pre-aggregated JSON files in [`web/public/data/`](web/public/data/):
+- `monthly_volume.json` — 331 rows (Yellow/Green 2015–2024, FHV 2017-06–2024-12)
+- `daily_volume.json` — ~10k rows
+- `events.json` — 12 curated annotation events
+- `taxi_zones.topojson` — 460 KB simplified TopoJSON
+
+Aggregation script: [`nyc-tlc-pipeline/aggregations/make_milestone2_aggregations.py`](nyc-tlc-pipeline/aggregations/make_milestone2_aggregations.py)
+
 
 ## Milestone 3 (29th May, 5pm)
 

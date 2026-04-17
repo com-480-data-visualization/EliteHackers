@@ -5,10 +5,16 @@ nyc-tlc-pipeline/data/processed/
 # === Generated reports ===
 nyc-tlc-pipeline/reports/
 
-# === Visualization dashboard ===
+# === Visualization dashboard (EDA) ===
 nyc-tlc-viz/node_modules/
 nyc-tlc-viz/dist/
 nyc-tlc-viz/.env
+
+# === Web dashboard (Milestone 2+) ===
+web/node_modules/
+web/dist/
+web/.env
+web/.vercel/
 
 # === Python ===
 __pycache__/

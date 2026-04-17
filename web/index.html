@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NYC Taxi Mobility — How a City Moves</title>
+  <link rel="stylesheet" href="/src/styles/tokens.css" />
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+<body>
+
+  <!-- ===== NAV ===== -->
+  <nav class="nav" id="main-nav">
+    <span class="nav__title">NYC Mobility</span>
+    <div class="nav__links">
+      <a class="nav__link" href="#narrative">Story</a>
+      <a class="nav__link" href="#dashboard">Dashboard</a>
+      <a class="nav__link nav__link--active" href="#v1">Trip Volume</a>
+      <a class="nav__link" href="#v2">Weekly Pulse</a>
+      <a class="nav__link" href="#v3">Zone Map</a>
+      <a class="nav__link" href="#v4">Trip Anatomy</a>
+      <a class="nav__link" href="#v5">Timeline</a>
+    </div>
+    <button class="nav__mode-toggle" id="mode-toggle" title="Toggle narrative / dashboard mode">
+      <span id="mode-label">Dashboard</span>
+    </button>
+  </nav>
+
+  <!-- ===== NARRATIVE MODE ===== -->
+  <section id="narrative" class="narrative-section">
+    <div class="narrative-graphic sticky-graphic">
+      <div id="narrative-chart"></div>
+    </div>
+
+    <div class="narrative-steps">
+      <!-- Step 1 -->
+      <div class="narrative-step" data-step="1">
+        <div class="step-content">
+          <h2>NYC moves<br><span class="accent">1M+ trips</span><br>per day.</h2>
+          <p>From 2015 to 2024, New York City's taxis — Yellow, Green, and For-Hire Vehicles — carried over <strong>1 billion passengers</strong>. Every dot of this chart is a month's worth of journeys across the city.</p>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="narrative-step" data-step="2">
+        <div class="step-content">
+          <h2>Every week<br>has a <span class="accent">rhythm</span>.</h2>
+          <p>Rush hours, late-night Friday surges, quiet Sunday mornings — the city's movement follows predictable patterns. Yellow taxis peak at midday; demand shifts toward FHV after midnight.</p>
+          <div class="step-annotation" id="step2-annotation">
+            <div class="annotation-box">2019 baseline week highlighted</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="narrative-step" data-step="3">
+        <div class="step-content">
+          <h2>Then<br><span class="accent">March 2020</span><br>happened.</h2>
+          <p>When New York issued the PAUSE order on March 22, 2020, trip volume collapsed overnight. Yellow taxi ridership fell <strong>~97%</strong> in April 2020 compared to the year before.</p>
+          <div class="step-annotation" id="step3-annotation">
+            <div class="annotation-box covid-box">
+              <strong>COVID-19 Lockdown</strong><br>
+              Mar 22 – May 31, 2020<br>
+              NYC PAUSE. Non-essential travel halted.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DASHBOARD MODE ===== -->
+  <section id="dashboard" class="dashboard-section">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">NYC Taxi Mobility Dashboard</h1>
+      <p class="dashboard-subtitle">2015–2024 · Yellow, Green &amp; FHV · Explore linked views</p>
+    </div>
+
+    <!-- Global Controls -->
+    <div class="controls-bar" id="controls-bar">
+      <div class="controls-group">
+        <span class="controls-label">Taxi type</span>
+        <div id="taxi-type-toggle" class="toggle-group"></div>
+      </div>
+      <div class="controls-group">
+        <span class="controls-label">Year range</span>
+        <div id="year-slider" class="slider-group"></div>
+      </div>
+      <button class="btn-reset" id="reset-btn">Reset filters</button>
+    </div>
+
+    <!-- V1: Stacked Area -->
+    <div class="panel panel--full" id="v1">
+      <div class="panel__header">
+        <h2 class="panel__title">Trip Volume Over Time</h2>
+        <p class="panel__subtitle">Monthly trips by taxi type, 2015–2024. Brush to zoom &amp; filter.</p>
+      </div>
+      <div class="panel__body" id="v1-container"></div>
+    </div>
+
+    <!-- V2 / V3 / V4 row -->
+    <div class="panel-row">
+      <div class="panel panel--third" id="v2">
+        <div class="panel__header">
+          <h2 class="panel__title">Weekly Pulse Heatmap</h2>
+          <p class="panel__subtitle">Hour-of-day × day-of-week</p>
+        </div>
+        <div class="panel__body panel__placeholder" id="v2-container">
+          <div class="placeholder-inner">
+            <div class="placeholder-icon">⬡</div>
+            <p class="placeholder-title">Weekly Pulse Heatmap (V2)</p>
+            <p class="placeholder-desc">Filters will update this view based on your selections in V1 and V3. Coming in Milestone 3.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel--third" id="v3">
+        <div class="panel__header">
+          <h2 class="panel__title">NYC Zone Choropleth</h2>
+          <p class="panel__subtitle">Pickup volume by taxi zone</p>
+        </div>
+        <div class="panel__body panel__placeholder" id="v3-container">
+          <div class="placeholder-inner">
+            <div class="placeholder-icon">⬡</div>
+            <p class="placeholder-title">Zone Choropleth (V3)</p>
+            <p class="placeholder-desc">Click a zone to filter all views by pickup location. Coming in Milestone 3.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel--third" id="v4">
+        <div class="panel__header">
+          <h2 class="panel__title">Trip Anatomy</h2>
+          <p class="panel__subtitle">Fare vs. distance scatter</p>
+        </div>
+        <div class="panel__body panel__placeholder" id="v4-container">
+          <div class="placeholder-inner">
+            <div class="placeholder-icon">⬡</div>
+            <p class="placeholder-title">Trip Anatomy Scatter (V4)</p>
+            <p class="placeholder-desc">~50k sampled trips colored by hour. Brush a region to filter. Coming in Milestone 3.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- V5: Timeline -->
+    <div class="panel panel--full" id="v5">
+      <div class="panel__header">
+        <h2 class="panel__title">Annotated Event Timeline</h2>
+        <p class="panel__subtitle">Daily trip count with event markers. Click a marker to jump to that period.</p>
+      </div>
+      <div class="panel__body" id="v5-container"></div>
+    </div>
+
+  </section>
+
+  <!-- Loading overlay -->
+  <div id="loading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Loading data…</p>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

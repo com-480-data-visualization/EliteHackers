@@ -1,0 +1,127 @@
+[
+  {
+    "id": "covid_lockdown",
+    "date": "2020-03-22",
+    "end_date": "2020-05-31",
+    "label": "COVID-19 Lockdown",
+    "category": "disruption",
+    "description": "NYC PAUSE order. Non-essential travel halted; taxi trips fell ~90%."
+  },
+  {
+    "id": "covid_phase1",
+    "date": "2020-06-08",
+    "end_date": "2020-06-21",
+    "label": "Phase 1 Reopening",
+    "category": "recovery",
+    "description": "NYC Phase 1 reopening: construction, manufacturing, curbside retail."
+  },
+  {
+    "id": "covid_phase2",
+    "date": "2020-06-22",
+    "end_date": "2020-07-05",
+    "label": "Phase 2 Reopening",
+    "category": "recovery",
+    "description": "Phase 2: offices, in-store retail, barbershops, outdoor dining."
+  },
+  {
+    "id": "covid_phase4",
+    "date": "2020-07-20",
+    "label": "Phase 4 Reopening",
+    "category": "recovery",
+    "description": "Phase 4 (no indoor dining): low-risk outdoor activities, media/entertainment."
+  },
+  {
+    "id": "blizzard_jonas_2016",
+    "date": "2016-01-23",
+    "end_date": "2016-01-24",
+    "label": "Blizzard Jonas",
+    "category": "weather",
+    "description": "Historic snowstorm. NYC travel ban Jan 23; ~27 inches of snow."
+  },
+  {
+    "id": "blizzard_stella_2017",
+    "date": "2017-03-14",
+    "label": "Blizzard Stella",
+    "category": "weather",
+    "description": "Nor'easter Stella; NYC dodged worst but still ~7 inches, disrupting service."
+  },
+  {
+    "id": "blizzard_2018",
+    "date": "2018-03-07",
+    "end_date": "2018-03-08",
+    "label": "Nor'easter Riley",
+    "category": "weather",
+    "description": "Nor'easter Riley: heavy snow and coastal flooding."
+  },
+  {
+    "id": "fare_hike_2015",
+    "date": "2015-01-01",
+    "label": "NYC Taxi Fare Update",
+    "category": "policy",
+    "description": "TLC fare structure in effect at start of dataset period."
+  },
+  {
+    "id": "fare_hike_2023",
+    "date": "2023-08-14",
+    "label": "Taxi Fare Increase",
+    "category": "policy",
+    "description": "NYC yellow taxi base fare raised for first time since 2012 (from $2.50 to $3.00)."
+  },
+  {
+    "id": "congestion_pricing_2024",
+    "date": "2024-06-30",
+    "label": "Congestion Pricing Paused",
+    "category": "policy",
+    "description": "Governor Hochul paused MTA congestion pricing program days before launch."
+  },
+  {
+    "id": "nye_2016",
+    "date": "2016-01-01",
+    "label": "New Year's Eve 2015/2016",
+    "category": "holiday",
+    "description": "NYE peak demand \u2014 one of the busiest taxi nights of the year."
+  },
+  {
+    "id": "thanksgiving_2019",
+    "date": "2019-11-28",
+    "label": "Thanksgiving 2019",
+    "category": "holiday",
+    "description": "Thanksgiving Day \u2014 typically the lowest weekday trip volume of the year."
+  },
+  {
+    "id": "nye_2020",
+    "date": "2020-01-01",
+    "label": "New Year's Eve 2019/2020",
+    "category": "holiday",
+    "description": "Last pre-COVID NYE. Yellow+Green peak ~600k trips/day."
+  },
+  {
+    "id": "christmas_2020",
+    "date": "2020-12-25",
+    "label": "Christmas 2020",
+    "category": "holiday",
+    "description": "First post-lockdown Christmas; volume recovering but still far below normal."
+  },
+  {
+    "id": "nye_2022",
+    "date": "2022-01-01",
+    "label": "New Year's Eve 2021/2022",
+    "category": "holiday",
+    "description": "Omicron wave subdued celebrations."
+  },
+  {
+    "id": "hurricane_ida_2021",
+    "date": "2021-09-01",
+    "end_date": "2021-09-02",
+    "label": "Hurricane Ida Remnants",
+    "category": "weather",
+    "description": "Record rainfall flooded NYC subway; street flooding paralyzed taxi operations."
+  },
+  {
+    "id": "subway_shutdown_2017",
+    "date": "2017-08-01",
+    "label": "MTA 'Summer of Hell'",
+    "category": "disruption",
+    "description": "MTA emergency repairs on Penn Station; summer-long service cuts drove taxi surge."
+  }
+]

@@ -1,0 +1,1557 @@
+[
+  {
+    "month": "2015-01",
+    "type": "green",
+    "trips": 1485275
+  },
+  {
+    "month": "2015-01",
+    "type": "yellow",
+    "trips": 12662094
+  },
+  {
+    "month": "2015-02",
+    "type": "green",
+    "trips": 1551883
+  },
+  {
+    "month": "2015-02",
+    "type": "yellow",
+    "trips": 12364651
+  },
+  {
+    "month": "2015-03",
+    "type": "green",
+    "trips": 1696267
+  },
+  {
+    "month": "2015-03",
+    "type": "yellow",
+    "trips": 13257128
+  },
+  {
+    "month": "2015-04",
+    "type": "green",
+    "trips": 1639542
+  },
+  {
+    "month": "2015-04",
+    "type": "yellow",
+    "trips": 12982037
+  },
+  {
+    "month": "2015-05",
+    "type": "green",
+    "trips": 1761686
+  },
+  {
+    "month": "2015-05",
+    "type": "yellow",
+    "trips": 13069952
+  },
+  {
+    "month": "2015-06",
+    "type": "green",
+    "trips": 1614112
+  },
+  {
+    "month": "2015-06",
+    "type": "yellow",
+    "trips": 12242534
+  },
+  {
+    "month": "2015-07",
+    "type": "green",
+    "trips": 1518610
+  },
+  {
+    "month": "2015-07",
+    "type": "yellow",
+    "trips": 11482863
+  },
+  {
+    "month": "2015-08",
+    "type": "green",
+    "trips": 1509431
+  },
+  {
+    "month": "2015-08",
+    "type": "yellow",
+    "trips": 11049741
+  },
+  {
+    "month": "2015-09",
+    "type": "green",
+    "trips": 1466868
+  },
+  {
+    "month": "2015-09",
+    "type": "yellow",
+    "trips": 11136853
+  },
+  {
+    "month": "2015-10",
+    "type": "green",
+    "trips": 1598448
+  },
+  {
+    "month": "2015-10",
+    "type": "yellow",
+    "trips": 12218199
+  },
+  {
+    "month": "2015-11",
+    "type": "green",
+    "trips": 1498294
+  },
+  {
+    "month": "2015-11",
+    "type": "yellow",
+    "trips": 11217223
+  },
+  {
+    "month": "2015-12",
+    "type": "green",
+    "trips": 1575725
+  },
+  {
+    "month": "2015-12",
+    "type": "yellow",
+    "trips": 11369872
+  },
+  {
+    "month": "2016-01",
+    "type": "green",
+    "trips": 1414333
+  },
+  {
+    "month": "2016-01",
+    "type": "yellow",
+    "trips": 10827557
+  },
+  {
+    "month": "2016-02",
+    "type": "green",
+    "trips": 1480610
+  },
+  {
+    "month": "2016-02",
+    "type": "yellow",
+    "trips": 11298441
+  },
+  {
+    "month": "2016-03",
+    "type": "green",
+    "trips": 1544450
+  },
+  {
+    "month": "2016-03",
+    "type": "yellow",
+    "trips": 12119157
+  },
+  {
+    "month": "2016-04",
+    "type": "green",
+    "trips": 1512655
+  },
+  {
+    "month": "2016-04",
+    "type": "yellow",
+    "trips": 11837459
+  },
+  {
+    "month": "2016-05",
+    "type": "green",
+    "trips": 1505186
+  },
+  {
+    "month": "2016-05",
+    "type": "yellow",
+    "trips": 11747794
+  },
+  {
+    "month": "2016-06",
+    "type": "green",
+    "trips": 1375650
+  },
+  {
+    "month": "2016-06",
+    "type": "yellow",
+    "trips": 11050776
+  },
+  {
+    "month": "2016-07",
+    "type": "green",
+    "trips": 1304416
+  },
+  {
+    "month": "2016-07",
+    "type": "yellow",
+    "trips": 10215761
+  },
+  {
+    "month": "2016-08",
+    "type": "green",
+    "trips": 1221933
+  },
+  {
+    "month": "2016-08",
+    "type": "yellow",
+    "trips": 9868090
+  },
+  {
+    "month": "2016-09",
+    "type": "green",
+    "trips": 1138231
+  },
+  {
+    "month": "2016-09",
+    "type": "yellow",
+    "trips": 10040505
+  },
+  {
+    "month": "2016-10",
+    "type": "green",
+    "trips": 1228741
+  },
+  {
+    "month": "2016-10",
+    "type": "yellow",
+    "trips": 10773401
+  },
+  {
+    "month": "2016-11",
+    "type": "green",
+    "trips": 1126337
+  },
+  {
+    "month": "2016-11",
+    "type": "yellow",
+    "trips": 10022896
+  },
+  {
+    "month": "2016-12",
+    "type": "green",
+    "trips": 1200194
+  },
+  {
+    "month": "2016-12",
+    "type": "yellow",
+    "trips": 10368948
+  },
+  {
+    "month": "2017-01",
+    "type": "green",
+    "trips": 1049390
+  },
+  {
+    "month": "2017-01",
+    "type": "yellow",
+    "trips": 9640735
+  },
+  {
+    "month": "2017-02",
+    "type": "green",
+    "trips": 1002720
+  },
+  {
+    "month": "2017-02",
+    "type": "yellow",
+    "trips": 9103238
+  },
+  {
+    "month": "2017-03",
+    "type": "green",
+    "trips": 1136433
+  },
+  {
+    "month": "2017-03",
+    "type": "yellow",
+    "trips": 10217988
+  },
+  {
+    "month": "2017-04",
+    "type": "green",
+    "trips": 1060994
+  },
+  {
+    "month": "2017-04",
+    "type": "yellow",
+    "trips": 9968420
+  },
+  {
+    "month": "2017-05",
+    "type": "green",
+    "trips": 1040396
+  },
+  {
+    "month": "2017-05",
+    "type": "yellow",
+    "trips": 10024598
+  },
+  {
+    "month": "2017-06",
+    "type": "green",
+    "trips": 959242
+  },
+  {
+    "month": "2017-06",
+    "type": "yellow",
+    "trips": 9581742
+  },
+  {
+    "month": "2017-07",
+    "type": "green",
+    "trips": 897912
+  },
+  {
+    "month": "2017-07",
+    "type": "yellow",
+    "trips": 8517364
+  },
+  {
+    "month": "2017-08",
+    "type": "green",
+    "trips": 851853
+  },
+  {
+    "month": "2017-08",
+    "type": "yellow",
+    "trips": 8353191
+  },
+  {
+    "month": "2017-09",
+    "type": "green",
+    "trips": 867295
+  },
+  {
+    "month": "2017-09",
+    "type": "yellow",
+    "trips": 8873016
+  },
+  {
+    "month": "2017-10",
+    "type": "green",
+    "trips": 909766
+  },
+  {
+    "month": "2017-10",
+    "type": "yellow",
+    "trips": 9689421
+  },
+  {
+    "month": "2017-11",
+    "type": "green",
+    "trips": 858426
+  },
+  {
+    "month": "2017-11",
+    "type": "yellow",
+    "trips": 9207462
+  },
+  {
+    "month": "2017-12",
+    "type": "green",
+    "trips": 889821
+  },
+  {
+    "month": "2017-12",
+    "type": "yellow",
+    "trips": 9431291
+  },
+  {
+    "month": "2018-01",
+    "type": "green",
+    "trips": 778588
+  },
+  {
+    "month": "2018-01",
+    "type": "yellow",
+    "trips": 8691369
+  },
+  {
+    "month": "2018-02",
+    "type": "green",
+    "trips": 756737
+  },
+  {
+    "month": "2018-02",
+    "type": "yellow",
+    "trips": 8427404
+  },
+  {
+    "month": "2018-03",
+    "type": "green",
+    "trips": 821980
+  },
+  {
+    "month": "2018-03",
+    "type": "yellow",
+    "trips": 9353647
+  },
+  {
+    "month": "2018-04",
+    "type": "green",
+    "trips": 785668
+  },
+  {
+    "month": "2018-04",
+    "type": "yellow",
+    "trips": 9231035
+  },
+  {
+    "month": "2018-05",
+    "type": "green",
+    "trips": 782607
+  },
+  {
+    "month": "2018-05",
+    "type": "yellow",
+    "trips": 9148374
+  },
+  {
+    "month": "2018-06",
+    "type": "green",
+    "trips": 725877
+  },
+  {
+    "month": "2018-06",
+    "type": "yellow",
+    "trips": 8637183
+  },
+  {
+    "month": "2018-07",
+    "type": "green",
+    "trips": 672561
+  },
+  {
+    "month": "2018-07",
+    "type": "yellow",
+    "trips": 7777796
+  },
+  {
+    "month": "2018-08",
+    "type": "green",
+    "trips": 664051
+  },
+  {
+    "month": "2018-08",
+    "type": "yellow",
+    "trips": 7781947
+  },
+  {
+    "month": "2018-09",
+    "type": "green",
+    "trips": 670193
+  },
+  {
+    "month": "2018-09",
+    "type": "yellow",
+    "trips": 7973542
+  },
+  {
+    "month": "2018-10",
+    "type": "green",
+    "trips": 719220
+  },
+  {
+    "month": "2018-10",
+    "type": "yellow",
+    "trips": 8746180
+  },
+  {
+    "month": "2018-11",
+    "type": "green",
+    "trips": 661441
+  },
+  {
+    "month": "2018-11",
+    "type": "yellow",
+    "trips": 8073463
+  },
+  {
+    "month": "2018-12",
+    "type": "green",
+    "trips": 706058
+  },
+  {
+    "month": "2018-12",
+    "type": "yellow",
+    "trips": 8110989
+  },
+  {
+    "month": "2019-01",
+    "type": "green",
+    "trips": 657395
+  },
+  {
+    "month": "2019-01",
+    "type": "yellow",
+    "trips": 7618923
+  },
+  {
+    "month": "2019-02",
+    "type": "fhv",
+    "trips": 1673176
+  },
+  {
+    "month": "2019-02",
+    "type": "green",
+    "trips": 602164
+  },
+  {
+    "month": "2019-02",
+    "type": "yellow",
+    "trips": 6977106
+  },
+  {
+    "month": "2019-03",
+    "type": "fhv",
+    "trips": 1435111
+  },
+  {
+    "month": "2019-03",
+    "type": "green",
+    "trips": 629576
+  },
+  {
+    "month": "2019-03",
+    "type": "yellow",
+    "trips": 7787219
+  },
+  {
+    "month": "2019-04",
+    "type": "fhv",
+    "trips": 1893473
+  },
+  {
+    "month": "2019-04",
+    "type": "green",
+    "trips": 556323
+  },
+  {
+    "month": "2019-04",
+    "type": "yellow",
+    "trips": 7399995
+  },
+  {
+    "month": "2019-05",
+    "type": "fhv",
+    "trips": 2023320
+  },
+  {
+    "month": "2019-05",
+    "type": "green",
+    "trips": 535105
+  },
+  {
+    "month": "2019-05",
+    "type": "yellow",
+    "trips": 7514590
+  },
+  {
+    "month": "2019-06",
+    "type": "fhv",
+    "trips": 1968993
+  },
+  {
+    "month": "2019-06",
+    "type": "green",
+    "trips": 496431
+  },
+  {
+    "month": "2019-06",
+    "type": "yellow",
+    "trips": 6887242
+  },
+  {
+    "month": "2019-07",
+    "type": "fhv",
+    "trips": 1911977
+  },
+  {
+    "month": "2019-07",
+    "type": "green",
+    "trips": 461129
+  },
+  {
+    "month": "2019-07",
+    "type": "yellow",
+    "trips": 6231304
+  },
+  {
+    "month": "2019-08",
+    "type": "fhv",
+    "trips": 1846628
+  },
+  {
+    "month": "2019-08",
+    "type": "green",
+    "trips": 440017
+  },
+  {
+    "month": "2019-08",
+    "type": "yellow",
+    "trips": 5994403
+  },
+  {
+    "month": "2019-09",
+    "type": "fhv",
+    "trips": 1223891
+  },
+  {
+    "month": "2019-09",
+    "type": "green",
+    "trips": 439631
+  },
+  {
+    "month": "2019-09",
+    "type": "yellow",
+    "trips": 6486273
+  },
+  {
+    "month": "2019-10",
+    "type": "fhv",
+    "trips": 1860311
+  },
+  {
+    "month": "2019-10",
+    "type": "green",
+    "trips": 466995
+  },
+  {
+    "month": "2019-10",
+    "type": "yellow",
+    "trips": 7126381
+  },
+  {
+    "month": "2019-11",
+    "type": "fhv",
+    "trips": 1850231
+  },
+  {
+    "month": "2019-11",
+    "type": "green",
+    "trips": 424746
+  },
+  {
+    "month": "2019-11",
+    "type": "yellow",
+    "trips": 6786150
+  },
+  {
+    "month": "2019-12",
+    "type": "fhv",
+    "trips": 2010430
+  },
+  {
+    "month": "2019-12",
+    "type": "green",
+    "trips": 443987
+  },
+  {
+    "month": "2019-12",
+    "type": "yellow",
+    "trips": 6804283
+  },
+  {
+    "month": "2020-01",
+    "type": "fhv",
+    "trips": 1996695
+  },
+  {
+    "month": "2020-01",
+    "type": "green",
+    "trips": 439330
+  },
+  {
+    "month": "2020-01",
+    "type": "yellow",
+    "trips": 6322359
+  },
+  {
+    "month": "2020-02",
+    "type": "fhv",
+    "trips": 1882069
+  },
+  {
+    "month": "2020-02",
+    "type": "green",
+    "trips": 391505
+  },
+  {
+    "month": "2020-02",
+    "type": "yellow",
+    "trips": 6222563
+  },
+  {
+    "month": "2020-03",
+    "type": "fhv",
+    "trips": 1417715
+  },
+  {
+    "month": "2020-03",
+    "type": "green",
+    "trips": 219240
+  },
+  {
+    "month": "2020-03",
+    "type": "yellow",
+    "trips": 2969560
+  },
+  {
+    "month": "2020-04",
+    "type": "fhv",
+    "trips": 557573
+  },
+  {
+    "month": "2020-04",
+    "type": "green",
+    "trips": 34728
+  },
+  {
+    "month": "2020-04",
+    "type": "yellow",
+    "trips": 234112
+  },
+  {
+    "month": "2020-05",
+    "type": "fhv",
+    "trips": 762703
+  },
+  {
+    "month": "2020-05",
+    "type": "green",
+    "trips": 56109
+  },
+  {
+    "month": "2020-05",
+    "type": "yellow",
+    "trips": 342688
+  },
+  {
+    "month": "2020-06",
+    "type": "fhv",
+    "trips": 1000790
+  },
+  {
+    "month": "2020-06",
+    "type": "green",
+    "trips": 61784
+  },
+  {
+    "month": "2020-06",
+    "type": "yellow",
+    "trips": 541402
+  },
+  {
+    "month": "2020-07",
+    "type": "fhv",
+    "trips": 1116108
+  },
+  {
+    "month": "2020-07",
+    "type": "green",
+    "trips": 70705
+  },
+  {
+    "month": "2020-07",
+    "type": "yellow",
+    "trips": 788556
+  },
+  {
+    "month": "2020-08",
+    "type": "fhv",
+    "trips": 1165800
+  },
+  {
+    "month": "2020-08",
+    "type": "green",
+    "trips": 79435
+  },
+  {
+    "month": "2020-08",
+    "type": "yellow",
+    "trips": 992577
+  },
+  {
+    "month": "2020-09",
+    "type": "fhv",
+    "trips": 1252938
+  },
+  {
+    "month": "2020-09",
+    "type": "green",
+    "trips": 86358
+  },
+  {
+    "month": "2020-09",
+    "type": "yellow",
+    "trips": 1318411
+  },
+  {
+    "month": "2020-10",
+    "type": "fhv",
+    "trips": 1240973
+  },
+  {
+    "month": "2020-10",
+    "type": "green",
+    "trips": 93282
+  },
+  {
+    "month": "2020-10",
+    "type": "yellow",
+    "trips": 1653462
+  },
+  {
+    "month": "2020-11",
+    "type": "fhv",
+    "trips": 1188534
+  },
+  {
+    "month": "2020-11",
+    "type": "green",
+    "trips": 86825
+  },
+  {
+    "month": "2020-11",
+    "type": "yellow",
+    "trips": 1484367
+  },
+  {
+    "month": "2020-12",
+    "type": "fhv",
+    "trips": 1152084
+  },
+  {
+    "month": "2020-12",
+    "type": "green",
+    "trips": 81523
+  },
+  {
+    "month": "2020-12",
+    "type": "yellow",
+    "trips": 1436421
+  },
+  {
+    "month": "2021-01",
+    "type": "fhv",
+    "trips": 1141655
+  },
+  {
+    "month": "2021-01",
+    "type": "green",
+    "trips": 75109
+  },
+  {
+    "month": "2021-01",
+    "type": "yellow",
+    "trips": 1345692
+  },
+  {
+    "month": "2021-02",
+    "type": "fhv",
+    "trips": 1028230
+  },
+  {
+    "month": "2021-02",
+    "type": "green",
+    "trips": 63509
+  },
+  {
+    "month": "2021-02",
+    "type": "yellow",
+    "trips": 1346295
+  },
+  {
+    "month": "2021-03",
+    "type": "fhv",
+    "trips": 1290045
+  },
+  {
+    "month": "2021-03",
+    "type": "green",
+    "trips": 82441
+  },
+  {
+    "month": "2021-03",
+    "type": "yellow",
+    "trips": 1893889
+  },
+  {
+    "month": "2021-04",
+    "type": "fhv",
+    "trips": 1251066
+  },
+  {
+    "month": "2021-04",
+    "type": "green",
+    "trips": 85479
+  },
+  {
+    "month": "2021-04",
+    "type": "yellow",
+    "trips": 2139755
+  },
+  {
+    "month": "2021-05",
+    "type": "fhv",
+    "trips": 1251211
+  },
+  {
+    "month": "2021-05",
+    "type": "green",
+    "trips": 86497
+  },
+  {
+    "month": "2021-05",
+    "type": "yellow",
+    "trips": 2471079
+  },
+  {
+    "month": "2021-06",
+    "type": "fhv",
+    "trips": 1297043
+  },
+  {
+    "month": "2021-06",
+    "type": "green",
+    "trips": 84910
+  },
+  {
+    "month": "2021-06",
+    "type": "yellow",
+    "trips": 2793760
+  },
+  {
+    "month": "2021-07",
+    "type": "fhv",
+    "trips": 1222254
+  },
+  {
+    "month": "2021-07",
+    "type": "green",
+    "trips": 81785
+  },
+  {
+    "month": "2021-07",
+    "type": "yellow",
+    "trips": 2778104
+  },
+  {
+    "month": "2021-08",
+    "type": "fhv",
+    "trips": 1189626
+  },
+  {
+    "month": "2021-08",
+    "type": "green",
+    "trips": 81574
+  },
+  {
+    "month": "2021-08",
+    "type": "yellow",
+    "trips": 2744998
+  },
+  {
+    "month": "2021-09",
+    "type": "fhv",
+    "trips": 1166882
+  },
+  {
+    "month": "2021-09",
+    "type": "green",
+    "trips": 93226
+  },
+  {
+    "month": "2021-09",
+    "type": "yellow",
+    "trips": 2920241
+  },
+  {
+    "month": "2021-10",
+    "type": "fhv",
+    "trips": 1265319
+  },
+  {
+    "month": "2021-10",
+    "type": "green",
+    "trips": 108182
+  },
+  {
+    "month": "2021-10",
+    "type": "yellow",
+    "trips": 3416487
+  },
+  {
+    "month": "2021-11",
+    "type": "fhv",
+    "trips": 1217575
+  },
+  {
+    "month": "2021-11",
+    "type": "green",
+    "trips": 105498
+  },
+  {
+    "month": "2021-11",
+    "type": "yellow",
+    "trips": 3424282
+  },
+  {
+    "month": "2021-12",
+    "type": "fhv",
+    "trips": 1328915
+  },
+  {
+    "month": "2021-12",
+    "type": "green",
+    "trips": 97211
+  },
+  {
+    "month": "2021-12",
+    "type": "yellow",
+    "trips": 3165300
+  },
+  {
+    "month": "2022-01",
+    "type": "fhv",
+    "trips": 1134031
+  },
+  {
+    "month": "2022-01",
+    "type": "green",
+    "trips": 60435
+  },
+  {
+    "month": "2022-01",
+    "type": "yellow",
+    "trips": 2427619
+  },
+  {
+    "month": "2022-02",
+    "type": "fhv",
+    "trips": 1240852
+  },
+  {
+    "month": "2022-02",
+    "type": "green",
+    "trips": 67222
+  },
+  {
+    "month": "2022-02",
+    "type": "yellow",
+    "trips": 2937442
+  },
+  {
+    "month": "2022-03",
+    "type": "fhv",
+    "trips": 1369276
+  },
+  {
+    "month": "2022-03",
+    "type": "green",
+    "trips": 76001
+  },
+  {
+    "month": "2022-03",
+    "type": "yellow",
+    "trips": 3572799
+  },
+  {
+    "month": "2022-04",
+    "type": "fhv",
+    "trips": 1236367
+  },
+  {
+    "month": "2022-04",
+    "type": "green",
+    "trips": 73917
+  },
+  {
+    "month": "2022-04",
+    "type": "yellow",
+    "trips": 3542952
+  },
+  {
+    "month": "2022-05",
+    "type": "fhv",
+    "trips": 1246338
+  },
+  {
+    "month": "2022-05",
+    "type": "green",
+    "trips": 74442
+  },
+  {
+    "month": "2022-05",
+    "type": "yellow",
+    "trips": 3527844
+  },
+  {
+    "month": "2022-06",
+    "type": "fhv",
+    "trips": 1186836
+  },
+  {
+    "month": "2022-06",
+    "type": "green",
+    "trips": 71157
+  },
+  {
+    "month": "2022-06",
+    "type": "yellow",
+    "trips": 3490543
+  },
+  {
+    "month": "2022-07",
+    "type": "fhv",
+    "trips": 1149412
+  },
+  {
+    "month": "2022-07",
+    "type": "green",
+    "trips": 61838
+  },
+  {
+    "month": "2022-07",
+    "type": "yellow",
+    "trips": 3116312
+  },
+  {
+    "month": "2022-08",
+    "type": "fhv",
+    "trips": 1140662
+  },
+  {
+    "month": "2022-08",
+    "type": "green",
+    "trips": 63570
+  },
+  {
+    "month": "2022-08",
+    "type": "yellow",
+    "trips": 3094390
+  },
+  {
+    "month": "2022-09",
+    "type": "fhv",
+    "trips": 1151879
+  },
+  {
+    "month": "2022-09",
+    "type": "green",
+    "trips": 66512
+  },
+  {
+    "month": "2022-09",
+    "type": "yellow",
+    "trips": 3126715
+  },
+  {
+    "month": "2022-10",
+    "type": "fhv",
+    "trips": 1166742
+  },
+  {
+    "month": "2022-10",
+    "type": "green",
+    "trips": 66827
+  },
+  {
+    "month": "2022-10",
+    "type": "yellow",
+    "trips": 3605499
+  },
+  {
+    "month": "2022-11",
+    "type": "fhv",
+    "trips": 1096842
+  },
+  {
+    "month": "2022-11",
+    "type": "green",
+    "trips": 60037
+  },
+  {
+    "month": "2022-11",
+    "type": "yellow",
+    "trips": 3189210
+  },
+  {
+    "month": "2022-12",
+    "type": "fhv",
+    "trips": 1275363
+  },
+  {
+    "month": "2022-12",
+    "type": "green",
+    "trips": 70000
+  },
+  {
+    "month": "2022-12",
+    "type": "yellow",
+    "trips": 3335242
+  },
+  {
+    "month": "2023-01",
+    "type": "fhv",
+    "trips": 1106479
+  },
+  {
+    "month": "2023-01",
+    "type": "green",
+    "trips": 66548
+  },
+  {
+    "month": "2023-01",
+    "type": "yellow",
+    "trips": 3016414
+  },
+  {
+    "month": "2023-02",
+    "type": "fhv",
+    "trips": 1102419
+  },
+  {
+    "month": "2023-02",
+    "type": "green",
+    "trips": 63208
+  },
+  {
+    "month": "2023-02",
+    "type": "yellow",
+    "trips": 2865589
+  },
+  {
+    "month": "2023-03",
+    "type": "fhv",
+    "trips": 1317986
+  },
+  {
+    "month": "2023-03",
+    "type": "green",
+    "trips": 70256
+  },
+  {
+    "month": "2023-03",
+    "type": "yellow",
+    "trips": 3345640
+  },
+  {
+    "month": "2023-04",
+    "type": "fhv",
+    "trips": 1237182
+  },
+  {
+    "month": "2023-04",
+    "type": "green",
+    "trips": 63723
+  },
+  {
+    "month": "2023-04",
+    "type": "yellow",
+    "trips": 3231037
+  },
+  {
+    "month": "2023-05",
+    "type": "fhv",
+    "trips": 1376906
+  },
+  {
+    "month": "2023-05",
+    "type": "green",
+    "trips": 67293
+  },
+  {
+    "month": "2023-05",
+    "type": "yellow",
+    "trips": 3452424
+  },
+  {
+    "month": "2023-06",
+    "type": "fhv",
+    "trips": 1211853
+  },
+  {
+    "month": "2023-06",
+    "type": "green",
+    "trips": 63774
+  },
+  {
+    "month": "2023-06",
+    "type": "yellow",
+    "trips": 3247924
+  },
+  {
+    "month": "2023-07",
+    "type": "fhv",
+    "trips": 1362494
+  },
+  {
+    "month": "2023-07",
+    "type": "green",
+    "trips": 59528
+  },
+  {
+    "month": "2023-07",
+    "type": "yellow",
+    "trips": 2849816
+  },
+  {
+    "month": "2023-08",
+    "type": "fhv",
+    "trips": 1432184
+  },
+  {
+    "month": "2023-08",
+    "type": "green",
+    "trips": 58665
+  },
+  {
+    "month": "2023-08",
+    "type": "yellow",
+    "trips": 2767925
+  },
+  {
+    "month": "2023-09",
+    "type": "fhv",
+    "trips": 1285610
+  },
+  {
+    "month": "2023-09",
+    "type": "green",
+    "trips": 63282
+  },
+  {
+    "month": "2023-09",
+    "type": "yellow",
+    "trips": 2792601
+  },
+  {
+    "month": "2023-10",
+    "type": "fhv",
+    "trips": 1618977
+  },
+  {
+    "month": "2023-10",
+    "type": "green",
+    "trips": 64272
+  },
+  {
+    "month": "2023-10",
+    "type": "yellow",
+    "trips": 3454969
+  },
+  {
+    "month": "2023-11",
+    "type": "fhv",
+    "trips": 1336841
+  },
+  {
+    "month": "2023-11",
+    "type": "green",
+    "trips": 62256
+  },
+  {
+    "month": "2023-11",
+    "type": "yellow",
+    "trips": 3273953
+  },
+  {
+    "month": "2023-12",
+    "type": "fhv",
+    "trips": 1369749
+  },
+  {
+    "month": "2023-12",
+    "type": "green",
+    "trips": 62428
+  },
+  {
+    "month": "2023-12",
+    "type": "yellow",
+    "trips": 3303927
+  },
+  {
+    "month": "2024-01",
+    "type": "fhv",
+    "trips": 1283150
+  },
+  {
+    "month": "2024-01",
+    "type": "green",
+    "trips": 54907
+  },
+  {
+    "month": "2024-01",
+    "type": "yellow",
+    "trips": 2901801
+  },
+  {
+    "month": "2024-02",
+    "type": "fhv",
+    "trips": 1169300
+  },
+  {
+    "month": "2024-02",
+    "type": "green",
+    "trips": 52032
+  },
+  {
+    "month": "2024-02",
+    "type": "yellow",
+    "trips": 2942654
+  },
+  {
+    "month": "2024-03",
+    "type": "fhv",
+    "trips": 1461248
+  },
+  {
+    "month": "2024-03",
+    "type": "green",
+    "trips": 55841
+  },
+  {
+    "month": "2024-03",
+    "type": "yellow",
+    "trips": 3495207
+  },
+  {
+    "month": "2024-04",
+    "type": "fhv",
+    "trips": 1437291
+  },
+  {
+    "month": "2024-04",
+    "type": "green",
+    "trips": 54770
+  },
+  {
+    "month": "2024-04",
+    "type": "yellow",
+    "trips": 3427894
+  },
+  {
+    "month": "2024-05",
+    "type": "fhv",
+    "trips": 1344888
+  },
+  {
+    "month": "2024-05",
+    "type": "green",
+    "trips": 59093
+  },
+  {
+    "month": "2024-05",
+    "type": "yellow",
+    "trips": 3632622
+  },
+  {
+    "month": "2024-06",
+    "type": "fhv",
+    "trips": 1378721
+  },
+  {
+    "month": "2024-06",
+    "type": "green",
+    "trips": 53025
+  },
+  {
+    "month": "2024-06",
+    "type": "yellow",
+    "trips": 3447129
+  },
+  {
+    "month": "2024-07",
+    "type": "fhv",
+    "trips": 1376795
+  },
+  {
+    "month": "2024-07",
+    "type": "green",
+    "trips": 50094
+  },
+  {
+    "month": "2024-07",
+    "type": "yellow",
+    "trips": 2988814
+  },
+  {
+    "month": "2024-08",
+    "type": "fhv",
+    "trips": 1477751
+  },
+  {
+    "month": "2024-08",
+    "type": "green",
+    "trips": 49949
+  },
+  {
+    "month": "2024-08",
+    "type": "yellow",
+    "trips": 2890614
+  },
+  {
+    "month": "2024-09",
+    "type": "fhv",
+    "trips": 1710996
+  },
+  {
+    "month": "2024-09",
+    "type": "green",
+    "trips": 52652
+  },
+  {
+    "month": "2024-09",
+    "type": "yellow",
+    "trips": 3527718
+  },
+  {
+    "month": "2024-10",
+    "type": "fhv",
+    "trips": 1415007
+  },
+  {
+    "month": "2024-10",
+    "type": "green",
+    "trips": 54394
+  },
+  {
+    "month": "2024-10",
+    "type": "yellow",
+    "trips": 3725830
+  },
+  {
+    "month": "2024-11",
+    "type": "fhv",
+    "trips": 1584791
+  },
+  {
+    "month": "2024-11",
+    "type": "green",
+    "trips": 50564
+  },
+  {
+    "month": "2024-11",
+    "type": "yellow",
+    "trips": 3543509
+  },
+  {
+    "month": "2024-12",
+    "type": "fhv",
+    "trips": 1906482
+  },
+  {
+    "month": "2024-12",
+    "type": "green",
+    "trips": 52152
+  },
+  {
+    "month": "2024-12",
+    "type": "yellow",
+    "trips": 3556590
+  }
+]
