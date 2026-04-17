@@ -1,4 +1,4 @@
-# NYC Taxi Mobility
+# NYC Taxi Mobility: High-level overview and Milestone 2 Status
 
 **Live URL:** [https://elitehackers-six.vercel.app](https://elitehackers-six.vercel.app)
 
@@ -21,7 +21,16 @@ python nyc-tlc-pipeline/aggregations/make_milestone2_aggregations.py \
 
 The script reads cleaned parquet files (output of `nyc-tlc-pipeline/pipeline/preprocess.py`) and produces the JSON files committed in `web/public/data/`.
 
-## Architecture
+#### Data aggregations
+
+Pre-aggregated JSON files in `[web/public/data/](web/public/data/)`:
+
+- `monthly_volume.json` — 331 rows (Yellow/Green 2015–2024, FHV 2017-06–2024-12)
+- `daily_volume.json` — ~10k rows
+- `events.json` — 12 curated annotation events
+- `taxi_zones.topojson` — 460 KB simplified TopoJSON
+
+## High-level Architecture
 
 ```
                         ┌─────────────┐
