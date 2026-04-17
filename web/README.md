@@ -67,7 +67,7 @@ This dashboard visualises NYC TLC Yellow taxi, Green taxi, and traditional FHV (
 | V2 Weekly Pulse Heatmap | Stub           | Placeholder panel, Milestone 3                                                                                                                                            |
 | V3 Zone Choropleth      | Stub           | Placeholder panel, Milestone 3                                                                                                                                            |
 | V4 Trip Anatomy Scatter | Stub           | Placeholder panel, Milestone 3                                                                                                                                            |
-| Scrollama narrative     | **Functional** | 3-step story → dashboard (will expand and prepare a separate narrative mode for multiple events other than the COVID)                                                     |
+| Scrollama narrative     | **Functional** | 3-step story (expand and prepare a separate narrative mode for multiple events other than the COVID, Milestone 3)                                                         |
 | Global controls         | **Functional** | Taxi toggle, year slider, reset                                                                                                                                           |
 
 

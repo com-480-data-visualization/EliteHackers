@@ -185,7 +185,7 @@ These sources influenced our focus on clean design, progressive disclosure of in
 
 **Live deploy:** [https://elitehackers-six.vercel.app](https://elitehackers-six.vercel.app)
 
-**Source:** `[web/](web/)` — Vite + D3.js + Scrollama
+**Source:** [web/](web/) — Vite + D3.js + Scrollama
 
 ## Milestone 3 (29th May, 5pm)
 
