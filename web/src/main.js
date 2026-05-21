@@ -5,6 +5,7 @@
 
 import { init as initV1 } from './views/v1_stackedArea.js';
 import { init as initV5 } from './views/v5_timeline.js';
+import { init as initGlobalPatterns } from './views/v_globalPatterns.js';
 import { init as initTaxiToggle } from './controls/taxiTypeToggle.js';
 import { init as initYearSlider } from './controls/yearSlider.js';
 import { init as initReset } from './controls/resetButton.js';
@@ -13,19 +14,20 @@ import { initScrollama } from './narrative/scrollama_setup.js';
 console.info('[NYC Mobility] Dashboard initialising…');
 
 async function loadData() {
-  const [monthly, daily, events] = await Promise.all([
+  const [monthly, daily, events, globalPatterns] = await Promise.all([
     fetch('/data/monthly_volume.json').then(r => r.json()),
     fetch('/data/daily_volume.json').then(r => r.json()),
     fetch('/data/events.json').then(r => r.json()),
+    fetch('/data/global_patterns.json').then(r => r.json()).catch(() => null),
   ]);
-  return { monthly, daily, events };
+  return { monthly, daily, events, globalPatterns };
 }
 
 async function main() {
   const loading = document.getElementById('loading');
 
   try {
-    const { monthly, daily, events } = await loadData();
+    const { monthly, daily, events, globalPatterns } = await loadData();
 
     // Hide loading
     loading.classList.add('hidden');
@@ -44,6 +46,9 @@ async function main() {
 
     // Init V5
     initV5(document.getElementById('v5-container'), { dailyData: daily, events });
+
+    // Init Global Patterns tab
+    initGlobalPatterns(document.getElementById('gp-root'), globalPatterns);
 
     // Wire Scrollama narrative
     initScrollama();
