@@ -1,198 +1,162 @@
-# Project of Data Visualization (COM-480)
+# EliteHackers — NYC Taxi Mobility
 
+COM-480 Data Visualization · EPFL MA4 · 2025
 
-| Student's name        | SCIPER |
-| --------------------- | ------ |
-| Debajyoti Dasgupta    | 416472 |
-| Paola Biocchi         | 340437 |
-| Siba Smarak Panigrahi | 352339 |
+Interactive visualizations of 100M+ NYC TLC taxi trips (2015–2024): Yellow, Green, and FHV vehicle types.
 
+---
 
-[Milestone 1](#milestone-1) • [Milestone 2](#milestone-2) • [Milestone 3](#milestone-3)
+## Repo structure
 
-## Milestone 1 (20th March, 5pm)
+```
+nyc-tlc-pipeline/       Python ETL — raw TLC parquet → cleaned data → JSON/CSV for the web
+nyc-tlc-viz/            Standalone EDA dashboard (D3, Vite) — reads pipeline CSV exports
+web/                    Main website (Vite + D3 + Scrollama) — story + dashboard + global patterns
+```
 
-**10% of the final grade**
+---
+
+## `nyc-tlc-pipeline/`
 
-This is a preliminary milestone to let you set up goals for your final project and assess the feasibility of your ideas.
-Please, fill the following sections about your project.
+### Pipeline stages — run in order
 
-*(max. 2000 characters per section)*
+| File | What it does |
+|------|-------------|
+| `config.py` | Central config: date range, vehicle types, cleaning thresholds, all paths |
+| `pipeline/download.py` | Async-downloads monthly `.parquet` files from TLC CDN with retry/backoff. Also fetches `taxi_zone_lookup.csv` and `taxi_zones.zip`. Writes `data/raw/manifest.json`. |
+| `pipeline/validate.py` | Checks schema, null rates, value ranges, duplicates. Writes per-file JSON reports + `reports/stats/validation_summary.csv`. |
+| `pipeline/preprocess.py` | Cleans data (invalid fares, distances, durations), renames columns, engineers features: `pickup_hour`, `pickup_dow`, `duration_minutes`, `speed_mph`, `tip_pct`, zone/borough joins. Output: `data/processed/*_clean.parquet` (snappy). |
+| `pipeline/profile.py` | Statistical summaries per file (distributions, top zones, OD pairs, fare analysis). Output: `reports/stats/*.md`. |
+| `pipeline/export.py` | Incremental aggregation to 11 CSVs consumed by `nyc-tlc-viz`: `trips_by_hour`, `trips_by_dow`, `trips_by_month`, `fare_by_hour`, `speed_by_hour`, `distance_distribution`, `payment_share`, `zone_trip_counts`, `trips_by_borough_od`, `top_pickup_zones`, `top_od_pairs`. |
+| `pipeline/check_raw.py` | Standalone utility: counts valid/corrupt/missing raw files and total GB downloaded. |
+| `run_pipeline.sh` | Runs all five stages in sequence using the `nyc_tlc` conda env. |
 
-### Dataset
+### Aggregation scripts — produce JSON for `web/`
 
-> Find a dataset (or multiple) that you will explore. Assess the quality of the data it contains and how much preprocessing / data-cleaning it will require before tackling visualization. We recommend using a standard dataset as this course is not about scraping nor data processing.
->
-> Hint: some good pointers for finding quality publicly available datasets ([Google dataset search](https://datasetsearch.research.google.com/), [Kaggle](https://www.kaggle.com/datasets), [OpenSwissData](https://opendata.swiss/en/), [SNAP](https://snap.stanford.edu/data/) and [FiveThirtyEight](https://data.fivethirtyeight.com/)).
+| File | Output |
+|------|--------|
+| `aggregations/make_milestone2_aggregations.py` | `monthly_volume.json`, `daily_volume.json`, `weekly_heatmap.json`, `zones_volume.json`, `events.json` → `web/public/data/` |
+| `aggregations/make_global_patterns.py` | `global_patterns.json` (hourly demand by year and by borough, 7×24 grids) → `web/public/data/` |
 
-The dataset selected for this project is the **New York City Taxi and Limousine Commission (TLC) Trip Record Data**, publicly available at [NYC TLC Trips Data](https://home4.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
+### Setup
 
-This dataset contains detailed trip-level records of taxi activity in New York City, including Yellow Taxis, Green Taxis, and For-Hire Vehicles (FHV). Each row corresponds to a single trip and captures temporal, spatial, and economic attributes, such as pickup and dropoff timestamps, trip distance, passenger count, geographic location identifiers, fare components, and total payment amount.
+```bash
+cd nyc-tlc-pipeline
+pip install -r requirements.txt   # or: conda create -n nyc_tlc && conda activate nyc_tlc && pip install -r requirements.txt
+```
 
-The data is distributed as monthly Parquet files, each containing millions of records. For example, the 2025 dataset alone comprises over 40 million trips across 11 months, making it a large-scale, high-resolution dataset well-suited for analyzing urban mobility patterns, demand dynamics, and transportation economics.
+Dependencies: `polars`, `pandas`, `pyarrow`, `httpx`, `tqdm`, `rich`, `numpy`.
 
-**Data Quality Assessment**: Overall, the dataset is of high quality and reliability, reflecting its origin from an official municipal authority and its widespread use in academic and industry research. Key strengths include:
+### Running
 
-- Consistent schema across time, with ~20 well-defined variables
-- Standardized data types (timestamps, numeric values, categorical location IDs)
-- High temporal granularity, enabling fine-grained analysis
-- Comprehensive coverage of a major metropolitan transportation system. 
-These characteristics make the dataset particularly suitable for visualization tasks involving temporal trends, spatial distributions, and demand fluctuations.
+```bash
+# Full pipeline (downloads ~60 GB, takes several hours)
+bash run_pipeline.sh
 
-**Preprocessing and Cleaning Requirements**: Despite its overall quality, it requires non-trivial preprocessing to ensure analytical validity:
+# Or stage by stage:
+python pipeline/download.py
+python pipeline/validate.py
+python pipeline/preprocess.py
+python pipeline/export.py
 
-- **Missing values**: Certain fields (e.g., passenger count, location IDs, airport fees) may be incomplete
-- **Invalid or unrealistic entries**:
-  - Zero or negative trip distances
-  - Implausible passenger counts (e.g., 0 or excessively large values)
-  - Fare amounts that are zero, negative, or inconsistent with the distance
-- **Outliers**: Extreme values may arise from sensor errors, data entry issues, or rare edge-case trips
-- **Temporal inconsistencies**: Occasional anomalies such as dropoff times preceding pickup times
-
-To address these issues, the preprocessing pipeline will include:
-
-- Filtering invalid or implausible records
-- Handling missing values (removal or imputation where appropriate)
-- Outlier detection using statistical thresholds or domain-informed rules
-- Validation of temporal and spatial consistency
-
-### Problematic
-
-> Frame the general topic of your visualization and the main axis that you want to develop.
->
-> - What am I trying to show with my visualization?
-> - Think of an overview for the project, your motivation, and the target audience.
-
-This project focuses on analyzing and visualizing **urban mobility patterns in New York City using large-scale taxi trip data**. 
-The primary objective is to uncover how taxi usage evolves and how key factors such as trip distance, fare amount, passenger count, and time of day interact to shape mobility behavior.
-
-At its core, the project is guided by the following question:
-**How do taxi usage patterns vary across time, and what underlying factors drive these variations?**
-To address this, the visualization will explore three main axes:
-
-- **Temporal dynamics**: how demand fluctuates across hours of the day, days of the week, and months of the year
-- **Trip characteristics**: relationships between distance, fare, and passenger count
-- **Behavioral patterns**: identifying typical vs. anomalous trips and detecting irregular spikes or drops in activity
-
-Additionally, the project will investigate traffic-driven insights, including peak congestion hours, commuting patterns, and differences in weekday and weekend mobility.
-
-**Motivation**: Urban transportation systems are a critical component of modern cities. Understanding how people move when, where, and under what conditions can provide valuable insights for improving infrastructure, optimizing traffic flow, and enhancing user experience. By leveraging a large-scale, real-world dataset, this project aims to bridge the gap between raw mobility data and actionable insights, highlighting patterns that are often hidden in high-dimensional data.
-
-**Target Audience**: The visualizations are designed for a broad but relevant audience, including:
-
-- Urban planners and transportation analysts are interested in demand patterns and system efficiency
-- Policy makers and city stakeholders, who rely on data-driven insights for infrastructure and regulation decisions
-- Mobility and logistics professionals (e.g., ride-hailing, traffic management), seeking to understand usage trends and peak demand
-- Students and data practitioners, looking to explore real-world, large-scale data through intuitive visual interfaces
-
-To serve this audience effectively, the project emphasizes clarity, interpretability, and interactive exploration, enabling users to derive insights without requiring deep technical expertise.
-
-### Exploratory Data Analysis (EDA)
-
-> Pre-processing of the data set you chose
->
-> - Show some basic statistics and get insights about the data
-
-To enable scalable analysis, we developed a data pipeline to automatically download and preprocess records from the [NYC TLC Trip Record Data Portal](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). The goal of this stage is to extract high-level patterns and validate data consistency before moving to more advanced visualizations.
-
-Our analysis focuses on **three taxi categories**: Yellow Taxis, Green Taxis, and For-Hire Vehicles (FHVs). High-Volume FHVs were excluded due to their significantly larger storage footprint (*≈450 MB* per file per month), which would substantially increase computational overhead.
-
-**Data Pipeline and Preprocessing:** The pipeline ([nyc-tlc-pipeline](nyc-tlc-pipeline)) performs the following steps:
-
-1. Automated ingestion of monthly Parquet files
-2. Schema validation to ensure consistency across time
-3. Data cleaning, including handling of null values and removal of clearly invalid records
-4. Schema harmonization across taxi types. For example, aligning different datetime fields (`tpep_pickup_datetime`, `lpep_pickup_datetime`) into a unified `pickup_datetime`
-5. Standardization of column names and formats for downstream analysis
-
-A preview of the cleaned data is available for [Yellow Taxi (Jan 2015)](nyc-tlc-pipeline/data/preview/yellow_tripdata_2015-01_clean_preview.csv), and the full processed dataset is publicly hosted on [HuggingFace](https://huggingface.co/datasets/sibasmarakp/nyc-tlc-processed/tree/main/data).
-
-**Aggregation Strategy:** Given the scale of the dataset, we perform aggregation-based EDA to make exploration tractable. The processed data is summarized into CSV files, capturing key dimensions:
-
-- *Temporal aggregations*: trips by hour of day, day of week, and month
-- *Economic indicators*: fare and tip statistics over time
-- *Trip characteristics*: distribution of trip distances
-- *Behavioral signals*: payment method usage
-- *Spatial activity*: pickup and dropoff counts across taxi zones
-
-These aggregated views for EDA are visualized using interactive dashboards built with `D3.js` ([nyc-tlc-viz](nyc-tlc-viz)).
-
-**Key Observations:** The dataset spans approximately 1.37 billion trips over 10 years and covers 123 taxi zones. The distribution across taxi types includes 786M trips for *Yellow taxis*, 520M trips for *FHV*, and 67M trips for *Green taxis*.
-
-Several high-level patterns emerge:
-
-- *Strong temporal seasonality*, with consistent peaks in pre-2020 years.
-- *A sharp and sustained decline* in trip volume corresponding to the COVID-19 pandemic, pronounced between April and June 2020.
-- *Clear daily and weekly usage cycles*, indicating commuting and leisure-driven mobility patterns.
-
-> Note: EDA visualizations are available in the [dashboard](nyc-tlc-viz/dashboard.md).
-
-**Data Quality Insights:** While overall data quality is high, several limitations must be accounted for. Missing values in key fields include 22.8% for shared ride indicators, 9.6% for pickup zone IDs, 3.4% for dropoff zone IDs, and 2.4% for airport fees. These gaps are not uniformly distributed and may introduce bias in specific analyses (e.g., spatial or shared mobility trends). As a result, careful filtering or imputation strategies are required depending on the task.
-
-**Limitations and Next Steps:** A notable issue arises with FHV data before June 2017: a substantial number of records are dropped during preprocessing. This aligns with known inconsistencies documented in the TLC data errata. To address this in future stages, we consider two possible directions:
-
-- Restrict analysis to post-2017 data for FHV, or
-- Focus primarily on the Yellow and Green taxi datasets, which exhibit higher consistency over time
-
-For this initial milestone, we retain the full 10-year range to capture global trends, while acknowledging these limitations.
-
-### Related work
-
-> - What others have already done with the data?
-> - Why is your approach original?
-> - What source of inspiration do you take? Visualizations that you found on other websites or magazines (might be unrelated to your data).
-> - In case you are using a dataset that you have already explored in another context (ML or ADA course, semester project...), you are required to share the report of that work to outline the differences with the submission for this class.
-
-The NYC TLC dataset is used in both academic research and industry for analyzing urban mobility, demand forecasting, and transportation efficiency. Prior work typically falls into three main categories:
-
-- **Descriptive analytics and dashboards:** Platforms such as NYC Taxi & Limousine Commission reports and public dashboards provide aggregated statistics on trip volumes, revenue, and geographic distribution. These are often static or limited in interactivity.
-- **Predictive modeling and machine learning**: Some studies use this dataset for tasks such as demand prediction, travel time estimation, and surge-pricing modeling. These works focus on model performance rather than interpretability or visualization.
-- **Mobility and urban science research:** Academic works analyze spatial-temporal patterns, congestion, and human mobility behavior, often using clustering or network-based methods. However, these analyses are typically presented through static figures and lack interactive exploration.
-
-In addition, several data journalism platforms (e.g., FiveThirtyEight) have explored subsets of the dataset, often focusing on specific questions such as tipping behavior or airport traffic.
-
-**Limitations of Existing Work:** Despite the richness of prior analyses, most existing approaches exhibit at least one of the following limitations:
-
-- Limited interactivity, restricting user-driven exploration
-- Narrow scope, focusing on isolated variables rather than integrated patterns
-- Lack of multi-scale analysis, failing to connect hourly, daily, and yearly trends
-- Minimal focus on anomalies or disruptions, such as the impact of COVID-19
-
-**Our Approach and Originality**: This project takes a visual analytics perspective, aiming to bridge the gap between large-scale data and intuitive understanding. The key distinguishing aspects are:
-
-- Multi-scale temporal analysis: We simultaneously explore patterns across hours, days, months, and years, enabling a unified view of mobility dynamics.
-- Integrated feature relationships: Rather than analyzing variables in isolation, we examine how trip distance, fare, passenger count, and time interact to shape behavior.
-- Focus on anomalies and global events: We explicitly highlight disruptions such as the COVID-19 pandemic, treating them as first-class analytical features rather than noise.
-- Interactive, user-driven exploration: Our D3.js dashboards enable users to navigate among temporal, spatial, and economic dimensions seamlessly.
-
-**Sources of Inspiration:** The design of our visualizations draws inspiration from high-quality data storytelling and interactive visualization platforms, including:
-
-- The New York Times interactive graphics are known for their clarity and narrative-driven design
-- Observable notebooks, which emphasize interactivity and exploratory workflows
-- FiveThirtyEight, particularly for combining statistical rigor with accessible storytelling
-These sources influenced our focus on clean design, progressive disclosure of information, and intuitive user interaction.
-
-**Prior Work with This Dataset:** We have not used this dataset in prior coursework or projects. Therefore, this work is developed specifically for this visualization project, with a focus on exploratory analysis and interactive design rather than predictive modeling.
-
-## Milestone 2 (17th April, 5pm)
-
-**10% of the final grade**
-
-- The project goal description, along with visualizations, tools, are available in [milestone2.pdf](milestone2/milestone2.pdf) file.   
-- The details of the status of each visualization and remaining work for Milestone 3 are available in [web/README.md](web/README.md) file.
-
-### Functional Prototype — NYC Taxi Mobility Dashboard
-
-**Live deploy:** [https://elitehackers-six.vercel.app](https://elitehackers-six.vercel.app)
-
-**Source:** [web/](web/) — Vite + D3.js + Scrollama
-
-## Milestone 3 (29th May, 5pm)
-
-**80% of the final grade**
-
-## Late policy
-
-- < 24h: 80% of the grade for the milestone
-- < 48h: 70% of the grade for the milestone
-
+# Check download status at any point:
+python pipeline/check_raw.py
+
+# Generate web data after preprocess is done:
+python aggregations/make_milestone2_aggregations.py
+python aggregations/make_global_patterns.py
+```
+
+> **Note:** `download.py` is rate-limited by the TLC CDN and may need to be run multiple times. It resumes from where it left off using `manifest.json`.
+
+---
+
+## `web/` — Main website
+
+**Stack:** Vite 6, D3 7, Scrollama 3, TopJSON 3. Vanilla JS ES modules, no framework.
+
+### Source files
+
+| File | Role |
+|------|------|
+| `index.html` | Single-page app shell. Defines nav, narrative section (scrollama steps), dashboard section (V1–V5 panels), and Global Patterns section. |
+| `src/main.js` | Entry point: fetches all JSON data, initialises all views and controls. |
+| `src/state/filterBus.js` | Central pub/sub state bus. All views subscribe to it; controls call `update()`. State: `dateRange`, `taxiTypes`, `selectedZone`. |
+| `src/controls/taxiTypeToggle.js` | Yellow / Green / FHV toggle buttons — writes to `filterBus.taxiTypes`. |
+| `src/controls/yearSlider.js` | Dual range slider (2015–2024) — writes to `filterBus.dateRange`. Syncs bidirectionally with V1 brush. |
+| `src/controls/resetButton.js` | Resets all filterBus state to defaults. |
+| `src/views/v1_stackedArea.js` | Monthly stacked area chart with brush for date range selection. Used twice (dashboard + narrative). |
+| `src/views/v5_timeline.js` | Daily line chart with annotated event markers (COVID, blizzards, policy changes). Click a marker to zoom. |
+| `src/views/v_globalPatterns.js` | 7×24 demand heatmap (day of week × hour). Local controls: year range slider, borough multi-select, normalize toggle. Click a row for a 24h detail line chart. |
+| `src/views/v2_heatmap.js` | Stub — Milestone 3. |
+| `src/views/v3_choropleth.js` | Stub — Milestone 3. |
+| `src/views/v4_scatter.js` | Stub — Milestone 3. |
+| `src/narrative/scrollama_setup.js` | Initialises Scrollama on `.narrative-step` elements. |
+| `src/narrative/steps.js` | Defines what happens on each scroll step: brush V1 to a date range, show/hide annotation overlays. |
+| `src/styles/tokens.css` | CSS custom properties: colors, typography, spacing, shadows. |
+| `src/styles/main.css` | All component styles. |
+
+### Data files (`public/data/`)
+
+| File | Contents | Source |
+|------|----------|--------|
+| `monthly_volume.json` | `[{month, type, trips}]` — 331 rows | `make_milestone2_aggregations.py` |
+| `daily_volume.json` | `[{date, type, trips}]` — ~10k rows | `make_milestone2_aggregations.py` |
+| `events.json` | 17 hand-curated events (COVID, blizzards, fare hikes, holidays) | `make_milestone2_aggregations.py` |
+| `global_patterns.json` | `{heatmap_by_year, heatmap_by_borough, borough_list}` — hourly demand grids | `make_global_patterns.py` |
+| `taxi_zones.topojson` | NYC taxi zone polygons (263 zones) | TLC / NYC Open Data |
+| `weekly_heatmap.json`, `zones_volume.json`, `trip_sample.json` | Empty stubs — Milestone 3 | — |
+
+### Setup & run
+
+```bash
+cd web
+npm install
+npm run dev      # dev server → http://localhost:3001 (opens automatically)
+npm run build    # production build → dist/
+```
+
+Requires Node.js 18+. If not installed: `brew install node` or download from nodejs.org.
+
+---
+
+## `nyc-tlc-viz/` — Standalone EDA dashboard
+
+**Stack:** Vite 6, D3 7, Mapbox GL JS 3. Nine independent chart components.
+
+Reads CSVs directly from `../nyc-tlc-pipeline/data/exports/` via a Vite dev-server middleware (no copy needed). **Requires the pipeline `export.py` stage to have run.**
+
+| Component | Chart type |
+|-----------|-----------|
+| `ChartHourlyDemand.js` | Multi-line: trips by hour, one line per vehicle type |
+| `ChartDayOfWeek.js` | Grouped bar chart by day of week |
+| `ChartMonthlyTrend.js` | Stacked area with brush zoom + COVID band |
+| `ChartFareByHour.js` | Dual-axis: avg fare (bar) + tip % (line) |
+| `ChartDistanceDistrib.js` | Horizontal grouped bars, log/linear toggle |
+| `ChartPaymentSplit.js` | Donut chart by payment method |
+| `MapPickupChoropleth.js` | Mapbox choropleth of 263 taxi zones |
+| `ChartBoroughOD.js` | 6×6 origin–destination heatmap |
+| `ChartSpeedByHour.js` | Avg + median speed band by hour |
+
+```bash
+cd nyc-tlc-viz
+npm install
+npm run dev      # → http://localhost:3000
+```
+
+Optional: set `VITE_MAPBOX_TOKEN` in a `.env` file for styled map tiles; falls back to NYC Open Data GeoJSON otherwise.
+
+---
+
+## Data flow
+
+```
+TLC CDN (monthly .parquet files)
+  └─ download.py → data/raw/
+  └─ preprocess.py → data/processed/*_clean.parquet
+        ├─ export.py → data/exports/*.csv ──────────────────→ nyc-tlc-viz/
+        ├─ make_milestone2_aggregations.py → web/public/data/monthly_volume.json
+        │                                    web/public/data/daily_volume.json
+        │                                    web/public/data/events.json
+        └─ make_global_patterns.py ────────→ web/public/data/global_patterns.json
+```
