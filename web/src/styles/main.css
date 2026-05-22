@@ -472,6 +472,232 @@ body {
   stroke-width: 2.5;
 }
 
+/* V5 event band (after a click) */
+.event-band {
+  fill-opacity: 0.18;
+  pointer-events: none;
+}
+.event-band-line {
+  stroke-dasharray: 4, 4;
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+
+/* V5 recurring holiday-season band (Dec 24 – Jan 2). Ambient seasonal context
+   drawn behind the trip line. Warm amber to feel seasonal/festive while
+   avoiding every event-category color (red / green / blue / orange / purple),
+   and clearly fainter than the colored .event-band (~0.18) so the two are
+   never confused. Non-interactive — pointer-events disabled here AND on the
+   label, so neither swallows hovers/clicks meant for the event markers. */
+.holiday-band {
+  fill: #d4a574;
+  fill-opacity: 0.10;
+  pointer-events: none;
+}
+.holiday-band-label {
+  fill: #d4a574;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* ============================================================
+   V5 Event Info Panel
+   ============================================================ */
+.event-panel {
+  border-top: 1px solid var(--border);
+  padding: 18px 24px 20px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-panel--empty {
+  padding: 14px 24px;
+  color: var(--text-muted);
+  display: block;
+}
+
+.event-panel__hint {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.event-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.event-panel__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.event-panel__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.event-panel__meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.event-panel__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.event-panel__category-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.event-panel__controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.event-panel__btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+.event-panel__btn:hover:not(:disabled) {
+  background: var(--bg-card-hover);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+.event-panel__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.event-panel__btn--clear:hover {
+  border-color: var(--color-disruption);
+  color: var(--color-disruption);
+}
+
+.event-panel__description {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.event-panel__impact {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  line-height: 1.5;
+}
+
+.event-panel__impact strong {
+  font-weight: 700;
+}
+.event-panel__impact--drop strong { color: var(--color-disruption); }
+.event-panel__impact--spike strong { color: var(--color-recovery); }
+.event-panel__impact--flat strong { color: var(--text-secondary); }
+
+/* Per-taxi impact grid — one compact row per active taxi type, showing
+   mean daily trips and CV as Before → During → After triples. Extends the
+   `.event-panel` block; not a standalone component. */
+.event-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+
+.event-stats__legend {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.event-stats__row {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 16px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+}
+.event-stats__row:first-of-type {
+  border-top: none;
+}
+
+.event-stats__type {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.event-stats__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.event-stats__metric-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.event-stats__metric-value {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* On narrow viewports, drop to a stacked layout: type name on its own row,
+   then each metric on its own line so the triples never overflow. */
+@media (max-width: 640px) {
+  .event-stats__row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
 /* Narrative step active state */
 .narrative-step.is-active .step-content h2 { color: var(--text-primary); }
 .narrative-step:not(.is-active) .step-content { opacity: 0.4; transition: opacity 0.5s; }

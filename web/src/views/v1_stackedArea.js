@@ -1,7 +1,8 @@
 /**
  * V1 — Trip Volume Over Time (stacked area chart).
- * Reads: state.dateRange, state.taxiTypes
- * Writes: filterBus.update({ dateRange }) on user brush
+ * Reads: state.dateRange, state.taxiTypes, state.selectedEvent
+ * Writes: filterBus.update({ dateRange, selectedEvent: null }) on user brush
+ *   (a manual brush clears any stale event selection — see filterBus contract).
  *
  * Factory pattern — each init() call is fully isolated (own closed-over state).
  * Module-level brushTo/clearBrush delegate to whichever instance was marked primary.
@@ -19,14 +20,21 @@ const TYPES   = ['yellow', 'green', 'fhv'];
 const FHV_START   = new Date('2019-02-01');
 const FHV_LABEL   = 'HVFHV split (rideshare separated)';
 const TRANSITION_MS = 400;
+// Switch V1 to daily-aggregation rendering when the visible x-domain is this
+// short or shorter (≈4 months). Above this width, monthly aggregation reads
+// better and keeps render cost low.
+const DAILY_THRESHOLD_DAYS = 120;
+// App-wide valid range. daily_volume.json carries a few stray dates from raw
+// TLC parser leftovers — clamp here (mirrors V5's APP_RANGE clamp).
+const APP_RANGE = [new Date('2015-01-01'), new Date('2024-12-31')];
 
 let _primaryInstance = null;
 const _allInstances = [];
 
 // ─── Public module API ────────────────────────────────────────────────────────
 
-export function init(container, data, { primary = true } = {}) {
-  const inst = _createInstance(container, data);
+export function init(container, { monthly, daily }, { primary = true } = {}) {
+  const inst = _createInstance(container, { monthly, daily });
   if (primary) _primaryInstance = inst;
   _allInstances.push(inst);
   return inst;
@@ -45,40 +53,83 @@ export function clearHighlightBand() {
 
 // ─── Instance factory ─────────────────────────────────────────────────────────
 
-function _createInstance(container, data) {
+function _createInstance(container, { monthly, daily }) {
   // All mutable state is closed over — no module-level globals leaking between instances.
-  let _wide, _xDomain, _iw, _ih;
+  let _wideMonthly, _wideDaily, _xDomain, _iw, _ih;
   let _xScale, _yScale, _xAxisG;
-  let _areaGroup, _bandGroup, _fhvMarkGroup, _clipId, _brushEl, _brush;
+  let _areaGroup, _bandGroup, _fhvMarkGroup, _weekGridGroup, _clipId, _brushEl, _brush;
   let _currentTypes = new Set(TYPES);
   let _band = null; // { d0, d1, label } when active, else null
+  // Active wide array for the current render — read by the tooltip bisector
+  // so it always probes the right resolution.
+  let _activeWide = null;
 
   // ── Parse raw data once ──────────────────────────────────────────────────────
+  // Builds two parallel wide arrays — one keyed by month, one keyed by day —
+  // both shaped `{ month: Date, yellow, green, fhv }` so the rest of the
+  // rendering code (`_makeArea`, stacking, tooltip bisector) works unchanged
+  // regardless of which resolution is active.
   function _parse() {
-    const parsed = data.map(d => ({
+    // Monthly
+    const parsedMonthly = monthly.map(d => ({
       month: d3.timeParse('%Y-%m')(d.month),
       type:  d.type,
       trips: +d.trips,
     })).filter(d => d.month);
 
-    const byMonth = d3.rollup(parsed, vs => {
+    const byMonth = d3.rollup(parsedMonthly, vs => {
       const obj = { month: vs[0].month };
       for (const v of vs) obj[v.type] = v.trips;
       return obj;
     }, d => d.month.getTime());
 
-    _wide = Array.from(byMonth.values()).sort((a, b) => a.month - b.month);
-    for (const row of _wide) {
+    _wideMonthly = Array.from(byMonth.values()).sort((a, b) => a.month - b.month);
+    for (const row of _wideMonthly) {
       for (const t of TYPES) if (row[t] == null) row[t] = 0;
     }
-    _xDomain = d3.extent(_wide, d => d.month);
+    // The full monthly extent — used as the default x-domain when no
+    // `dateRange` is set. Must remain constant across resolution switches.
+    _xDomain = d3.extent(_wideMonthly, d => d.month);
+
+    // Daily — same shape, keyed by day. Clamp to APP_RANGE to drop stray
+    // dates the parser left behind in raw TLC files (mirrors V5).
+    const parsedDaily = (daily || []).map(d => ({
+      month: d3.timeParse('%Y-%m-%d')(d.date),
+      type:  d.type,
+      trips: +d.trips,
+    })).filter(d => d.month && d.month >= APP_RANGE[0] && d.month <= APP_RANGE[1]);
+
+    const byDay = d3.rollup(parsedDaily, vs => {
+      const obj = { month: vs[0].month };
+      for (const v of vs) obj[v.type] = v.trips;
+      return obj;
+    }, d => d.month.getTime());
+
+    _wideDaily = Array.from(byDay.values()).sort((a, b) => a.month - b.month);
+    for (const row of _wideDaily) {
+      for (const t of TYPES) if (row[t] == null) row[t] = 0;
+    }
+  }
+
+  // ── Resolution selector ──────────────────────────────────────────────────────
+  // Picks 'daily' for short windows (~event zooms, tight brushes) and
+  // 'monthly' for wide windows (default 2015–2024 view).
+  function _pickResolution(xDom) {
+    const days = (xDom[1] - xDom[0]) / 86400000;
+    return days <= DAILY_THRESHOLD_DAYS ? 'daily' : 'monthly';
+  }
+
+  function _activeData(xDom) {
+    return _pickResolution(xDom) === 'daily' ? _wideDaily : _wideMonthly;
   }
 
   // ── Re-stack helper ──────────────────────────────────────────────────────────
-  function _stack(activeTypes) {
+  // Stacks whichever wide array is currently active (passed in by the caller
+  // so the choice is explicit at the render site).
+  function _stack(activeTypes, wide) {
     return d3.stack()
       .keys(activeTypes)
-      .value((d, k) => (k === 'fhv' && d.month < FHV_START) ? 0 : (d[k] ?? 0))(_wide);
+      .value((d, k) => (k === 'fhv' && d.month < FHV_START) ? 0 : (d[k] ?? 0))(wide);
   }
 
   // ── Area generator ───────────────────────────────────────────────────────────
@@ -147,6 +198,48 @@ function _createInstance(container, data) {
       .text(FHV_LABEL);
   }
 
+  // ── X-axis ticks + format chosen by resolution ──────────────────────────────
+  // Daily mode picks day- or week-stepped ticks based on window width so labels
+  // don't crowd. Monthly mode preserves the original behavior exactly.
+  function _xAxisSpec(xDom, resolution) {
+    if (resolution === 'daily') {
+      const days = (xDom[1] - xDom[0]) / 86400000;
+      const targetCount = Math.max(2, Math.floor(_iw / 80));
+      let interval;
+      if (days <= targetCount * 2) {
+        const step = Math.max(1, Math.ceil(days / targetCount));
+        interval = d3.timeDay.every(step);
+      } else {
+        const weeks = days / 7;
+        const step = Math.max(1, Math.ceil(weeks / targetCount));
+        interval = d3.timeMonday.every(step);
+      }
+      return { interval, format: d3.timeFormat('%d %b') };
+    }
+    return {
+      interval: d3.timeMonth.every(Math.ceil(_iw / 80)),
+      format:   d3.timeFormat('%b %Y'),
+    };
+  }
+
+  // ── Week gridlines (daily resolution only) ──────────────────────────────────
+  // Faint Monday-aligned verticals across the visible x-domain. Cleared and
+  // recomputed each render so they always track the x-scale (mirrors
+  // `_drawFhvMark`). In monthly resolution this draws nothing.
+  function _drawWeekGridlines(xDom, resolution) {
+    if (!_weekGridGroup) return;
+    _weekGridGroup.selectAll('*').remove();
+    if (resolution !== 'daily') return;
+
+    const weeks = d3.timeMonday.range(xDom[0], xDom[1]);
+    _weekGridGroup.selectAll('line')
+      .data(weeks)
+      .join('line')
+        .attr('class', 'gridline week-gridline')
+        .attr('x1', d => _xScale(d)).attr('x2', d => _xScale(d))
+        .attr('y1', 0).attr('y2', _ih);
+  }
+
   // ── Legend helper ────────────────────────────────────────────────────────────
   function _updateLegend(activeTypes) {
     const el = d3.select(container).select('.v1-legend');
@@ -166,13 +259,17 @@ function _createInstance(container, data) {
 
     _currentTypes = new Set(state.taxiTypes);
     const activeTypes = TYPES.filter(t => state.taxiTypes.has(t));
-    const series = _stack(activeTypes);
 
-    // Update x domain
+    // Update x domain — resolution follows the visible window width.
     const xDom = state.dateRange
       ? [new Date(state.dateRange[0]), new Date(state.dateRange[1])]
       : _xDomain;
     _xScale.domain(xDom);
+
+    const resolution = _pickResolution(xDom);
+    const wide = _activeData(xDom);
+    _activeWide = wide;
+    const series = _stack(activeTypes, wide);
 
     // Update y domain
     const yMax = d3.max(series, s => d3.max(s, d => d[1])) || 1;
@@ -180,7 +277,8 @@ function _createInstance(container, data) {
 
     const area = _makeArea();
 
-    // Animate area paths in/out
+    // Animate area paths in/out — keyed by series.key (yellow/green/fhv),
+    // which is stable across a resolution flip, so the three layers persist.
     _areaGroup.selectAll('.area-path')
       .data(series, d => d.key)
       .join(
@@ -193,11 +291,10 @@ function _createInstance(container, data) {
           .attr('fill-opacity', 0).remove())
       );
 
-    // Update x axis
+    // Update x axis — ticks/format follow resolution
+    const { interval, format } = _xAxisSpec(xDom, resolution);
     _xAxisG.transition().duration(TRANSITION_MS)
-      .call(d3.axisBottom(_xScale)
-        .ticks(d3.timeMonth.every(Math.ceil(_iw / 80)))
-        .tickFormat(d3.timeFormat('%b %Y')))
+      .call(d3.axisBottom(_xScale).ticks(interval).tickFormat(format))
       .call(ax => ax.select('.domain').remove())
       .selectAll('text').attr('dy', '1em').attr('font-size', 10);
 
@@ -209,6 +306,7 @@ function _createInstance(container, data) {
       .call(ax => ax.select('.domain').remove());
 
     _updateLegend(activeTypes);
+    _drawWeekGridlines(xDom, resolution);
     _drawBand();
     _drawFhvMark(activeTypes);
 
@@ -220,6 +318,21 @@ function _createInstance(container, data) {
       }
     } else {
       _brushEl.call(_brush.move, null); // clear brush visually
+    }
+
+    // Mirror V5's event selection as a labelled band on V1. The narrative Step 2
+    // band shares this slot but is reset on entering the dashboard, so a single
+    // `_band` slot is fine here (per AGENT.md scope note).
+    const ev = state.selectedEvent;
+    if (ev) {
+      const evParse = d3.timeParse('%Y-%m-%d');
+      const d0 = evParse(ev.date);
+      const d1Raw = ev.end_date ? evParse(ev.end_date) : null;
+      // Single-day events get a 1-day band so the highlight stays visible.
+      const d1 = d1Raw || new Date(d0.getTime() + 24 * 60 * 60 * 1000);
+      if (d0) highlightBand(d0, d1, ev.label);
+    } else {
+      clearHighlightBand();
     }
   }
 
@@ -238,11 +351,14 @@ function _createInstance(container, data) {
     _clipId = 'v1-clip-' + Math.random().toString(36).slice(2);
     _currentTypes = new Set(state.taxiTypes);
     const activeTypes = TYPES.filter(t => state.taxiTypes.has(t));
-    const series = _stack(activeTypes);
 
     const xDom = state.dateRange
       ? [new Date(state.dateRange[0]), new Date(state.dateRange[1])]
       : _xDomain;
+    const resolution = _pickResolution(xDom);
+    const wide = _activeData(xDom);
+    _activeWide = wide;
+    const series = _stack(activeTypes, wide);
 
     _xScale = d3.scaleTime().domain(xDom).range([0, _iw]).clamp(true);
     const yMax = d3.max(series, s => d3.max(s, d => d[1])) || 1;
@@ -261,6 +377,12 @@ function _createInstance(container, data) {
       .call(d3.axisLeft(_yScale).tickSize(-_iw).tickFormat(''))
       .select('.domain').remove();
     g.selectAll('.gridlines line').attr('class', 'gridline');
+
+    // Week gridline layer — sits behind areas and band so it never obscures
+    // data. Only populated in daily resolution; otherwise stays empty.
+    _weekGridGroup = g.append('g')
+      .attr('class', 'week-gridlines')
+      .attr('clip-path', `url(#${_clipId})`);
 
     // Area paths
     _areaGroup = g.append('g').attr('clip-path', `url(#${_clipId})`);
@@ -281,12 +403,16 @@ function _createInstance(container, data) {
       .attr('clip-path', `url(#${_clipId})`);
     _drawFhvMark(activeTypes);
 
-    // X axis — save ref for later updates
+    // Initial week gridlines (no-op in monthly resolution)
+    _drawWeekGridlines(xDom, resolution);
+
+    // X axis — save ref for later updates. Ticks/format follow resolution.
+    const { interval: xTickInterval, format: xTickFormat } = _xAxisSpec(xDom, resolution);
     _xAxisG = g.append('g').attr('class', 'axis axis--x')
       .attr('transform', `translate(0,${_ih})`)
       .call(d3.axisBottom(_xScale)
-        .ticks(d3.timeMonth.every(Math.ceil(_iw / 80)))
-        .tickFormat(d3.timeFormat('%b %Y')))
+        .ticks(xTickInterval)
+        .tickFormat(xTickFormat))
       .call(ax => ax.select('.domain').remove());
     _xAxisG.selectAll('text').attr('dy', '1em').attr('font-size', 10);
 
@@ -306,19 +432,20 @@ function _createInstance(container, data) {
       .style('opacity', 0).style('position', 'absolute');
     const bisect = d3.bisector(d => d.month).left;
 
-    // Brush — sourceEvent guard prevents filterBus ↔ brush feedback loop
+    // Brush — sourceEvent guard prevents filterBus ↔ brush feedback loop.
+    // A manual brush always clears `selectedEvent` so V5's panel/band don't go stale.
     _brush = d3.brushX()
       .extent([[0, 0], [_iw, _ih]])
       .on('end', function(event) {
         if (!event.sourceEvent) return; // programmatic move — ignore
         if (!event.selection) {
-          update({ dateRange: null });
+          update({ dateRange: null, selectedEvent: null });
           return;
         }
         const [x0, x1] = event.selection.map(_xScale.invert);
         const span = (x1 - x0) / (1000 * 60 * 60 * 24 * 30);
         if (span < 6) console.info('[V1] brush < 6 months — signal daily zoom', x0, x1);
-        update({ dateRange: [x0, x1] });
+        update({ dateRange: [x0, x1], selectedEvent: null });
       });
 
     _brushEl = g.append('g').attr('class', 'brush').call(_brush);
@@ -331,12 +458,19 @@ function _createInstance(container, data) {
         if (event.buttons !== 0) return; // user is dragging a brush — skip tooltip
         const [mx] = d3.pointer(event);
         const x0 = _xScale.invert(mx);
-        const idx = bisect(_wide, x0, 1);
-        const dL = _wide[idx - 1], dR = _wide[idx];
+        // Probe whichever dataset is currently rendered so the tooltip's row
+        // values match the visible area shape.
+        const wideNow = _activeWide || _wideMonthly;
+        const idx = bisect(wideNow, x0, 1);
+        const dL = wideNow[idx - 1], dR = wideNow[idx];
         if (!dL) return;
         const d = dR && (x0 - dL.month > dR.month - x0) ? dR : dL;
         const active = TYPES.filter(t => _currentTypes.has(t));
-        let html = `<div class="tooltip-title">${d3.timeFormat('%b %Y')(d.month)}</div>`;
+        // Day-precision title in daily mode, month in monthly.
+        const titleFmt = _pickResolution(_xScale.domain()) === 'daily'
+          ? d3.timeFormat('%a %d %b %Y')
+          : d3.timeFormat('%b %Y');
+        let html = `<div class="tooltip-title">${titleFmt(d.month)}</div>`;
         for (const t of [...active].reverse()) {
           const v = t === 'fhv' && d.month < FHV_START ? null : d[t];
           if (v == null) continue;

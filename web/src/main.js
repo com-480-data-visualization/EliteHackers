@@ -38,11 +38,15 @@ async function main() {
     initReset(document.getElementById('reset-btn'));
 
     // Dashboard V1 — primary instance; brush/clearBrush module exports target this one.
-    initV1(document.getElementById('v1-container'), monthly, { primary: true });
+    initV1(document.getElementById('v1-container'),
+           { monthly, daily },
+           { primary: true });
 
     // Narrative V1 — non-primary; subscribes to filterBus for state-driven brushing
     // but does not steal the primary slot used by scrollama steps.
-    initV1(document.getElementById('narrative-chart'), monthly, { primary: false });
+    initV1(document.getElementById('narrative-chart'),
+           { monthly, daily },
+           { primary: false });
 
     // Init V5
     initV5(document.getElementById('v5-container'), { dailyData: daily, events });

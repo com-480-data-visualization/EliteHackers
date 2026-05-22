@@ -1,7 +1,8 @@
 /**
  * V5 — Annotated Event Timeline.
- * Reads: state.dateRange, state.taxiTypes
- * Writes: filterBus.update({ dateRange }) on event marker click
+ * Reads: state.dateRange, state.taxiTypes, state.selectedEvent
+ * Writes: filterBus.update({ dateRange, selectedEvent }) on event marker click,
+ *         Prev/Next, and Clear inside the event info panel.
  */
 
 import * as d3 from 'd3';
@@ -17,19 +18,385 @@ const CATEGORY_COLORS = {
 
 const TYPES = ['yellow', 'green', 'fhv'];
 
+// Per-taxi colors mirror V1's palette so the per-taxi stat rows in the event
+// panel match the rest of the dashboard.
+const TAXI_COLORS = {
+  yellow: '#f5c542',
+  green: '#2ecc71',
+  fhv: '#9b6ff5',
+};
+const TAXI_LABELS = {
+  yellow: 'Yellow',
+  green: 'Green',
+  fhv: 'FHV',
+};
+
 // App-wide valid range. daily_volume.json contains stray dates outside 2015–2024
 // (parser leftovers from raw TLC files); clamp here so V5 doesn't span 2001–2098.
 const APP_RANGE = [new Date('2015-01-01'), new Date('2024-12-31')];
 
-let _container, _dailyData, _events;
+const DAY_MS = 24 * 60 * 60 * 1000;
+// Context window padding on each side of an event (Task 2a).
+const CONTEXT_PAD_DAYS = 21;
+// Draw week gridlines when the visible x-domain is this short or shorter
+// (≈4 months) — matches V1's DAILY_THRESHOLD_DAYS so both views switch to the
+// daily-orientation look at the same zoom level.
+const DAILY_THRESHOLD_DAYS = 120;
+// Hide the recurring Dec 24 – Jan 2 holiday band when the visible window is
+// shorter than this. At tight zooms the user is focused on a single event and
+// the seasonal strip would read as clutter rather than context.
+const HOLIDAY_BAND_MIN_DAYS = 90;
+
+const PARSE = d3.timeParse('%Y-%m-%d');
+
+let _container, _dailyData, _events, _sortedEvents, _panelEl;
 
 export function init(container, { dailyData, events }) {
   _container = container;
   _dailyData = dailyData;
   _events = events;
-  _render(getState());
-  subscribe(_render);
+
+  // Sort events chronologically once for Prev/Next navigation.
+  _sortedEvents = events
+    .slice()
+    .sort((a, b) => PARSE(a.date) - PARSE(b.date));
+
+  _panelEl = document.getElementById('v5-event-panel');
+
+  const state = getState();
+  _render(state);
+  _renderPanel(state);
+  subscribe(s => {
+    _render(s);
+    _renderPanel(s);
+  });
 }
+
+// ─── Impact calculation: three-prong per-taxi stats engine ─────────────────────
+
+/**
+ * Compute three-prong (before / during / after), per-taxi-type statistics for
+ * an event. All three windows have equal length `D` — the event's own duration
+ * (inclusive day count, minimum 1 day). Per-type stats are tracked for each
+ * active taxi type independently; an aggregate level (mean of summed-across-
+ * types daily trips) is also returned so the caller can drive a single
+ * natural-language headline (see `describeAggregateTrend`).
+ *
+ * Pure and total: missing/empty windows return `hasData: false` with `null`
+ * stat values rather than throwing. Callers render `—` for null cells.
+ *
+ * Returns:
+ *   {
+ *     durationDays: D,
+ *     before: { aggregateLevel, hasData, perType: { <type>: { level, volatility } } },
+ *     during: { ...same shape... },
+ *     after:  { ...same shape... },
+ *   }
+ * `perType` only contains types in `activeTypes`.
+ */
+export function computeEventImpact(ev, dailyData, activeTypes) {
+  const types = Array.isArray(activeTypes) ? activeTypes.slice() : [];
+
+  function emptyWindow() {
+    const perType = {};
+    for (const t of types) perType[t] = { level: null, volatility: null };
+    return { aggregateLevel: null, hasData: false, perType };
+  }
+
+  const blank = {
+    durationDays: 0,
+    before: emptyWindow(),
+    during: emptyWindow(),
+    after: emptyWindow(),
+  };
+
+  if (!ev || !types.length || !Array.isArray(dailyData)) return blank;
+
+  const eventStart = PARSE(ev.date);
+  const eventEnd = ev.end_date ? PARSE(ev.end_date) : eventStart;
+  if (!eventStart || !eventEnd || eventEnd < eventStart) return blank;
+
+  const D = Math.max(1, Math.round((eventEnd - eventStart) / DAY_MS) + 1);
+
+  // Short events compare against the SAME days one week away, so the baseline
+  // isn't polluted by the weekday/weekend rhythm. Long events use the
+  // immediately-adjacent window (it already averages over the weekly cycle).
+  const SHORT_EVENT_MAX_DAYS = 7;
+
+  let beforeStart, beforeEnd, afterStart, afterEnd;
+  if (D < SHORT_EVENT_MAX_DAYS) {
+    beforeStart = new Date(eventStart.getTime() - 7 * DAY_MS);
+    beforeEnd   = new Date(eventEnd.getTime()   - 7 * DAY_MS);
+    afterStart  = new Date(eventStart.getTime() + 7 * DAY_MS);
+    afterEnd    = new Date(eventEnd.getTime()   + 7 * DAY_MS);
+  } else {
+    beforeStart = new Date(eventStart.getTime() - D * DAY_MS);
+    beforeEnd   = new Date(eventStart.getTime() - DAY_MS);
+    afterStart  = new Date(eventEnd.getTime()   + DAY_MS);
+    afterEnd    = new Date(eventEnd.getTime()   + D * DAY_MS);
+  }
+
+  // Index daily trips per type per date for fast window slicing. Duplicate
+  // (date, type) rows — should not exist but we collapse defensively — are
+  // summed so the stats stay total even on malformed input.
+  const typeSet = new Set(types);
+  const byTypeByDate = new Map();
+  for (const t of types) byTypeByDate.set(t, new Map());
+  for (const row of dailyData) {
+    if (!typeSet.has(row.type)) continue;
+    const trips = +row.trips;
+    if (!isFinite(trips)) continue;
+    const m = byTypeByDate.get(row.type);
+    m.set(row.date, (m.get(row.date) || 0) + trips);
+  }
+
+  // Union of all dates that have data for ANY active type. Used both to
+  // detect the available date range (so out-of-range windows degrade) and to
+  // iterate windows without re-parsing on every call.
+  const allDateStrs = new Set();
+  for (const m of byTypeByDate.values()) {
+    for (const ds of m.keys()) allDateStrs.add(ds);
+  }
+  const allDates = Array.from(allDateStrs, ds => ({ ds, d: PARSE(ds) }))
+    .filter(x => x.d)
+    .sort((a, b) => a.d - b.d);
+  if (!allDates.length) return { ...blank, durationDays: D };
+
+  const dataMin = allDates[0].d;
+  const dataMax = allDates[allDates.length - 1].d;
+
+  function statsForWindow(from, to) {
+    const lo = new Date(Math.max(+dataMin, +from));
+    const hi = new Date(Math.min(+dataMax, +to));
+    if (hi < lo) return emptyWindow();
+
+    const datesInWin = [];
+    for (const x of allDates) {
+      if (x.d >= lo && x.d <= hi) datesInWin.push(x.ds);
+    }
+    if (!datesInWin.length) return emptyWindow();
+
+    const perType = {};
+    for (const t of types) {
+      const m = byTypeByDate.get(t);
+      const vals = [];
+      for (const ds of datesInWin) {
+        const v = m.get(ds);
+        if (v != null && isFinite(v)) vals.push(v);
+      }
+      let level = null;
+      let volatility = null;
+      if (vals.length) {
+        level = d3.mean(vals);
+        if (vals.length >= 2 && level && level !== 0) {
+          const sd = d3.deviation(vals);
+          if (sd != null && isFinite(sd)) volatility = sd / level;
+        }
+      }
+      perType[t] = { level, volatility };
+    }
+
+    // Aggregate = mean of per-date totals (sum across active types). A date
+    // with NO data for any active type does not contribute to the mean.
+    const dailyTotals = [];
+    for (const ds of datesInWin) {
+      let total = 0;
+      let any = false;
+      for (const t of types) {
+        const v = byTypeByDate.get(t).get(ds);
+        if (v != null && isFinite(v)) { total += v; any = true; }
+      }
+      if (any) dailyTotals.push(total);
+    }
+    const aggregateLevel = dailyTotals.length ? d3.mean(dailyTotals) : null;
+
+    return {
+      aggregateLevel,
+      hasData: dailyTotals.length > 0,
+      perType,
+    };
+  }
+
+  return {
+    durationDays: D,
+    before: statsForWindow(beforeStart, beforeEnd),
+    during: statsForWindow(eventStart, eventEnd),
+    after: statsForWindow(afterStart, afterEnd),
+  };
+}
+
+// ─── Aggregate-level trend description ─────────────────────────────────────────
+
+/**
+ * Convert the aggregate-level triple (before → during → after) of an impact
+ * result into a short human-readable headline. The natural-language phrase is
+ * derived from the aggregate mean daily trips ALONE — per-type levels and
+ * volatility never influence the prose (they appear only in the grid).
+ *
+ * Logic:
+ *  - DURING vs BEFORE → the shock ("fell 69%" / "rose 22%").
+ *  - AFTER vs BEFORE → the lasting effect ("recovered to within X%",
+ *    "remained X% below baseline", …).
+ *  - |change| < 5% on a comparison ⇒ that comparison reads as "roughly flat".
+ *  - Both comparisons flat ⇒ a single "changed little" sentence.
+ *  - Missing AFTER data is acknowledged rather than invented.
+ *
+ * Returns { html, direction } where `direction` is 'drop' | 'spike' | 'flat'
+ * for the headline's colored emphasis class.
+ */
+function describeAggregateTrend(impact) {
+  const beforeLvl = impact.before.aggregateLevel;
+  const duringLvl = impact.during.aggregateLevel;
+  const afterLvl = impact.after.aggregateLevel;
+
+  if (!impact.before.hasData || beforeLvl == null || beforeLvl === 0) {
+    return {
+      html: 'Daily trips: <strong>no baseline data</strong> available before the event.',
+      direction: 'flat',
+    };
+  }
+  if (!impact.during.hasData || duringLvl == null) {
+    return {
+      html: 'Daily trips: <strong>no data</strong> during the event window.',
+      direction: 'flat',
+    };
+  }
+
+  const duringChange = ((duringLvl - beforeLvl) / beforeLvl) * 100;
+  const hasAfter = impact.after.hasData && afterLvl != null;
+  const afterChange = hasAfter ? ((afterLvl - beforeLvl) / beforeLvl) * 100 : null;
+
+  const duringFlat = Math.abs(duringChange) < 5;
+  const afterFlat = afterChange !== null && Math.abs(afterChange) < 5;
+
+  if (duringFlat && (afterChange === null || afterFlat)) {
+    return {
+      html: 'Daily trips <strong>changed little</strong> (&lt; 5%) across the event window.',
+      direction: 'flat',
+    };
+  }
+
+  let direction = 'flat';
+  let shock;
+  if (duringFlat) {
+    shock = 'Daily trips held roughly flat during the event';
+  } else if (duringChange < 0) {
+    direction = 'drop';
+    shock = `Daily trips <strong>fell ${Math.abs(duringChange).toFixed(0)}%</strong> during the event`;
+  } else {
+    direction = 'spike';
+    shock = `Daily trips <strong>rose ${duringChange.toFixed(0)}%</strong> during the event`;
+  }
+  const triplet = ` (${_formatTrips(beforeLvl)} → ${_formatTrips(duringLvl)})`;
+
+  let recovery;
+  if (afterChange === null) {
+    recovery = '; no data available after the event';
+  } else if (afterFlat) {
+    const pct = Math.round(Math.abs(afterChange));
+    recovery = pct === 0
+      ? ', then settled back to baseline'
+      : `, then recovered to within ${pct}% of baseline`;
+  } else if (afterChange < 0) {
+    recovery = ` and remained ${Math.abs(afterChange).toFixed(0)}% below baseline after`;
+  } else {
+    recovery = ` and remained ${afterChange.toFixed(0)}% above baseline after`;
+  }
+
+  return { html: `${shock}${triplet}${recovery}.`, direction };
+}
+
+// ─── Click / Prev / Next / Clear handlers ──────────────────────────────────────
+
+/**
+ * Compute the context window that propagates on an event click.
+ * Clamps to APP_RANGE so views never request data outside 2015–2024.
+ */
+function _contextWindow(ev) {
+  const eventStart = PARSE(ev.date);
+  const eventEnd = ev.end_date ? PARSE(ev.end_date) : eventStart;
+  const winStart = new Date(
+    Math.max(+APP_RANGE[0], eventStart.getTime() - CONTEXT_PAD_DAYS * DAY_MS)
+  );
+  const winEnd = new Date(
+    Math.min(+APP_RANGE[1], eventEnd.getTime() + CONTEXT_PAD_DAYS * DAY_MS)
+  );
+  return [winStart, winEnd];
+}
+
+function _selectEvent(ev) {
+  if (!ev) return;
+  const [winStart, winEnd] = _contextWindow(ev);
+  update({ dateRange: [winStart, winEnd], selectedEvent: ev });
+}
+
+function _clearSelection() {
+  update({ dateRange: null, selectedEvent: null });
+}
+
+// ─── Formatting helpers ────────────────────────────────────────────────────────
+
+// Match the y-axis tickFormat convention already in this file.
+function _formatTrips(n) {
+  if (n == null || !isFinite(n)) return '–';
+  if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
+  if (n >= 1e3) return `${(n / 1e3).toFixed(0)}k`;
+  return d3.format(',')(Math.round(n));
+}
+
+// Panel cells use an em-dash for "no data" (per the impact-stats spec), versus
+// the en-dash used by chart axes via `_formatTrips`. Keep these helpers
+// separate so we don't accidentally change axis labels.
+function _formatLevel(n) {
+  if (n == null || !isFinite(n)) return '—';
+  return _formatTrips(n);
+}
+
+function _formatCV(v) {
+  if (v == null || !isFinite(v)) return '—';
+  return v.toFixed(2);
+}
+
+// "before → during → after" triple for a given per-window value picker.
+// `pick` returns the raw value for one window; `fmt` formats it.
+function _formatTriple(impact, pick, fmt) {
+  return ['before', 'during', 'after']
+    .map(w => fmt(pick(impact[w])))
+    .join(' → ');
+}
+
+function _formatDate(d) {
+  return d3.timeFormat('%b %-d, %Y')(d);
+}
+
+function _capitalise(s) {
+  if (!s) return '';
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// X-axis ticks + format chosen by visible window width. Mirrors V1's
+// `_xAxisSpec`: zoomed views (≤ DAILY_THRESHOLD_DAYS) get day- or week-stepped
+// ticks with a `'%d %b'` format so labels stay readable; wide views keep the
+// original yearly ticks.
+function _xAxisSpec(xDomain, iw) {
+  const days = (xDomain[1] - xDomain[0]) / DAY_MS;
+  if (days <= DAILY_THRESHOLD_DAYS) {
+    const targetCount = Math.max(2, Math.floor(iw / 80));
+    let interval;
+    if (days <= targetCount * 2) {
+      const step = Math.max(1, Math.ceil(days / targetCount));
+      interval = d3.timeDay.every(step);
+    } else {
+      const weeks = days / 7;
+      const step = Math.max(1, Math.ceil(weeks / targetCount));
+      interval = d3.timeMonday.every(step);
+    }
+    return { interval, format: d3.timeFormat('%d %b') };
+  }
+  return { interval: d3.timeYear.every(1), format: d3.timeFormat('%Y') };
+}
+
+// ─── Main chart render ─────────────────────────────────────────────────────────
 
 function _render(state) {
   const el = d3.select(_container);
@@ -42,8 +409,6 @@ function _render(state) {
   const iw = W - M.left - M.right;
   const ih = H - M.top - M.bottom;
 
-  const parse = d3.timeParse('%Y-%m-%d');
-
   // Aggregate daily data: sum across active types
   const activeTypes = TYPES.filter(t => state.taxiTypes.has(t));
   const byDate = d3.rollup(
@@ -53,7 +418,7 @@ function _render(state) {
   );
 
   let daily = Array.from(byDate, ([dateStr, trips]) => ({
-    date: parse(dateStr),
+    date: PARSE(dateStr),
     trips,
   })).filter(d => d.date && d.date >= APP_RANGE[0] && d.date <= APP_RANGE[1])
     .sort((a, b) => a.date - b.date);
@@ -87,6 +452,32 @@ function _render(state) {
     .select('.domain').remove();
   g.selectAll('.gridlines line').attr('class', 'gridline');
 
+  // Week gridlines — Monday-aligned verticals, only when zoomed in enough that
+  // a daily orientation reads usefully (matches V1's resolution switch).
+  // Drawn here so they sit behind the event band, the line/area, and markers.
+  const xDomDays = (xDomain[1] - xDomain[0]) / DAY_MS;
+  if (xDomDays <= DAILY_THRESHOLD_DAYS) {
+    const weeks = d3.timeMonday.range(xDomain[0], xDomain[1]);
+    g.append('g').attr('class', 'week-gridlines')
+      .selectAll('line')
+      .data(weeks)
+      .join('line')
+        .attr('class', 'gridline week-gridline')
+        .attr('x1', d => xScale(d)).attr('x2', d => xScale(d))
+        .attr('y1', 0).attr('y2', ih);
+  }
+
+  // Recurring holiday band — ambient seasonal context (Dec 24 – Jan 2 of every
+  // year intersecting xDomain). Drawn after the gridlines and before the event
+  // band / line / area so it sits behind the data without competing with the
+  // colored event highlight band.
+  _drawHolidayBands(g, xScale, xDomain, ih);
+
+  // Selected-event band (Task 2d) — drawn below the line so it sits behind data.
+  if (state.selectedEvent) {
+    _drawEventBand(g, state.selectedEvent, xScale, ih);
+  }
+
   // Line
   const line = d3.line()
     .x(d => xScale(d.date))
@@ -110,10 +501,13 @@ function _render(state) {
     .attr('fill-opacity', 0.08)
     .attr('d', area);
 
-  // Axes
+  // Axes — tick interval + format follow the visible window width so a zoomed
+  // event view shows day-precision labels matching V1, while the full view
+  // keeps the original yearly ticks.
+  const { interval: xTickInterval, format: xTickFormat } = _xAxisSpec(xDomain, iw);
   g.append('g').attr('class', 'axis axis--x')
     .attr('transform', `translate(0,${ih})`)
-    .call(d3.axisBottom(xScale).ticks(d3.timeYear.every(1)).tickFormat(d3.timeFormat('%Y')))
+    .call(d3.axisBottom(xScale).ticks(xTickInterval).tickFormat(xTickFormat))
     .call(ax => ax.select('.domain').remove())
     .selectAll('text').attr('font-size', 11);
 
@@ -124,7 +518,7 @@ function _render(state) {
 
   // Event markers
   const visibleEvents = _events.filter(ev => {
-    const d = parse(ev.date);
+    const d = PARSE(ev.date);
     return d >= xDomain[0] && d <= xDomain[1];
   });
 
@@ -132,7 +526,7 @@ function _render(state) {
     .style('opacity', 0).style('position', 'absolute');
 
   visibleEvents.forEach(ev => {
-    const evDate = parse(ev.date);
+    const evDate = PARSE(ev.date);
     const cx = xScale(evDate);
     const color = CATEGORY_COLORS[ev.category] || '#888';
 
@@ -157,16 +551,10 @@ function _render(state) {
         .style('left', `${event.offsetX + 12}px`)
         .style('top', `${event.offsetY - 30}px`);
     }).on('mouseout', () => tooltip.style('opacity', 0))
-      .on('click', () => {
-        const d0 = evDate;
-        const d1 = ev.end_date
-          ? parse(ev.end_date)
-          : new Date(evDate.getTime() + 30 * 24 * 60 * 60 * 1000);
-        update({ dateRange: [d0, d1] });
-      });
+      .on('click', () => _selectEvent(ev));
   });
 
-  // Category legend
+  // Category legend + holiday-band annotation
   const categories = [...new Set(visibleEvents.map(e => e.category))];
   const legendG = g.append('g').attr('transform', `translate(0, ${ih + 32})`);
   categories.forEach((cat, i) => {
@@ -177,4 +565,247 @@ function _render(state) {
       .attr('fill', 'var(--text-muted)').attr('font-size', 10)
       .text(cat.charAt(0).toUpperCase() + cat.slice(1));
   });
+
+  // Holiday-band annotation: explains the recurring amber strip as the
+  // Christmas + New Year window. Uses a rect swatch (not a circle) so it
+  // visually reads as a band annotation rather than a clickable event
+  // category, and only renders when the band itself is showing so the legend
+  // never explains something the user can't see on the chart.
+  if (xDomDays >= HOLIDAY_BAND_MIN_DAYS) {
+    const hItem = legendG.append('g')
+      .attr('transform', `translate(${categories.length * 120}, 0)`);
+    hItem.append('rect')
+      .attr('x', 0).attr('y', 1)
+      .attr('width', 10).attr('height', 8)
+      .attr('fill', '#d4a574')
+      .attr('fill-opacity', 0.55);
+    hItem.append('text').attr('x', 14).attr('y', 9)
+      .attr('fill', 'var(--text-muted)').attr('font-size', 10)
+      .text('Holidays (Christmas and New Year)');
+  }
+}
+
+// ─── Event band inside V5 (Task 2d) ────────────────────────────────────────────
+
+function _drawEventBand(g, ev, xScale, ih) {
+  const color = CATEGORY_COLORS[ev.category] || '#888';
+  const eventStart = PARSE(ev.date);
+  const eventEnd = ev.end_date ? PARSE(ev.end_date) : eventStart;
+  if (!eventStart) return;
+
+  const [xMin, xMax] = xScale.range();
+  // Single-day events get a 1-day band so they remain visible inside the zoom.
+  const bandEnd = ev.end_date
+    ? eventEnd
+    : new Date(eventStart.getTime() + DAY_MS);
+
+  const x0 = Math.max(xMin, xScale(eventStart));
+  const x1 = Math.min(xMax, xScale(bandEnd));
+  if (x1 > x0) {
+    g.append('rect')
+      .attr('class', 'event-band')
+      .attr('x', x0).attr('y', 0)
+      .attr('width', Math.max(2, x1 - x0))
+      .attr('height', ih)
+      .attr('fill', color);
+  }
+
+  const lineX = xScale(eventStart);
+  if (lineX >= xMin && lineX <= xMax) {
+    g.append('line')
+      .attr('class', 'event-band-line')
+      .attr('x1', lineX).attr('x2', lineX)
+      .attr('y1', 0).attr('y2', ih)
+      .attr('stroke', color);
+  }
+}
+
+// ─── Recurring holiday band (Dec 24 – Jan 2) ───────────────────────────────────
+
+/**
+ * Draw a faint translucent rect over every Dec 24 → Jan 2 window that
+ * intersects the visible x-domain. This is recurring seasonal context — the
+ * annual holiday lull — not an event: non-interactive, warm amber (distinct
+ * from every event-category color) at a low fill-opacity so the seasonal
+ * rhythm reads as ambient context rather than competing with the trip line
+ * or the colored event highlight band.
+ *
+ * Gated by HOLIDAY_BAND_MIN_DAYS: at very tight zooms the strip would read as
+ * noise rather than context, so we draw nothing. Independent of selectedEvent.
+ *
+ * Bands at the chart edges are clipped to xDomain so partial windows render
+ * correctly (mirrors how event markers are filtered to the visible range).
+ *
+ * EACH visible band gets a small "Holidays" label centered above the band
+ * near the top of the plot area. The strips are very narrow (≈10 days) and
+ * regularly repeated, so labelling them all (rather than only the first) is
+ * what makes the rhythm legible — a viewer reads "Holidays / Holidays /
+ * Holidays…" and immediately groups the recurring dips as the same effect.
+ */
+function _drawHolidayBands(g, xScale, xDomain, ih) {
+  const days = (xDomain[1] - xDomain[0]) / DAY_MS;
+  if (days < HOLIDAY_BAND_MIN_DAYS) return;
+
+  const [xMin, xMax] = xScale.range();
+  // Include the year before xDomain[0] so a domain starting in early January
+  // still picks up the tail of the prior Dec 24 – Jan 2 window.
+  const startY = xDomain[0].getFullYear() - 1;
+  const endY = xDomain[1].getFullYear();
+
+  const bandG = g.append('g').attr('class', 'holiday-bands');
+
+  for (let Y = startY; Y <= endY; Y++) {
+    const bandStart = new Date(Y, 11, 24);
+    const bandEnd = new Date(Y + 1, 0, 2);
+    if (bandEnd < xDomain[0] || bandStart > xDomain[1]) continue;
+
+    const clipStart = bandStart < xDomain[0] ? xDomain[0] : bandStart;
+    const clipEnd = bandEnd > xDomain[1] ? xDomain[1] : bandEnd;
+    const x0 = Math.max(xMin, xScale(clipStart));
+    const x1 = Math.min(xMax, xScale(clipEnd));
+    if (x1 <= x0) continue;
+
+    bandG.append('rect')
+      .attr('class', 'holiday-band')
+      .attr('x', x0).attr('y', 0)
+      .attr('width', x1 - x0)
+      .attr('height', ih);
+
+    bandG.append('text')
+      .attr('class', 'holiday-band-label')
+      .attr('x', x0 + (x1 - x0) / 2)
+      .attr('y', 11)
+      .attr('text-anchor', 'middle')
+      .text('Holidays');
+  }
+}
+
+// ─── Persistent info panel (Tasks 2c + 2e) ─────────────────────────────────────
+
+function _renderPanel(state) {
+  if (!_panelEl) return;
+
+  const ev = state.selectedEvent;
+  if (!ev) {
+    _panelEl.className = 'event-panel event-panel--empty';
+    _panelEl.innerHTML =
+      '<p class="event-panel__hint">Click an event marker to see its impact.</p>';
+    return;
+  }
+
+  const color = CATEGORY_COLORS[ev.category] || '#888';
+  const evStart = PARSE(ev.date);
+  const evEnd = ev.end_date ? PARSE(ev.end_date) : null;
+  const dateLabel = evEnd
+    ? `${_formatDate(evStart)} – ${_formatDate(evEnd)}`
+    : _formatDate(evStart);
+
+  // Prev/Next index in the chronologically-sorted list.
+  const idx = _sortedEvents.findIndex(e => e.id === ev.id);
+  const prevEv = idx > 0 ? _sortedEvents[idx - 1] : null;
+  const nextEv = idx >= 0 && idx < _sortedEvents.length - 1
+    ? _sortedEvents[idx + 1]
+    : null;
+
+  // Impact stats respect the live taxi-type toggle: aggregate headline and the
+  // per-taxi grid both re-derive from the current active types on every render.
+  const activeTypes = TYPES.filter(t => state.taxiTypes.has(t));
+  const impact = computeEventImpact(ev, _dailyData, activeTypes);
+  const impactHtml = _impactPanelHtml(impact, activeTypes);
+
+  _panelEl.className = 'event-panel';
+  _panelEl.innerHTML = `
+    <div class="event-panel__header">
+      <div class="event-panel__title-group">
+        <div class="event-panel__title" style="color:${color}">${_escape(ev.label)}</div>
+        <div class="event-panel__meta">
+          <span class="event-panel__meta-item">
+            <span class="event-panel__category-dot" style="background:${color}"></span>
+            ${_escape(_capitalise(ev.category))}
+          </span>
+          <span class="event-panel__meta-item">${_escape(dateLabel)}</span>
+        </div>
+      </div>
+      <div class="event-panel__controls">
+        <button class="event-panel__btn" data-action="prev" ${prevEv ? '' : 'disabled'}>← Prev</button>
+        <button class="event-panel__btn" data-action="next" ${nextEv ? '' : 'disabled'}>Next →</button>
+        <button class="event-panel__btn event-panel__btn--clear" data-action="clear">Clear</button>
+      </div>
+    </div>
+    <p class="event-panel__description">${_escape(ev.description || '')}</p>
+    ${impactHtml}
+  `;
+
+  // Wire up button handlers (innerHTML wipes any prior listeners).
+  _panelEl.querySelector('[data-action="prev"]')
+    ?.addEventListener('click', () => _selectEvent(prevEv));
+  _panelEl.querySelector('[data-action="next"]')
+    ?.addEventListener('click', () => _selectEvent(nextEv));
+  _panelEl.querySelector('[data-action="clear"]')
+    ?.addEventListener('click', _clearSelection);
+}
+
+/**
+ * Build the impact block HTML: the aggregate-trend headline followed by a
+ * compact per-taxi grid (mean daily trips and CV, each shown as a
+ * Before → During → After triple). One row per type in `activeTypes`.
+ *
+ * Rows are filtered to types that have data in at least one of the three
+ * windows: if a type's `level` is null across all of before / during / after
+ * (e.g. FHV when the event is fully before FHV started in the dataset), the
+ * row is omitted entirely instead of being rendered as three em-dashes.
+ * Types that exist for part of the windows (e.g. an event straddling FHV's
+ * start) still render with `—` in the empty cells — those dashes carry the
+ * meaningful "this type didn't exist yet" signal.
+ *
+ * If no active type has any data in the windows, the grid is dropped entirely
+ * and only the headline remains.
+ */
+function _impactPanelHtml(impact, activeTypes) {
+  if (!impact || !activeTypes.length) return '';
+
+  const trend = describeAggregateTrend(impact);
+  const headline =
+    `<div class="event-panel__impact event-panel__impact--${trend.direction}">${trend.html}</div>`;
+
+  const WINDOWS = ['before', 'during', 'after'];
+  const typesWithData = activeTypes.filter(t =>
+    WINDOWS.some(w => impact[w].perType[t]?.level != null)
+  );
+  if (!typesWithData.length) return headline;
+
+  const rows = typesWithData.map(t => {
+    const color = TAXI_COLORS[t] || '#888';
+    const label = TAXI_LABELS[t] || _capitalise(t);
+    const levels = _formatTriple(impact, w => w.perType[t]?.level, _formatLevel);
+    const cvs = _formatTriple(impact, w => w.perType[t]?.volatility, _formatCV);
+    return `
+      <div class="event-stats__row">
+        <span class="event-stats__type" style="color:${color}">${_escape(label)}</span>
+        <span class="event-stats__metric">
+          <span class="event-stats__metric-label">Mean daily trips</span>
+          <span class="event-stats__metric-value">${levels}</span>
+        </span>
+        <span class="event-stats__metric">
+          <span class="event-stats__metric-label">Volatility (CV)</span>
+          <span class="event-stats__metric-value">${cvs}</span>
+        </span>
+      </div>`;
+  }).join('');
+
+  const grid = `
+    <div class="event-stats" aria-label="Per-taxi impact statistics">
+      <div class="event-stats__legend">Before → During → After (${impact.durationDays}-day windows)</div>
+      ${rows}
+    </div>`;
+
+  return headline + grid;
+}
+
+function _escape(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }

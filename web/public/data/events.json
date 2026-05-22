@@ -1,34 +1,11 @@
 [
   {
-    "id": "covid_lockdown",
-    "date": "2020-03-22",
-    "end_date": "2020-05-31",
-    "label": "COVID-19 Lockdown",
-    "category": "disruption",
-    "description": "NYC PAUSE order. Non-essential travel halted; taxi trips fell ~90%."
-  },
-  {
-    "id": "covid_phase1",
-    "date": "2020-06-08",
-    "end_date": "2020-06-21",
-    "label": "Phase 1 Reopening",
-    "category": "recovery",
-    "description": "NYC Phase 1 reopening: construction, manufacturing, curbside retail."
-  },
-  {
-    "id": "covid_phase2",
-    "date": "2020-06-22",
-    "end_date": "2020-07-05",
-    "label": "Phase 2 Reopening",
-    "category": "recovery",
-    "description": "Phase 2: offices, in-store retail, barbershops, outdoor dining."
-  },
-  {
-    "id": "covid_phase4",
-    "date": "2020-07-20",
-    "label": "Phase 4 Reopening",
-    "category": "recovery",
-    "description": "Phase 4 (no indoor dining): low-risk outdoor activities, media/entertainment."
+    "id": "blizzard_juno_2015",
+    "date": "2015-01-26",
+    "end_date": "2015-01-27",
+    "label": "Winter Storm Juno",
+    "category": "weather",
+    "description": "NYC imposed a travel ban and shut the subway ahead of a forecast historic blizzard. The city was emptied; snowfall ultimately fell short of predictions."
   },
   {
     "id": "blizzard_jonas_2016",
@@ -36,92 +13,86 @@
     "end_date": "2016-01-24",
     "label": "Blizzard Jonas",
     "category": "weather",
-    "description": "Historic snowstorm. NYC travel ban Jan 23; ~27 inches of snow."
+    "description": "Record nor'easter dropping ~27.5 inches in Central Park, the largest single-storm accumulation on record for NYC. A travel ban shut down roads."
   },
   {
     "id": "blizzard_stella_2017",
-    "date": "2017-03-14",
-    "label": "Blizzard Stella",
+    "date": "2017-03-13",
+    "end_date": "2017-03-15",
+    "label": "Winter Storm Stella",
     "category": "weather",
-    "description": "Nor'easter Stella; NYC dodged worst but still ~7 inches, disrupting service."
+    "description": "Nor'easter forecast as a major blizzard; NYC got ~7 inches of sleet and snow. A state of emergency was declared and schools closed for two days."
   },
   {
-    "id": "blizzard_2018",
+    "id": "subway_shutdown_2017",
+    "date": "2017-07-10",
+    "end_date": "2017-09-01",
+    "label": "MTA 'Summer of Hell'",
+    "category": "disruption",
+    "description": "Amtrak's emergency Penn Station repairs cut LIRR and NJ Transit service for eight weeks. The widely-feared disruption barely registered in citywide taxi demand."
+  },
+  {
+    "id": "noreaster_riley_2018",
     "date": "2018-03-07",
     "end_date": "2018-03-08",
     "label": "Nor'easter Riley",
     "category": "weather",
-    "description": "Nor'easter Riley: heavy snow and coastal flooding."
+    "description": "Early-March nor'easter bringing heavy wet snow, damaging winds and coastal flooding to the NYC area."
   },
   {
-    "id": "fare_hike_2015",
-    "date": "2015-01-01",
-    "label": "NYC Taxi Fare Update",
-    "category": "policy",
-    "description": "TLC fare structure in effect at start of dataset period."
-  },
-  {
-    "id": "fare_hike_2023",
-    "date": "2023-08-14",
-    "label": "Taxi Fare Increase",
-    "category": "policy",
-    "description": "NYC yellow taxi base fare raised for first time since 2012 (from $2.50 to $3.00)."
-  },
-  {
-    "id": "congestion_pricing_2024",
-    "date": "2024-06-30",
-    "label": "Congestion Pricing Paused",
-    "category": "policy",
-    "description": "Governor Hochul paused MTA congestion pricing program days before launch."
-  },
-  {
-    "id": "nye_2016",
-    "date": "2016-01-01",
-    "label": "New Year's Eve 2015/2016",
-    "category": "holiday",
-    "description": "NYE peak demand \u2014 one of the busiest taxi nights of the year."
-  },
-  {
-    "id": "thanksgiving_2019",
-    "date": "2019-11-28",
-    "label": "Thanksgiving 2019",
-    "category": "holiday",
-    "description": "Thanksgiving Day \u2014 typically the lowest weekday trip volume of the year."
-  },
-  {
-    "id": "nye_2020",
-    "date": "2020-01-01",
-    "label": "New Year's Eve 2019/2020",
-    "category": "holiday",
-    "description": "Last pre-COVID NYE. Yellow+Green peak ~600k trips/day."
-  },
-  {
-    "id": "christmas_2020",
-    "date": "2020-12-25",
-    "label": "Christmas 2020",
-    "category": "holiday",
-    "description": "First post-lockdown Christmas; volume recovering but still far below normal."
-  },
-  {
-    "id": "nye_2022",
-    "date": "2022-01-01",
-    "label": "New Year's Eve 2021/2022",
-    "category": "holiday",
-    "description": "Omicron wave subdued celebrations."
-  },
-  {
-    "id": "hurricane_ida_2021",
-    "date": "2021-09-01",
-    "end_date": "2021-09-02",
-    "label": "Hurricane Ida Remnants",
-    "category": "weather",
-    "description": "Record rainfall flooded NYC subway; street flooding paralyzed taxi operations."
-  },
-  {
-    "id": "subway_shutdown_2017",
-    "date": "2017-08-01",
-    "label": "MTA 'Summer of Hell'",
+    "id": "covid_lockdown",
+    "date": "2020-03-22",
+    "end_date": "2020-06-07",
+    "label": "COVID-19 Lockdown",
     "category": "disruption",
-    "description": "MTA emergency repairs on Penn Station; summer-long service cuts drove taxi surge."
+    "description": "The NYC PAUSE order halted non-essential activity from March 22. Taxi trips collapsed by roughly 90% and stayed near zero until reopening began."
+  },
+  {
+    "id": "covid_phase1",
+    "date": "2020-06-08",
+    "end_date": "2020-06-21",
+    "label": "Phase 1 Reopening",
+    "category": "recovery",
+    "description": "NYC entered Phase 1 on June 8: construction, manufacturing, wholesale and curbside retail resumed, lifting trip volume off its floor."
+  },
+  {
+    "id": "covid_phase2",
+    "date": "2020-06-22",
+    "end_date": "2020-07-05",
+    "label": "Phase 2 Reopening",
+    "category": "recovery",
+    "description": "Phase 2 began June 22: offices, in-store retail, hair salons and outdoor dining reopened, accelerating the taxi recovery."
+  },
+  {
+    "id": "covid_phase3",
+    "date": "2020-07-06",
+    "end_date": "2020-07-19",
+    "label": "Phase 3 Reopening",
+    "category": "recovery",
+    "description": "Phase 3 began July 6 with personal-care services; indoor dining was held back in NYC, slowing the recovery relative to the rest of the state."
+  },
+  {
+    "id": "covid_phase4",
+    "date": "2020-07-20",
+    "end_date": "2020-08-16",
+    "label": "Phase 4 Reopening",
+    "category": "recovery",
+    "description": "Phase 4 began July 20, the final reopening step: low-risk outdoor activity and media/entertainment resumed, with no indoor dining."
+  },
+  {
+    "id": "blizzard_kenan_2022",
+    "date": "2022-01-28",
+    "end_date": "2022-01-30",
+    "label": "Winter Storm Kenan",
+    "category": "weather",
+    "description": "A bomb-cyclone nor'easter brought blizzard conditions and close to a foot of snow to NYC, the city's biggest snowstorm in years."
+  },
+  {
+    "id": "ophelia_floods_2023",
+    "date": "2023-09-28",
+    "end_date": "2023-09-30",
+    "label": "Tropical Storm Ophelia Floods",
+    "category": "weather",
+    "description": "Remnants of Tropical Storm Ophelia stalled over NYC, dropping over five inches of rain. A state of emergency was declared as flash flooding shut down subway lines and swamped streets citywide."
   }
 ]

@@ -6,6 +6,7 @@ const state = {
   selectedZone: null,
   selectedCell: null,
   scatterBrush: null,
+  selectedEvent: null,
 };
 
 const subscribers = new Set();
@@ -36,5 +37,6 @@ export function reset() {
     selectedZone: null,
     selectedCell: null,
     scatterBrush: null,
+    selectedEvent: null,
   });
 }
