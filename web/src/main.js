@@ -8,6 +8,7 @@ import { init as initV5 } from './views/v5_timeline.js';
 import { init as initGlobalPatterns } from './views/v_globalPatterns.js';
 import { init as initTaxiToggle } from './controls/taxiTypeToggle.js';
 import { init as initYearSlider } from './controls/yearSlider.js';
+import { init as initBoroughToggle } from './controls/boroughToggle.js';
 import { init as initReset } from './controls/resetButton.js';
 import { initScrollama } from './narrative/scrollama_setup.js';
 
@@ -35,6 +36,7 @@ async function main() {
     // Init controls
     initTaxiToggle(document.getElementById('taxi-type-toggle'));
     initYearSlider(document.getElementById('year-slider'));
+    initBoroughToggle(document.getElementById('borough-toggle'), globalPatterns?.borough_list);
     initReset(document.getElementById('reset-btn'));
 
     // Dashboard V1 — primary instance; brush/clearBrush module exports target this one.
@@ -47,8 +49,8 @@ async function main() {
     // Init V5
     initV5(document.getElementById('v5-container'), { dailyData: daily, events });
 
-    // Init Global Patterns tab
-    initGlobalPatterns(document.getElementById('gp-root'), globalPatterns);
+    // Init V2 — Global Patterns
+    initGlobalPatterns(document.getElementById('v2-container'), globalPatterns);
 
     // Wire Scrollama narrative
     initScrollama();

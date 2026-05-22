@@ -20,7 +20,6 @@
       <a class="nav__link" href="#v3">Zone Map</a>
       <a class="nav__link" href="#v4">Trip Anatomy</a>
       <a class="nav__link" href="#v5">Timeline</a>
-      <a class="nav__link" href="#global-patterns">Global Patterns</a>
     </div>
     <button class="nav__mode-toggle" id="mode-toggle" title="Toggle narrative / dashboard mode">
       <span id="mode-label">Dashboard</span>
@@ -87,6 +86,10 @@
         <span class="controls-label">Year range</span>
         <div id="year-slider" class="slider-group"></div>
       </div>
+      <div class="controls-group">
+        <span class="controls-label">Area</span>
+        <div id="borough-toggle" class="toggle-group"></div>
+      </div>
       <button class="btn-reset" id="reset-btn">Reset filters</button>
     </div>
 
@@ -99,47 +102,41 @@
       <div class="panel__body" id="v1-container"></div>
     </div>
 
-    <!-- V2 / V3 / V4 row -->
-    <div class="panel-row">
-      <div class="panel panel--third" id="v2">
-        <div class="panel__header">
-          <h2 class="panel__title">Weekly Pulse Heatmap</h2>
-          <p class="panel__subtitle">Hour-of-day × day-of-week</p>
-        </div>
-        <div class="panel__body panel__placeholder" id="v2-container">
-          <div class="placeholder-inner">
-            <div class="placeholder-icon">⬡</div>
-            <p class="placeholder-title">Weekly Pulse Heatmap (V2)</p>
-            <p class="placeholder-desc">Filters will update this view based on your selections in V1 and V3. Coming in Milestone 3.</p>
-          </div>
+    <!-- V2: Weekly Pulse Heatmap -->
+    <div class="panel panel--full" id="v2">
+      <div class="panel__header">
+        <h2 class="panel__title">Weekly Pulse Heatmap (V2)</h2>
+        <p class="panel__subtitle">Average hourly demand by day of week · filtered by taxi type, year range &amp; area. Click a row for the full 24h profile.</p>
+      </div>
+      <div class="panel__body" id="v2-container"></div>
+    </div>
+
+    <!-- V3: Zone Choropleth -->
+    <div class="panel panel--full" id="v3">
+      <div class="panel__header">
+        <h2 class="panel__title">NYC Zone Choropleth</h2>
+        <p class="panel__subtitle">Pickup volume by taxi zone</p>
+      </div>
+      <div class="panel__body panel__placeholder" id="v3-container">
+        <div class="placeholder-inner">
+          <div class="placeholder-icon">⬡</div>
+          <p class="placeholder-title">Zone Choropleth (V3)</p>
+          <p class="placeholder-desc">Coming in Milestone 3.</p>
         </div>
       </div>
+    </div>
 
-      <div class="panel panel--third" id="v3">
-        <div class="panel__header">
-          <h2 class="panel__title">NYC Zone Choropleth</h2>
-          <p class="panel__subtitle">Pickup volume by taxi zone</p>
-        </div>
-        <div class="panel__body panel__placeholder" id="v3-container">
-          <div class="placeholder-inner">
-            <div class="placeholder-icon">⬡</div>
-            <p class="placeholder-title">Zone Choropleth (V3)</p>
-            <p class="placeholder-desc">Click a zone to filter all views by pickup location. Coming in Milestone 3.</p>
-          </div>
-        </div>
+    <!-- V4: Trip Anatomy -->
+    <div class="panel panel--full" id="v4">
+      <div class="panel__header">
+        <h2 class="panel__title">Trip Anatomy</h2>
+        <p class="panel__subtitle">Fare vs. distance scatter</p>
       </div>
-
-      <div class="panel panel--third" id="v4">
-        <div class="panel__header">
-          <h2 class="panel__title">Trip Anatomy</h2>
-          <p class="panel__subtitle">Fare vs. distance scatter</p>
-        </div>
-        <div class="panel__body panel__placeholder" id="v4-container">
-          <div class="placeholder-inner">
-            <div class="placeholder-icon">⬡</div>
-            <p class="placeholder-title">Trip Anatomy Scatter (V4)</p>
-            <p class="placeholder-desc">~50k sampled trips colored by hour. Brush a region to filter. Coming in Milestone 3.</p>
-          </div>
+      <div class="panel__body panel__placeholder" id="v4-container">
+        <div class="placeholder-inner">
+          <div class="placeholder-icon">⬡</div>
+          <p class="placeholder-title">Trip Anatomy Scatter (V4)</p>
+          <p class="placeholder-desc">Coming in Milestone 3.</p>
         </div>
       </div>
     </div>
@@ -153,18 +150,6 @@
       <div class="panel__body" id="v5-container"></div>
     </div>
 
-  </section>
-
-  <!-- ===== GLOBAL PATTERNS ===== -->
-  <section id="global-patterns" class="gp-section">
-    <div class="gp-header">
-      <h1 class="dashboard-title">Global Patterns</h1>
-      <p class="dashboard-subtitle">
-        Average hourly demand by day of week · 2015–2024 ·
-        Filter by year range or borough, click a row for the full 24h profile.
-      </p>
-    </div>
-    <div id="gp-root"></div>
   </section>
 
   <!-- Loading overlay -->
