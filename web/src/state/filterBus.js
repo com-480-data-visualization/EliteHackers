@@ -3,6 +3,7 @@
 const state = {
   dateRange: null,
   taxiTypes: new Set(['yellow', 'green', 'fhv']),
+  selectedBoroughs: null,   // null = all; Set<string> = specific boroughs
   selectedZone: null,
   selectedCell: null,
   scatterBrush: null,
@@ -15,6 +16,7 @@ export function getState() {
   return {
     ...state,
     taxiTypes: new Set(state.taxiTypes),
+    selectedBoroughs: state.selectedBoroughs ? new Set(state.selectedBoroughs) : null,
   };
 }
 
@@ -34,6 +36,7 @@ export function reset() {
   update({
     dateRange: null,
     taxiTypes: new Set(['yellow', 'green', 'fhv']),
+    selectedBoroughs: null,
     selectedZone: null,
     selectedCell: null,
     scatterBrush: null,
