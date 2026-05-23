@@ -86,13 +86,5 @@
     "label": "Winter Storm Kenan",
     "category": "weather",
     "description": "A bomb-cyclone nor'easter brought blizzard conditions and close to a foot of snow to NYC, the city's biggest snowstorm in years."
-  },
-  {
-    "id": "ophelia_floods_2023",
-    "date": "2023-09-28",
-    "end_date": "2023-09-30",
-    "label": "Tropical Storm Ophelia Floods",
-    "category": "weather",
-    "description": "Remnants of Tropical Storm Ophelia stalled over NYC, dropping over five inches of rain. A state of emergency was declared as flash flooding shut down subway lines and swamped streets citywide."
   }
 ]

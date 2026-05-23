@@ -2,6 +2,7 @@
  * V5 — Annotated Event Timeline.
  * Reads: state.dateRange, state.taxiTypes, state.selectedEvent
  * Writes: filterBus.update({ dateRange, selectedEvent }) on event marker click,
+ *         a click anywhere on the plot (synthetic single-day inspection),
  *         Prev/Next, and Clear inside the event info panel.
  */
 
@@ -15,6 +16,11 @@ const CATEGORY_COLORS = {
   policy: '#f5a623',
   holiday: '#c084fc',
 };
+
+// Neutral color used for a synthetic (clicked-day) selection, which has no
+// event category. Distinct from every CATEGORY_COLORS value so a custom
+// inspection never visually masquerades as a curated event.
+const CUSTOM_COLOR = '#8b95a1';
 
 const TYPES = ['yellow', 'green', 'fhv'];
 
@@ -38,6 +44,9 @@ const APP_RANGE = [new Date('2015-01-01'), new Date('2024-12-31')];
 const DAY_MS = 24 * 60 * 60 * 1000;
 // Context window padding on each side of an event (Task 2a).
 const CONTEXT_PAD_DAYS = 21;
+// A click anywhere on the plot selects that day as a synthetic 1-day event;
+// the propagated context window is the clicked day ± this many days.
+const CUSTOM_DAY_PAD_DAYS = 30;
 // Draw week gridlines when the visible x-domain is this short or shorter
 // (≈4 months) — matches V1's DAILY_THRESHOLD_DAYS so both views switch to the
 // daily-orientation look at the same zoom level.
@@ -48,8 +57,15 @@ const DAILY_THRESHOLD_DAYS = 120;
 const HOLIDAY_BAND_MIN_DAYS = 90;
 
 const PARSE = d3.timeParse('%Y-%m-%d');
+const FORMAT_ISO = d3.timeFormat('%Y-%m-%d');
 
 let _container, _dailyData, _events, _sortedEvents, _panelEl;
+
+// Session-only cache for the "Explain this day" feature, keyed by the
+// `YYYY-MM-DD` date string. Module-scope (not localStorage) so it lives only
+// for the current page load — revisiting the same synthetic day during a
+// session re-shows the prior result instead of re-calling Gemini.
+const _explainCache = new Map();
 
 export function init(container, { dailyData, events }) {
   _container = container;
@@ -233,6 +249,10 @@ export function computeEventImpact(ev, dailyData, activeTypes) {
  * derived from the aggregate mean daily trips ALONE — per-type levels and
  * volatility never influence the prose (they appear only in the grid).
  *
+ * `isCustom` switches the wording from event language ("during the event") to
+ * day-inspection language ("on the selected day"), since a synthetic single-day
+ * selection is not an "event".
+ *
  * Logic:
  *  - DURING vs BEFORE → the shock ("fell 69%" / "rose 22%").
  *  - AFTER vs BEFORE → the lasting effect ("recovered to within X%",
@@ -244,20 +264,26 @@ export function computeEventImpact(ev, dailyData, activeTypes) {
  * Returns { html, direction } where `direction` is 'drop' | 'spike' | 'flat'
  * for the headline's colored emphasis class.
  */
-function describeAggregateTrend(impact) {
+function describeAggregateTrend(impact, isCustom) {
   const beforeLvl = impact.before.aggregateLevel;
   const duringLvl = impact.during.aggregateLevel;
   const afterLvl = impact.after.aggregateLevel;
 
+  // Wording differs for a synthetic single-day inspection vs a real event.
+  const duringNoun = isCustom ? 'the selected day' : 'the event';
+  const duringWindowNoun = isCustom ? 'the selected day' : 'the event window';
+  const beforeNoun = isCustom ? 'a week earlier' : 'before the event';
+  const afterNoun = isCustom ? 'a week later' : 'after the event';
+
   if (!impact.before.hasData || beforeLvl == null || beforeLvl === 0) {
     return {
-      html: 'Daily trips: <strong>no baseline data</strong> available before the event.',
+      html: `Daily trips: <strong>no baseline data</strong> available ${beforeNoun}.`,
       direction: 'flat',
     };
   }
   if (!impact.during.hasData || duringLvl == null) {
     return {
-      html: 'Daily trips: <strong>no data</strong> during the event window.',
+      html: `Daily trips: <strong>no data</strong> for ${duringWindowNoun}.`,
       direction: 'flat',
     };
   }
@@ -271,7 +297,7 @@ function describeAggregateTrend(impact) {
 
   if (duringFlat && (afterChange === null || afterFlat)) {
     return {
-      html: 'Daily trips <strong>changed little</strong> (&lt; 5%) across the event window.',
+      html: `Daily trips <strong>changed little</strong> (&lt; 5%) across ${duringWindowNoun}.`,
       direction: 'flat',
     };
   }
@@ -279,28 +305,28 @@ function describeAggregateTrend(impact) {
   let direction = 'flat';
   let shock;
   if (duringFlat) {
-    shock = 'Daily trips held roughly flat during the event';
+    shock = `Daily trips held roughly flat on ${duringNoun}`;
   } else if (duringChange < 0) {
     direction = 'drop';
-    shock = `Daily trips <strong>fell ${Math.abs(duringChange).toFixed(0)}%</strong> during the event`;
+    shock = `Daily trips <strong>fell ${Math.abs(duringChange).toFixed(0)}%</strong> on ${duringNoun}`;
   } else {
     direction = 'spike';
-    shock = `Daily trips <strong>rose ${duringChange.toFixed(0)}%</strong> during the event`;
+    shock = `Daily trips <strong>rose ${duringChange.toFixed(0)}%</strong> on ${duringNoun}`;
   }
   const triplet = ` (${_formatTrips(beforeLvl)} → ${_formatTrips(duringLvl)})`;
 
   let recovery;
   if (afterChange === null) {
-    recovery = '; no data available after the event';
+    recovery = `; no data available ${afterNoun}`;
   } else if (afterFlat) {
     const pct = Math.round(Math.abs(afterChange));
     recovery = pct === 0
       ? ', then settled back to baseline'
       : `, then recovered to within ${pct}% of baseline`;
   } else if (afterChange < 0) {
-    recovery = ` and remained ${Math.abs(afterChange).toFixed(0)}% below baseline after`;
+    recovery = ` and remained ${Math.abs(afterChange).toFixed(0)}% below baseline ${afterNoun}`;
   } else {
-    recovery = ` and remained ${afterChange.toFixed(0)}% above baseline after`;
+    recovery = ` and remained ${afterChange.toFixed(0)}% above baseline ${afterNoun}`;
   }
 
   return { html: `${shock}${triplet}${recovery}.`, direction };
@@ -328,6 +354,41 @@ function _selectEvent(ev) {
   if (!ev) return;
   const [winStart, winEnd] = _contextWindow(ev);
   update({ dateRange: [winStart, winEnd], selectedEvent: ev });
+}
+
+/**
+ * Select an arbitrary clicked day as a synthetic single-day "event". This is
+ * what makes the whole V5 plot clickable, not only the curated markers.
+ *
+ * The synthetic object has `synthetic: true` and a null category/description;
+ * it is NOT added to `_events`, so it never appears as a marker and never
+ * affects Prev/Next ordering. The stats engine treats it as a D=1 event, so
+ * (per the SHORT_EVENT rule) BEFORE/AFTER are the same day one week earlier
+ * and one week later. The propagated context window is the clicked day
+ * ± CUSTOM_DAY_PAD_DAYS, clamped to APP_RANGE.
+ */
+function _selectDay(day) {
+  if (!day) return;
+  const d0 = d3.timeDay.floor(day);
+  // Ignore clicks outside the dataset range entirely.
+  if (d0 < APP_RANGE[0] || d0 > APP_RANGE[1]) return;
+
+  const synthetic = {
+    id: 'custom',
+    synthetic: true,
+    date: FORMAT_ISO(d0),
+    label: _formatDate(d0),
+    category: null,
+    description: null,
+  };
+
+  const winStart = new Date(
+    Math.max(+APP_RANGE[0], d0.getTime() - CUSTOM_DAY_PAD_DAYS * DAY_MS)
+  );
+  const winEnd = new Date(
+    Math.min(+APP_RANGE[1], d0.getTime() + CUSTOM_DAY_PAD_DAYS * DAY_MS)
+  );
+  update({ dateRange: [winStart, winEnd], selectedEvent: synthetic });
 }
 
 function _clearSelection() {
@@ -516,6 +577,94 @@ function _render(state) {
       .tickFormat(d => d >= 1e6 ? `${(d / 1e6).toFixed(1)}M` : d >= 1e3 ? `${(d / 1e3).toFixed(0)}k` : d))
     .call(ax => ax.select('.domain').remove());
 
+  // Hover focus elements for the trip line (Feature A). Visual only —
+  // `pointer-events: none` ensures they never intercept the click/move events
+  // on the surface below, and they share the same parent `g` so the focus dot
+  // and guide line sit in the SAME coordinate space as the line/area
+  // (`xScale`/`yScale` values map directly to attribute values, no offset
+  // arithmetic). Inserted BEFORE the click surface so the surface still
+  // receives `mousemove`; hidden by default until the cursor enters.
+  const hoverGuide = g.append('line')
+    .attr('class', 'v5-hover-guide')
+    .attr('y1', 0).attr('y2', ih)
+    .style('opacity', 0);
+  const hoverDot = g.append('circle')
+    .attr('class', 'v5-hover-dot')
+    .attr('r', 4)
+    .style('opacity', 0);
+
+  // Separate tooltip instance for the line-hover (shares `.tooltip` styling
+  // with the marker tooltip below). Keeping them separate means the hover
+  // tooltip can be shown/hidden independently of the marker tooltip without
+  // either clobbering the other's contents on rapid mouse moves.
+  const hoverTooltip = d3.select(_container).append('div')
+    .attr('class', 'tooltip v5-hover-tooltip')
+    .style('opacity', 0).style('position', 'absolute');
+
+  // Bisector on the parsed Date — used to find the day in `daily` nearest the
+  // cursor in O(log n) on every mousemove.
+  const bisectDate = d3.bisector(d => d.date).left;
+  const formatTripsExact = d3.format(',');
+
+  // Transparent click surface — covers the whole plot area so a click ANYWHERE
+  // selects the day under the cursor as a synthetic single-day inspection.
+  // Inserted before markers/tooltip so the markers (added below) sit on top and
+  // their own click handlers take precedence; marker handlers additionally call
+  // stopPropagation so a marker click never also triggers a day inspection.
+  //
+  // The SAME rect also drives the line-hover (Feature A): a second overlay
+  // would intercept clicks, so `mousemove`/`mouseout` are attached here.
+  // Hover is purely visual — it never calls `update()` or `_selectDay`, so
+  // hovering ≠ selecting.
+  g.append('rect')
+    .attr('class', 'v5-click-surface')
+    .attr('x', 0).attr('y', 0)
+    .attr('width', iw).attr('height', ih)
+    .attr('fill', 'transparent')
+    .style('cursor', 'crosshair')
+    .on('click', function (event) {
+      const [mx] = d3.pointer(event, this);
+      const day = xScale.invert(mx);
+      _selectDay(day);
+    })
+    .on('mousemove', function (event) {
+      if (!daily.length) return;
+      const [mx] = d3.pointer(event, this);
+      const xDate = xScale.invert(mx);
+      const i = bisectDate(daily, xDate);
+      const d0 = daily[i - 1];
+      const d1 = daily[i];
+      const nearest = !d0 ? d1
+        : !d1 ? d0
+        : (xDate - d0.date > d1.date - xDate ? d1 : d0);
+      if (!nearest) return;
+
+      const fx = xScale(nearest.date);
+      const fy = yScale(nearest.trips);
+      hoverGuide
+        .attr('x1', fx).attr('x2', fx)
+        .style('opacity', 1);
+      hoverDot
+        .attr('cx', fx).attr('cy', fy)
+        .style('opacity', 1);
+
+      // Position the tooltip in container-space (the rect sits inside a
+      // translated <g>, so we ask d3 for the cursor relative to the parent
+      // container div that the absolute-positioned tooltip is anchored to).
+      const [cx, cy] = d3.pointer(event, _container);
+      hoverTooltip
+        .style('opacity', 1)
+        .html(`<div class="tooltip-title">${_formatDate(nearest.date)}</div>
+               <div class="v5-hover-trips">${formatTripsExact(Math.round(nearest.trips))} trips</div>`)
+        .style('left', `${cx + 12}px`)
+        .style('top', `${cy - 30}px`);
+    })
+    .on('mouseout', function () {
+      hoverGuide.style('opacity', 0);
+      hoverDot.style('opacity', 0);
+      hoverTooltip.style('opacity', 0);
+    });
+
   // Event markers
   const visibleEvents = _events.filter(ev => {
     const d = PARSE(ev.date);
@@ -531,7 +680,8 @@ function _render(state) {
     const color = CATEGORY_COLORS[ev.category] || '#888';
 
     const mg = g.append('g').attr('class', 'event-marker')
-      .attr('transform', `translate(${cx}, 0)`);
+      .attr('transform', `translate(${cx}, 0)`)
+      .style('cursor', 'pointer');
 
     mg.append('line')
       .attr('y1', 0).attr('y2', ih)
@@ -551,7 +701,12 @@ function _render(state) {
         .style('left', `${event.offsetX + 12}px`)
         .style('top', `${event.offsetY - 30}px`);
     }).on('mouseout', () => tooltip.style('opacity', 0))
-      .on('click', () => _selectEvent(ev));
+      .on('click', (event) => {
+        // Stop the click reaching the underlying click surface, so a marker
+        // click selects the curated event rather than a synthetic day.
+        event.stopPropagation();
+        _selectEvent(ev);
+      });
   });
 
   // Category legend + holiday-band annotation
@@ -588,7 +743,7 @@ function _render(state) {
 // ─── Event band inside V5 (Task 2d) ────────────────────────────────────────────
 
 function _drawEventBand(g, ev, xScale, ih) {
-  const color = CATEGORY_COLORS[ev.category] || '#888';
+  const color = ev.synthetic ? CUSTOM_COLOR : (CATEGORY_COLORS[ev.category] || '#888');
   const eventStart = PARSE(ev.date);
   const eventEnd = ev.end_date ? PARSE(ev.end_date) : eventStart;
   if (!eventStart) return;
@@ -680,6 +835,67 @@ function _drawHolidayBands(g, xScale, xDomain, ih) {
   }
 }
 
+// ─── "Explain this day" — Gemini proxy client ──────────────────────
+
+/**
+ * Ask the server-side Gemini proxy for a short, human-readable explanation of
+ * what happened in NYC on `dateStr` (`YYYY-MM-DD`) that could plausibly move
+ * the taxi-trip volume. Does no DOM work — Task 2's click handler renders the
+ * result. Always returns a string on success or throws a caught `Error` whose
+ * `.message` is suitable for showing to the user.
+ *
+ * `impact` is the computeEventImpact result for the selected day. We forward
+ * the observed before/during levels and % change so the server prompt can
+ * state the REAL direction and magnitude of the change — without this the
+ * model can get the direction backwards (claiming a surge on a day trips
+ * actually fell).
+ *
+ * Security: the Gemini key is NEVER read here. The browser only ever talks to
+ * the same-origin `/api/explain` proxy; the key lives only in
+ * `process.env.GEMINI_API_KEY` server-side.
+ */
+async function _explainDay(dateStr, impact) {
+  // Derive the observed change from the aggregate before/during levels the
+  // panel already computed. All fields optional — the server falls back to
+  // neutral phrasing if they're missing.
+  let impactPayload = null;
+  if (impact && impact.before && impact.during) {
+    const beforeLevel = impact.before.aggregateLevel;
+    const duringLevel = impact.during.aggregateLevel;
+    const pctChange =
+      (typeof beforeLevel === 'number' && beforeLevel !== 0 &&
+       typeof duringLevel === 'number')
+        ? ((duringLevel - beforeLevel) / beforeLevel) * 100
+        : null;
+    impactPayload = { pctChange, beforeLevel, duringLevel };
+  }
+
+  const res = await fetch('/api/explain', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ date: dateStr, impact: impactPayload }),
+  });
+
+  if (!res.ok) {
+    let msg = 'Could not explain this day right now.';
+    try {
+      const errJson = await res.json();
+      if (errJson && typeof errJson.error === 'string' && errJson.error) {
+        msg = errJson.error;
+      }
+    } catch {
+      // Body was not JSON — keep the generic message.
+    }
+    throw new Error(msg);
+  }
+
+  const data = await res.json().catch(() => null);
+  if (!data || typeof data.explanation !== 'string' || !data.explanation.trim()) {
+    throw new Error('Empty response from Gemini');
+  }
+  return data.explanation;
+}
+
 // ─── Persistent info panel (Tasks 2c + 2e) ─────────────────────────────────────
 
 function _renderPanel(state) {
@@ -689,29 +905,73 @@ function _renderPanel(state) {
   if (!ev) {
     _panelEl.className = 'event-panel event-panel--empty';
     _panelEl.innerHTML =
-      '<p class="event-panel__hint">Click an event marker to see its impact.</p>';
+      '<p class="event-panel__hint">Click any day on the timeline to inspect it, or click a marker for a known event.</p>';
     return;
   }
 
-  const color = CATEGORY_COLORS[ev.category] || '#888';
+  const isCustom = !!ev.synthetic;
+  const color = isCustom ? CUSTOM_COLOR : (CATEGORY_COLORS[ev.category] || '#888');
   const evStart = PARSE(ev.date);
   const evEnd = ev.end_date ? PARSE(ev.end_date) : null;
   const dateLabel = evEnd
     ? `${_formatDate(evStart)} – ${_formatDate(evEnd)}`
     : _formatDate(evStart);
 
-  // Prev/Next index in the chronologically-sorted list.
-  const idx = _sortedEvents.findIndex(e => e.id === ev.id);
-  const prevEv = idx > 0 ? _sortedEvents[idx - 1] : null;
-  const nextEv = idx >= 0 && idx < _sortedEvents.length - 1
-    ? _sortedEvents[idx + 1]
-    : null;
+  // Prev/Next navigation.
+  //  - Real event: step to the chronologically adjacent curated event.
+  //  - Synthetic day: jump to the nearest curated event before / after the
+  //    clicked day, so Prev/Next stays useful instead of being dead.
+  let prevEv = null;
+  let nextEv = null;
+  if (isCustom) {
+    for (const e of _sortedEvents) {
+      if (PARSE(e.date) < evStart) prevEv = e;
+      else if (PARSE(e.date) > evStart) { nextEv = e; break; }
+    }
+  } else {
+    const idx = _sortedEvents.findIndex(e => e.id === ev.id);
+    prevEv = idx > 0 ? _sortedEvents[idx - 1] : null;
+    nextEv = idx >= 0 && idx < _sortedEvents.length - 1
+      ? _sortedEvents[idx + 1]
+      : null;
+  }
 
   // Impact stats respect the live taxi-type toggle: aggregate headline and the
   // per-taxi grid both re-derive from the current active types on every render.
   const activeTypes = TYPES.filter(t => state.taxiTypes.has(t));
   const impact = computeEventImpact(ev, _dailyData, activeTypes);
-  const impactHtml = _impactPanelHtml(impact, activeTypes);
+  const impactHtml = _impactPanelHtml(impact, activeTypes, isCustom);
+
+  // Header meta line: a real event shows its category dot + label; a synthetic
+  // day inspection has no category, so it shows a neutral "Selected day" tag.
+  const metaCategory = isCustom
+    ? `<span class="event-panel__meta-item">
+         <span class="event-panel__category-dot" style="background:${color}"></span>
+         Selected day
+       </span>`
+    : `<span class="event-panel__meta-item">
+         <span class="event-panel__category-dot" style="background:${color}"></span>
+         ${_escape(_capitalise(ev.category))}
+       </span>`;
+
+  // A synthetic day has no description; omit the paragraph entirely rather
+  // than rendering an empty one.
+  const descriptionHtml = (!isCustom && ev.description)
+    ? `<p class="event-panel__description">${_escape(ev.description)}</p>`
+    : '';
+
+  // "Explain this day" UI (Feature B) — ONLY for synthetic day selections,
+  // never for curated events (those already carry a human-written
+  // description). The button and result container are emitted together so the
+  // panel layout doesn't shift between idle and post-click states; the
+  // container is initially empty (no automatic fetch on render — the Gemini
+  // call only happens on click).
+  const explainBtnHtml = isCustom
+    ? `<button class="event-panel__btn event-panel__btn--explain" data-action="explain">Explain this day</button>`
+    : '';
+  const explainContainerHtml = isCustom
+    ? `<div class="event-explain" id="v5-explain"></div>`
+    : '';
 
   _panelEl.className = 'event-panel';
   _panelEl.innerHTML = `
@@ -719,20 +979,19 @@ function _renderPanel(state) {
       <div class="event-panel__title-group">
         <div class="event-panel__title" style="color:${color}">${_escape(ev.label)}</div>
         <div class="event-panel__meta">
-          <span class="event-panel__meta-item">
-            <span class="event-panel__category-dot" style="background:${color}"></span>
-            ${_escape(_capitalise(ev.category))}
-          </span>
+          ${metaCategory}
           <span class="event-panel__meta-item">${_escape(dateLabel)}</span>
         </div>
       </div>
       <div class="event-panel__controls">
         <button class="event-panel__btn" data-action="prev" ${prevEv ? '' : 'disabled'}>← Prev</button>
         <button class="event-panel__btn" data-action="next" ${nextEv ? '' : 'disabled'}>Next →</button>
+        ${explainBtnHtml}
         <button class="event-panel__btn event-panel__btn--clear" data-action="clear">Clear</button>
       </div>
     </div>
-    <p class="event-panel__description">${_escape(ev.description || '')}</p>
+    ${descriptionHtml}
+    ${explainContainerHtml}
     ${impactHtml}
   `;
 
@@ -743,6 +1002,59 @@ function _renderPanel(state) {
     ?.addEventListener('click', () => _selectEvent(nextEv));
   _panelEl.querySelector('[data-action="clear"]')
     ?.addEventListener('click', _clearSelection);
+
+  // Wire up the "Explain this day" button + render any cached result so the
+  // panel re-render (e.g. after a taxi-type toggle) does not erase a prior
+  // explanation the user already loaded for this date.
+  if (isCustom) {
+    const explainBtnEl = _panelEl.querySelector('[data-action="explain"]');
+    const explainContainerEl = _panelEl.querySelector('#v5-explain');
+    if (explainContainerEl && _explainCache.has(ev.date)) {
+      _renderExplanation(explainContainerEl, _explainCache.get(ev.date));
+    }
+    if (explainBtnEl && explainContainerEl) {
+      explainBtnEl.addEventListener('click', async () => {
+        const date = ev.date;
+
+        if (_explainCache.has(date)) {
+          _renderExplanation(explainContainerEl, _explainCache.get(date));
+          return;
+        }
+
+        explainBtnEl.disabled = true;
+        explainContainerEl.className = 'event-explain event-explain--loading';
+        explainContainerEl.textContent = 'Asking Gemini…';
+
+        try {
+          const explanation = await _explainDay(date, impact);
+          _explainCache.set(date, explanation);
+          _renderExplanation(explainContainerEl, explanation);
+        } catch (err) {
+          const msg = (err && err.message) ? err.message
+            : 'Could not explain this day right now.';
+          explainContainerEl.className = 'event-explain event-explain--error';
+          // Escape the message — even though we control most error strings,
+          // some flow through from the API and must be treated as untrusted.
+          explainContainerEl.innerHTML = `<p class="event-explain__error">${_escape(msg)}</p>`;
+        } finally {
+          // Re-enable so the user can retry (a transient failure, e.g. a
+          // network blip, shouldn't wedge the button).
+          explainBtnEl.disabled = false;
+        }
+      });
+    }
+  }
+}
+
+/**
+ * Render a successful Gemini explanation into the container. Gemini output is
+ * UNTRUSTED — we escape via `_escape` and never innerHTML the raw text. CSS
+ * `white-space: pre-wrap` on `.event-explain__text` preserves any paragraph
+ * breaks Gemini returned without us having to parse them.
+ */
+function _renderExplanation(container, text) {
+  container.className = 'event-explain event-explain--success';
+  container.innerHTML = `<p class="event-explain__text">${_escape(text)}</p>`;
 }
 
 /**
@@ -760,11 +1072,14 @@ function _renderPanel(state) {
  *
  * If no active type has any data in the windows, the grid is dropped entirely
  * and only the headline remains.
+ *
+ * `isCustom` only adjusts the headline wording (event vs. selected-day
+ * language); the grid is identical for both.
  */
-function _impactPanelHtml(impact, activeTypes) {
+function _impactPanelHtml(impact, activeTypes, isCustom) {
   if (!impact || !activeTypes.length) return '';
 
-  const trend = describeAggregateTrend(impact);
+  const trend = describeAggregateTrend(impact, isCustom);
   const headline =
     `<div class="event-panel__impact event-panel__impact--${trend.direction}">${trend.html}</div>`;
 
@@ -793,6 +1108,8 @@ function _impactPanelHtml(impact, activeTypes) {
       </div>`;
   }).join('');
 
+  // The window-length legend reads naturally for both cases: a real event's
+  // duration in days, or "1-day" for a synthetic single-day inspection.
   const grid = `
     <div class="event-stats" aria-label="Per-taxi impact statistics">
       <div class="event-stats__legend">Before → During → After (${impact.durationDays}-day windows)</div>

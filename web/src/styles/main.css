@@ -472,6 +472,45 @@ body {
   stroke-width: 2.5;
 }
 
+/* V5 plot container — `position: relative` so the absolutely-positioned
+   `.tooltip` children (both the line-hover tooltip and the marker tooltip
+   created in `_render`) anchor their `left`/`top` coordinates to the
+   container, not the page body. Without this, `top: cy - 30px` (where `cy`
+   comes from `d3.pointer(event, _container)` and is therefore container-
+   relative) would be applied relative to the document and place the tooltip
+   far above the chart, off-screen for any user scrolled down to V5. */
+#v5-container {
+  position: relative;
+}
+
+/* V5 line-hover focus (Feature A). Visual only — pointer-events disabled so
+   the elements never intercept clicks or mousemove events on the underlying
+   `.v5-click-surface`. The focus dot uses the same accent color as the trip
+   line and a contrasting stroke so it reads as a value indicator rather than
+   a marker. The guide line is dashed and faint so the cursor's vertical
+   position registers without crowding the chart. */
+.v5-hover-dot {
+  fill: var(--accent);
+  stroke: var(--bg-card);
+  stroke-width: 2;
+  pointer-events: none;
+}
+.v5-hover-guide {
+  stroke: var(--text-muted);
+  stroke-dasharray: 2, 3;
+  stroke-width: 1;
+  opacity: 0.55;
+  pointer-events: none;
+}
+/* Tabular numerics so digits line up as the cursor drags across days and the
+   exact-count string doesn't jitter horizontally between values like
+   "33,120 trips" → "121,400 trips". */
+.v5-hover-trips {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
 /* V5 event band (after a click) */
 .event-band {
   fill-opacity: 0.18;
@@ -607,6 +646,61 @@ body {
   font-size: 0.88rem;
   color: var(--text-secondary);
   line-height: 1.55;
+  margin: 0;
+}
+
+/* "Explain this day" Gemini button + result container (V5 synthetic day
+   selections only). Styled as a soft accented variant of `.event-panel__btn`
+   so it reads as the panel's primary action without breaking the existing
+   pill-button row. */
+.event-panel__btn--explain {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.event-panel__btn--explain:hover:not(:disabled) {
+  background: rgba(77, 166, 255, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Result container — empty by default, populated by the click handler. The
+   container has no visible chrome until it carries content; the loading /
+   success / error states each pick their own background and border so the
+   user gets clear feedback without the empty state painting a stray box. */
+.event-explain {
+  margin: 0;
+}
+.event-explain:empty {
+  display: none;
+}
+.event-explain--loading,
+.event-explain--success,
+.event-explain--error {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  background: var(--bg-card-hover);
+}
+.event-explain--loading {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.event-explain--error {
+  border-color: var(--color-disruption);
+  color: var(--color-disruption);
+  background: rgba(224, 82, 82, 0.08);
+}
+.event-explain__text {
+  margin: 0;
+  color: var(--text-primary);
+  /* Preserve any paragraph breaks Gemini returns in plain text without us
+     having to inject HTML — pre-wrap collapses runs of spaces but keeps `\n`,
+     which is exactly what we want for the escaped output. */
+  white-space: pre-wrap;
+}
+.event-explain__error {
   margin: 0;
 }
 

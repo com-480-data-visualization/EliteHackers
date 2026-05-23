@@ -1,1 +1,7 @@
 .vercel
+
+# Local env files — the Gemini API key for `vercel dev` lives in .env,
+# and Vite picks up .env*.local for local overrides. Neither is ever committed.
+.env
+.env.local
+.env.*.local
