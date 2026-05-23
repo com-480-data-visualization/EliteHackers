@@ -15,11 +15,11 @@
     <div class="nav__links">
       <a class="nav__link" href="#narrative">Story</a>
       <a class="nav__link" href="#dashboard">Dashboard</a>
-      <a class="nav__link nav__link--active" href="#v1">Trip Volume</a>
+      <a class="nav__link nav__link--active" href="#v5">Timeline</a>
+      <a class="nav__link" href="#v1">Trip Volume</a>
       <a class="nav__link" href="#v2">Weekly Pulse</a>
       <a class="nav__link" href="#v3">Zone Map</a>
       <a class="nav__link" href="#v4">Trip Anatomy</a>
-      <a class="nav__link" href="#v5">Timeline</a>
     </div>
     <button class="nav__mode-toggle" id="mode-toggle" title="Toggle narrative / dashboard mode">
       <span id="mode-label">Dashboard</span>
@@ -93,6 +93,18 @@
       <button class="btn-reset" id="reset-btn">Reset filters</button>
     </div>
 
+    <!-- V5: Timeline (first — primary entry point) -->
+    <div class="panel panel--full" id="v5">
+      <div class="panel__header">
+        <h2 class="panel__title">Annotated Event Timeline</h2>
+        <p class="panel__subtitle">Daily trip count with event markers. Click any day or marker to zoom all views to that period.</p>
+      </div>
+      <div class="panel__body" id="v5-container"></div>
+      <div id="v5-event-panel" class="event-panel event-panel--empty">
+        <p class="event-panel__hint">Click any day on the timeline to inspect it, or click a marker for a known event.</p>
+      </div>
+    </div>
+
     <!-- V1: Stacked Area -->
     <div class="panel panel--full" id="v1">
       <div class="panel__header">
@@ -105,7 +117,7 @@
     <!-- V2: Weekly Pulse Heatmap -->
     <div class="panel panel--full" id="v2">
       <div class="panel__header">
-        <h2 class="panel__title">Weekly Pulse Heatmap (V2)</h2>
+        <h2 class="panel__title">Weekly Pulse Heatmap</h2>
         <p class="panel__subtitle">Average hourly demand by day of week · filtered by taxi type, year range &amp; area. Click a row for the full 24h profile.</p>
       </div>
       <div class="panel__body" id="v2-container"></div>
@@ -115,42 +127,18 @@
     <div class="panel panel--full" id="v3">
       <div class="panel__header">
         <h2 class="panel__title">NYC Zone Choropleth</h2>
-        <p class="panel__subtitle">Pickup volume by taxi zone</p>
+        <p class="panel__subtitle">Pickup volume by taxi zone · filtered by taxi type &amp; time period. Click a zone for details.</p>
       </div>
-      <div class="panel__body panel__placeholder" id="v3-container">
-        <div class="placeholder-inner">
-          <div class="placeholder-icon">⬡</div>
-          <p class="placeholder-title">Zone Choropleth (V3)</p>
-          <p class="placeholder-desc">Coming in Milestone 3.</p>
-        </div>
-      </div>
+      <div class="panel__body" id="v3-container"></div>
     </div>
 
     <!-- V4: Trip Anatomy -->
     <div class="panel panel--full" id="v4">
       <div class="panel__header">
-        <h2 class="panel__title">Trip Anatomy</h2>
-        <p class="panel__subtitle">Fare vs. distance scatter</p>
+        <h2 class="panel__title">Trip Anatomy Explorer</h2>
+        <p class="panel__subtitle">Scatter plot of sampled trips · color = hour of day · axes are swappable. Filtered by taxi type &amp; time period.</p>
       </div>
-      <div class="panel__body panel__placeholder" id="v4-container">
-        <div class="placeholder-inner">
-          <div class="placeholder-icon">⬡</div>
-          <p class="placeholder-title">Trip Anatomy Scatter (V4)</p>
-          <p class="placeholder-desc">Coming in Milestone 3.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- V5: Timeline -->
-    <div class="panel panel--full" id="v5">
-      <div class="panel__header">
-        <h2 class="panel__title">Annotated Event Timeline</h2>
-        <p class="panel__subtitle">Daily trip count with event markers. Click a marker to jump to that period.</p>
-      </div>
-      <div class="panel__body" id="v5-container"></div>
-      <div id="v5-event-panel" class="event-panel event-panel--empty">
-        <p class="event-panel__hint">Click an event marker to see its impact.</p>
-      </div>
+      <div class="panel__body" id="v4-container"></div>
     </div>
 
   </section>

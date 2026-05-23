@@ -350,6 +350,66 @@ body {
   margin-top: 4px;
 }
 
+/* Filter indicator — live filter-state chips inside each panel header */
+.filter-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  min-height: 14px;
+}
+
+.fi-chips {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fi-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  background: var(--border);
+  flex-shrink: 0;
+  transition: background var(--transition);
+}
+.fi-dot--active { /* background set inline */ }
+
+/* When all types active, dim the dot row slightly */
+.fi-chips--default .fi-dot--active { opacity: 0.6; }
+
+.fi-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.fi-sep {
+  color: var(--text-muted);
+  opacity: 0.4;
+  font-size: 0.72rem;
+}
+
+.fi-chip {
+  font-size: 0.72rem;
+  line-height: 1;
+  border-radius: 10px;
+  padding: 2px 7px;
+}
+
+.fi-chip--date {
+  background: rgba(77, 166, 255, 0.12);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.fi-chip--area {
+  background: rgba(155, 111, 245, 0.12);
+  color: #c084fc;
+  font-weight: 600;
+}
+
 .panel__body {
   padding: 16px 0;
   min-height: 360px;
@@ -899,6 +959,138 @@ body {
 
 #gp-detail-chart { position: relative; }
 
+/* ============================================================
+   V3 — Zone Choropleth
+   ============================================================ */
+.v3-wrap {
+  display: flex;
+  gap: 0;
+  position: relative;
+}
+
+.v3-map {
+  flex: 1;
+  position: relative;
+  min-height: 360px;
+}
+
+.v3-zone--selected {
+  stroke: #e2e8f0 !important;
+  stroke-width: 1.5px !important;
+}
+
+/* Side stats panel */
+.v3-panel {
+  width: 220px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--border);
+  padding: 16px;
+  position: relative;
+  transition: width 0.2s;
+}
+
+.v3-panel--hidden { display: none; }
+
+.v3-panel-close {
+  position: absolute;
+  top: 8px; right: 10px;
+  background: transparent; border: none;
+  color: var(--text-muted); font-size: 1rem;
+  cursor: pointer; line-height: 1;
+  font-family: var(--font-sans);
+}
+.v3-panel-close:hover { color: var(--text-primary); }
+
+.v3-panel-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+  padding-right: 20px;
+}
+
+.v3-panel-borough {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.v3-panel-section {
+  margin-bottom: 14px;
+}
+
+.v3-stat-header {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.v3-stat-total {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.v3-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin: 3px 0;
+}
+
+.v3-stat-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.v3-stat-label { flex: 1; }
+
+.v3-stat-value {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   V4 — Trip Anatomy Scatter
+   ============================================================ */
+.v4-controls {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 10px 24px 0;
+  flex-wrap: wrap;
+}
+
+.v4-axis-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.v4-select {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-family: var(--font-sans);
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.v4-select:focus { outline: none; border-color: var(--accent); }
+
+#v4-chart { position: relative; padding: 0 0 8px; }
+
+/* ============================================================
+   V2 empty state (shared)
+   ============================================================ */
 .gp-empty {
   color: var(--text-muted);
   font-size: 0.9rem;
