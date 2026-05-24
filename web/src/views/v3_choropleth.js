@@ -102,6 +102,48 @@ export function init(container, { zonesVolume, topoData }) {
     return { byType, peakMonth: MONTH_NAMES[peakMonthIdx] };
   }
 
+  // ── CartoDB Dark Matter tile background ───────────────────────────────────
+  function renderTiles(svg, projection, W, H) {
+    const tau   = 2 * Math.PI;
+    const z     = Math.round(Math.log2(projection.scale() * tau / 256));
+    const n     = Math.pow(2, z);
+    const subs  = ['a', 'b', 'c', 'd'];
+    let   ti    = 0;
+
+    const nw = projection.invert([0, 0]);
+    const se = projection.invert([W, H]);
+    if (!nw || !se) return;
+
+    const lng2tx  = (lng)       => Math.floor((lng + 180) / 360 * n);
+    const lat2ty  = (lat)       => {
+      const r = lat * Math.PI / 180;
+      return Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n);
+    };
+    const tx2lng  = (tx)        => tx / n * 360 - 180;
+    const ty2lat  = (ty)        => Math.atan(Math.sinh(Math.PI * (1 - 2 * ty / n))) * 180 / Math.PI;
+
+    const x0 = lng2tx(nw[0]) - 1;
+    const y0 = lat2ty(nw[1]) - 1;
+    const x1 = lng2tx(se[0]) + 1;
+    const y1 = lat2ty(se[1]) + 1;
+
+    const tileG = svg.append('g').attr('pointer-events', 'none').attr('class', 'v3-tiles');
+
+    for (let ix = x0; ix <= x1; ix++) {
+      for (let iy = y0; iy <= y1; iy++) {
+        const [px0, py0] = projection([tx2lng(ix),     ty2lat(iy)    ]);
+        const [px1, py1] = projection([tx2lng(ix + 1), ty2lat(iy + 1)]);
+        const tw = px1 - px0;
+        const th = py1 - py0;
+        if (px0 + tw < 0 || px0 > W || py0 + th < 0 || py0 > H) continue;
+        tileG.append('image')
+          .attr('href', `https://${subs[ti++ % 4]}.basemaps.cartocdn.com/dark_all/${z}/${ix}/${iy}.png`)
+          .attr('x', px0).attr('y', py0)
+          .attr('width', tw + 0.5).attr('height', th + 0.5);
+      }
+    }
+  }
+
   // ── Main render ───────────────────────────────────────────────────────────
   function render() {
     const mapEl = container.querySelector('#v3-map');
@@ -131,6 +173,8 @@ export function init(container, { zonesVolume, topoData }) {
     const svg = d3.select(mapEl).append('svg')
       .attr('width', W).attr('height', H);
 
+    renderTiles(svg, projection, W, H);
+
     svg.selectAll('path')
       .data(features.features)
       .join('path')
@@ -138,7 +182,7 @@ export function init(container, { zonesVolume, topoData }) {
         .attr('fill', d => {
           const lid = d.properties.LocationID;
           const t   = totals.get(lid) || 0;
-          return t === 0 ? '#1e2633' : colorScale(t);
+          return t === 0 ? 'rgba(18,24,38,0.72)' : colorScale(t);
         })
         .attr('stroke', '#0d1117')
         .attr('stroke-width', 0.4)
@@ -182,6 +226,30 @@ export function init(container, { zonesVolume, topoData }) {
       svg.selectAll('path')
         .filter(d => d.properties.LocationID === selectedZoneId)
         .attr('stroke', '#e2e8f0').attr('stroke-width', 1.5);
+    }
+
+    // Borough labels — one per borough, centered on merged geometry
+    const BOROUGH_NAMES = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island', 'EWR'];
+    const labelG = svg.append('g').attr('pointer-events', 'none');
+
+    for (const name of BOROUGH_NAMES) {
+      const geoms = topoData.objects.zones.geometries.filter(g => g.properties.borough === name);
+      if (!geoms.length) continue;
+      const merged = topojson.merge(topoData, geoms);
+      const [cx, cy] = pathGen.centroid(merged);
+      if (!isFinite(cx) || !isFinite(cy)) continue;
+
+      labelG.append('text')
+        .attr('x', cx).attr('y', cy)
+        .attr('text-anchor', 'middle').attr('dy', '0.35em')
+        .attr('font-size', 14).attr('font-weight', 800)
+        .attr('font-family', 'var(--font-sans, system-ui)')
+        .attr('fill', 'rgba(255,255,255,0.85)')
+        .attr('stroke', 'rgba(0,0,0,0.6)').attr('stroke-width', 3)
+        .attr('stroke-linejoin', 'round')
+        .style('paint-order', 'stroke fill')
+        .attr('letter-spacing', '0.06em')
+        .text(name.toUpperCase());
     }
 
     // Color legend
