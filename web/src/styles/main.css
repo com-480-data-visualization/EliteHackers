@@ -314,6 +314,7 @@ body {
   font-family: var(--font-sans);
 }
 .btn-reset:hover { border-color: var(--accent); color: var(--accent); }
+.fi-reset { margin-left: 10px; padding: 4px 10px; font-size: 0.75rem; }
 
 /* Panel layout */
 .panel {

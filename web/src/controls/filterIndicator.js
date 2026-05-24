@@ -6,7 +6,8 @@
  * Only reads filterBus (never writes).
  */
 
-import { getState, subscribe } from '../state/filterBus.js';
+import { getState, subscribe, reset } from '../state/filterBus.js';
+import { clearBrush } from '../views/v1_stackedArea.js';
 
 const TAXI_COLORS  = { yellow: '#f5c542', green: '#2ecc71', fhv: '#9b6ff5' };
 const TAXI_LABELS  = { yellow: 'Yellow',  green: 'Green',   fhv: 'FHV'    };
@@ -91,25 +92,39 @@ function buildHtml(state) {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 
+function isFiltered(state) {
+  return state.dateRange !== null ||
+         state.taxiTypes.size !== 3 ||
+         state.selectedBoroughs !== null;
+}
+
 export function init() {
-  // Inject one indicator div into every panel header inside the dashboard
   const headers = document.querySelectorAll('#dashboard .panel .panel__header');
   const indicators = [];
+  const resetBtns = [];
 
   for (const header of headers) {
     const div = document.createElement('div');
     div.className = 'filter-indicator';
     header.appendChild(div);
     indicators.push(div);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-reset fi-reset';
+    btn.textContent = 'Reset filters';
+    btn.style.display = 'none';
+    btn.addEventListener('click', () => { clearBrush(); reset(); });
+    header.appendChild(btn);
+    resetBtns.push(btn);
   }
 
   if (!indicators.length) return;
 
   function render(state) {
     const html = buildHtml(state);
-    for (const div of indicators) {
-      div.innerHTML = html;
-    }
+    const filtered = isFiltered(state);
+    for (const div of indicators) div.innerHTML = html;
+    for (const btn of resetBtns) btn.style.display = filtered ? '' : 'none';
   }
 
   render(getState());
