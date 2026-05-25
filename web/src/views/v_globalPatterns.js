@@ -260,9 +260,6 @@ export function init(container, data) {
     legG.append('text').attr('x', 24 + legendW + 4).attr('y', -3)
       .attr('fill', '#586069').attr('font-size', 10)
       .attr('font-family', 'var(--font-sans, system-ui)').text('High');
-    legG.append('text').attr('x', innerW).attr('y', -3).attr('text-anchor', 'end')
-      .attr('fill', '#586069').attr('font-size', 10)
-      .attr('font-family', 'var(--font-sans, system-ui)').text('Click a row for hourly detail →');
   }
 
   // ── Render: detail line chart ────────────────────────────────────────────────
