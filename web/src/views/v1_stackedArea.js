@@ -200,7 +200,9 @@ function _createInstance(container, { monthly, daily }) {
 
   // ── X-axis ticks + format chosen by resolution ──────────────────────────────
   // Daily mode picks day- or week-stepped ticks based on window width so labels
-  // don't crowd. Monthly mode preserves the original behavior exactly.
+  // don't crowd. Monthly mode adapts both the step and the label format to the
+  // visible time span: sub-yearly ranges show month names; multi-year ranges
+  // show year-only labels.
   function _xAxisSpec(xDom, resolution) {
     if (resolution === 'daily') {
       const days = (xDom[1] - xDom[0]) / 86400000;
@@ -216,9 +218,17 @@ function _createInstance(container, { monthly, daily }) {
       }
       return { interval, format: d3.timeFormat('%d %b') };
     }
+
+    // Monthly resolution — pick the smallest "nice" step that keeps the tick
+    // count within the pixel budget.
+    const totalMonths = Math.round((xDom[1] - xDom[0]) / (1000 * 60 * 60 * 24 * 30.44));
+    const maxTicks    = Math.max(4, Math.floor(_iw / 72));
+    const STEPS       = [1, 2, 3, 4, 6, 12, 24, 36, 48, 60];
+    const monthStep   = STEPS.find(s => Math.ceil(totalMonths / s) <= maxTicks) ?? 60;
+
     return {
-      interval: d3.timeMonth.every(Math.ceil(_iw / 80)),
-      format:   d3.timeFormat('%b %Y'),
+      interval: d3.timeMonth.every(monthStep),
+      format:   monthStep < 12 ? d3.timeFormat('%b %Y') : d3.timeFormat('%Y'),
     };
   }
 
