@@ -114,6 +114,9 @@
         <p class="panel__description">Monthly trips stacked by taxi type (Yellow, Green, FHV) from 2015 to 2024; the COVID-19 collapse appears as a sharp valley in spring 2020, and the long-term structural shift from Yellow cabs toward FHV is clearly visible. Brush the x-axis to select any date range — this becomes the active time filter for all other views. Hovering shows exact counts per taxi type for any given month.</p>
       </div>
       <div class="panel__body" id="v1-container"></div>
+      <div class="event-panel event-panel--empty">
+        <p class="event-panel__hint">Brush the chart to select a date range and filter all views. Double-click or use Reset filters to clear.</p>
+      </div>
     </div>
 
     <!-- V2: Weekly Pulse Heatmap -->
@@ -137,6 +140,9 @@
         <p class="panel__description">Pickup volume per taxi zone across NYC's 265 zones, colored from yellow (low) to red (high). Manhattan alone accounts for 72% of all 1.2 billion pickups, with Upper East Side and Midtown as the top hotspots, while airport hubs like JFK and LaGuardia stand out as strong contrasts in their boroughs. Click any zone to open a side panel with pickup counts broken down by taxi type and the peak month of activity. The map updates live as you change the taxi-type, time period, or borough filters.</p>
       </div>
       <div class="panel__body" id="v3-container"></div>
+      <div class="event-panel event-panel--empty">
+        <p class="event-panel__hint">Click any zone to open a details panel with pickup breakdown by taxi type and peak month.</p>
+      </div>
     </div>
 
     <!-- V4: Trip Anatomy -->
@@ -147,6 +153,9 @@
         <p class="panel__description">Scatter plot of ~10 000 sampled trips colored by hour of day (dark = overnight, warm tones = daytime), revealing fare structures, tip outliers, and clusters like short Manhattan hops versus long airport runs. Hover any point for full trip details; swap axes to explore fare vs. tip %, distance vs. duration, or passenger count vs. fare. The displayed sample updates live with the active taxi-type and time-period filters.</p>
       </div>
       <div class="panel__body" id="v4-container"></div>
+      <div class="event-panel event-panel--empty">
+        <p class="event-panel__hint">Hover any point for full trip details. Use the dropdowns to swap axes and explore different dimensions.</p>
+      </div>
     </div>
 
   </section>
