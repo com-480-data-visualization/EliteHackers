@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NYC Taxi Mobility — How a City Moves</title>
+  <link rel="stylesheet" href="/src/styles/tokens.css" />
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+<body data-page="story">
+
+  <!-- ===== NAV ===== -->
+  <nav class="nav" id="main-nav">
+    <span class="nav__title">NYC Mobility</span>
+    <div class="nav__links" id="nav-page-links"><!-- populated by src/nav.js from LANDING --></div>
+  </nav>
+
+  <!-- ===== NARRATIVE ===== -->
+  <!--
+    Two arcs in nine steps:
+      Steps 1-5 — recurring events: July 4th and the year-end holidays cause
+                  the same dips every year. Recurrence is the point.
+      Steps 6-9 — the COVID shock: March 2020 broke that rhythm; the weekly
+                  pattern itself degraded before / during / after.
+
+    Every displayed statistic (`data-stat="…"`) is computed at runtime by
+    src/storyMain.js from `daily_volume.json` — nothing is hardcoded.
+  -->
+  <section id="narrative" class="narrative-section">
+    <div class="narrative-graphic sticky-graphic">
+      <div class="narrative-progress" id="narrative-progress" aria-hidden="true"></div>
+      <div id="narrative-chart"></div>
+    </div>
+
+    <div class="narrative-steps">
+      <!-- Step 1 — hook -->
+      <div class="narrative-step" data-step="1">
+        <div class="step-content">
+          <h2>A decade of trips,<br>one continuous <span class="accent">pulse</span>.</h2>
+          <p>From 2015 to 2024, New York's Yellow, Green and For-Hire vehicles carried roughly <strong data-stat="totalBillions">— billion</strong> passenger trips. The line is the city's daily heartbeat. Step through to see what shapes it.</p>
+        </div>
+      </div>
+
+      <!-- Step 2 — ten years on one axis -->
+      <div class="narrative-step" data-step="2">
+        <div class="step-content">
+          <h2>The city keeps a <span class="accent">calendar</span>.</h2>
+          <p>Stack all ten years on a shared January-to-December axis and the noise resolves into a pattern: peaks and valleys that fall on the same days of the year, year after year.</p>
+          <div class="step-annotation">
+            <div class="annotation-box">7-day smoothed daily totals · Feb 29 dropped for alignment</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 — July 4th -->
+      <div class="narrative-step" data-step="3">
+        <div class="step-content">
+          <h2>July 4th <span class="accent-jul">empties</span> the streets.</h2>
+          <p>Every July, demand collapses around the holiday. Across the decade, the Jul 4th total falls about <strong class="accent-jul" data-stat="julDipMean">—%</strong> below the surrounding-July baseline. Hover the amber band for the per-year drop.</p>
+          <div class="step-annotation">
+            <div class="annotation-box accent-jul-box">Baseline: that year's Jul 11–25 mean</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 — year-end -->
+      <div class="narrative-step" data-step="4">
+        <div class="step-content">
+          <h2>The <span class="accent-dec">year-end cliff</span>.</h2>
+          <p>The deeper recurring valley sits at Dec 24 through Jan 1 — about <strong class="accent-dec" data-stat="decDipMean">—%</strong> below an early-December baseline. The dip is steeper, longer, and unmistakable in every year.</p>
+          <div class="step-annotation">
+            <div class="annotation-box accent-dec-box">Baseline: that year's Dec 8–18 mean</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 — both -->
+      <div class="narrative-step" data-step="5">
+        <div class="step-content">
+          <h2>Two dips,<br><span class="accent">every year</span>.</h2>
+          <p>Predictable for a decade. Whatever else happens to NYC — weather, policy, fare hikes — Jul 4th and year-end always show up on the chart. Until 2020.</p>
+        </div>
+      </div>
+
+      <!-- Step 6 — the rhythm breaks -->
+      <div class="narrative-step" data-step="6">
+        <div class="step-content">
+          <h2>Then came <span class="accent-covid">2020</span>.</h2>
+          <p>The rhythm of the decade breaks. The ghost line is the 2019 trajectory drawn over the same window — what 2020 would have looked like if business had carried on as usual.</p>
+        </div>
+      </div>
+
+      <!-- Step 7 — the PAUSE -->
+      <div class="narrative-step" data-step="7">
+        <div class="step-content">
+          <h2>The <span class="accent-covid">PAUSE</span> that stopped the city.</h2>
+          <p>NYC's PAUSE order halted non-essential travel on March 22. April-2020 daily volume came in <strong class="accent-covid" data-stat="covidTrough">—%</strong> below April 2019. The annotated trough is the actual minimum day in the window — no smoothing, no rounding for effect.</p>
+          <div class="step-annotation">
+            <div class="annotation-box accent-covid-box"><strong>COVID-19 Lockdown</strong> · Mar 22 – Jun 7, 2020</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 8 — weekly shapes -->
+      <div class="narrative-step" data-step="8">
+        <div class="step-content">
+          <h2>The <span class="accent-covid">weekly rhythm</span> degraded.</h2>
+          <p>Three equal-length windows: the 78 days before the PAUSE, the lockdown itself, and the first 78 days of Phase-1 reopening. <em>Before</em> shows the normal Mon-Sun shape; <em>during</em> is near-flat, near-zero; <em>after</em> is partial — not back to before. The shape itself is what changed.</p>
+        </div>
+      </div>
+
+      <!-- Step 9 — recovery -->
+      <div class="narrative-step" data-step="9">
+        <div class="step-content">
+          <h2>A long, <span class="accent">uneven climb</span> back.</h2>
+          <p>Demand begins to recover in summer 2020 and continues through 2021–22, but the trajectory is jagged and well below the pre-pandemic line for years. The pulse returns; the calendar does not, quite.</p>
+        </div>
+      </div>
+
+      <!-- End-of-story CTA — wording derives from LANDING via src/nav.js -->
+      <div class="story-cta" id="story-cta"></div>
+    </div>
+  </section>
+
+  <!-- Loading overlay -->
+  <div id="loading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Loading data…</p>
+  </div>
+
+  <script type="module" src="/src/storyMain.js"></script>
+</body>
+</html>

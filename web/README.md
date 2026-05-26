@@ -10,6 +10,43 @@ npm install
 npm run dev   # opens http://localhost:3001
 ```
 
+## Pages
+
+The site is split into two pages with native Vite multi-page support:
+
+- `story.html` — scrollytelling narrative
+- `dashboard.html` — V1–V5 interactive dashboard
+
+### Story page — 9-step scrollytelling narrative
+
+The story page renders a self-contained scrollytelling narrative built on
+`daily_volume.json`. The graphic lives in `src/narrative/narrativeGraphic.js`
+and imports nothing from `src/views/` or `src/state/` — it is fully decoupled
+from the dashboard half of the codebase. Every displayed statistic (July
+dip %, year-end dip %, COVID trough %) is computed at runtime in
+`src/narrative/stats.js`; nothing is hardcoded.
+
+Note: the AGENT.md spec mentions a "~-97%" COVID trough, which is the
+yellow-taxi-only figure. The narrative graphic shows the total across all
+active taxi types (per AGENT.md §1.7: "April-2020 mean daily volume vs.
+April-2019 mean"), which lands around **-92%** with the current
+`daily_volume.json`. The annotation is computed and pinned to the actual
+minimum data point — it is not a hardcoded number.
+
+### Switching the landing page
+
+Which page is served at `/` is controlled by a single constant in
+[`src/siteConfig.js`](src/siteConfig.js):
+
+```js
+export const LANDING = 'story'; // or 'dashboard'
+```
+
+To make the dashboard the landing page, set `LANDING = 'dashboard'` in
+`src/siteConfig.js` and rebuild — that one change flips the `/` route
+(via a regenerated `vercel.json`), the cross-page nav ordering, and the
+end-of-story call-to-action wording. No other code change required.
+
 ## Regenerate JSON aggregations
 
 ```bash

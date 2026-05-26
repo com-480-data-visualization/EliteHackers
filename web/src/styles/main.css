@@ -63,19 +63,21 @@ body {
   color: var(--text-primary);
 }
 
-.nav__mode-toggle {
-  background: var(--accent);
-  border: none;
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 20px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background var(--transition);
+/* Span (non-anchor) version used to mark the current page in the cross-page
+   link group rendered by src/nav.js — sits next to the in-page anchor links
+   on the dashboard page, so it must look identical to the active anchor. */
+span.nav__link {
+  cursor: default;
 }
-.nav__mode-toggle:hover { background: var(--accent-hover); }
+
+/* Subtle separator between the cross-page link group and the in-page anchor
+   group on the dashboard nav. */
+.nav__links--pages {
+  flex: 0 0 auto;
+  border-right: 1px solid var(--border);
+  padding-right: 10px;
+  margin-right: 6px;
+}
 
 /* ============================================================
    Loading overlay
@@ -1115,4 +1117,398 @@ body {
   font-size: 0.9rem;
   padding: 48px;
   text-align: center;
+}
+
+/* ============================================================
+   Phase 0 — Story end-of-page CTA
+   Appended for the page-split. Lives on the story page only.
+   Wording is filled in by src/nav.js based on the LANDING constant
+   in src/siteConfig.js (forward when story is home, back-reference
+   when dashboard is home).
+   ============================================================ */
+.story-cta {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 380px;
+  padding: 60px 0;
+}
+.story-cta__headline {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 14px;
+  color: var(--text-primary);
+}
+.story-cta__subline {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  margin-bottom: 22px;
+}
+.story-cta__btn {
+  display: inline-block;
+  align-self: flex-start;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 10px 22px;
+  border-radius: 24px;
+  transition: background var(--transition);
+}
+.story-cta__btn:hover { background: var(--accent-hover); }
+
+/* ============================================================
+   Phase 1 — Narrative scrollytelling rework
+   ============================================================
+   Append-only block per AGENT.md §1.2: all new narrative CSS lives here
+   so the page-split CSS and the dashboard CSS above are untouched.
+   Selectors are namespaced with `ng-` (narrative graphic) or
+   `narrative-` so they cannot collide with the dashboard's V1-V5.
+   ============================================================ */
+
+/* Sticky-graphic root needs to be a positioning context for the absolutely
+   stacked layers and the floating progress rail. The pre-existing
+   `.sticky-graphic` rule provides flex centering; we relax it so the layers
+   can fill the area. */
+.narrative-section .sticky-graphic {
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 16px 24px 12px;
+  flex-direction: column;
+  position: sticky;
+}
+
+/* The chart container becomes the layered canvas. */
+#narrative-chart {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Progress rail — sits on the right edge of the sticky graphic */
+.narrative-progress {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  z-index: 10;
+}
+.narrative-progress__dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  opacity: 0.35;
+  padding: 0; margin: 0;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.narrative-progress__dot:hover { opacity: 0.7; }
+.narrative-progress__dot--active {
+  background: var(--text-primary);
+  opacity: 1;
+  width: 11px; height: 11px;
+  margin: -1.5px -1.5px;
+}
+
+/* Stacked layers. Each layer fills the chart container; visibility is a
+   CSS opacity cross-fade driven by narrativeGraphic.js. */
+.ng-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;   /* the active layer flips this on (see below) */
+  transition: opacity 450ms ease;
+}
+.ng-layer[style*="opacity: 1"] { pointer-events: auto; }
+
+/* Layer-specific layouts */
+.ng-layer--timeline { }
+.ng-layer--overlay {
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  gap: 6px;
+}
+.ng-layer--weekly { padding-top: 8px; }
+
+.ng-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.ng-svg--timeline,
+.ng-svg--overlay {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Timeline layer */
+.ng-timeline-area {
+  fill: var(--accent);
+  fill-opacity: 0.12;
+}
+.ng-timeline-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+}
+.ng-timeline-ghost {
+  fill: none;
+  stroke: var(--text-secondary);
+  stroke-width: 1.4;
+  stroke-dasharray: 4 4;
+}
+.ng-timeline-ghost-label {
+  fill: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  text-anchor: end;
+}
+.ng-annotation-dot {
+  fill: var(--color-disruption);
+  stroke: var(--bg-card);
+  stroke-width: 1.5;
+}
+.ng-annotation-leader {
+  stroke: var(--color-disruption);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+  opacity: 0.9;
+  stroke-linecap: round;
+}
+/* Chip behind the label cluster — provides contrast against the busy area
+   where the trough sits (the dashed 2019 ghost line passes through here). */
+.ng-annotation-chip {
+  fill: rgba(13, 17, 23, 0.94);
+  stroke: var(--color-disruption);
+  stroke-width: 1;
+  rx: 4;
+  ry: 4;
+}
+.ng-annotation-label {
+  fill: var(--color-disruption);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.ng-annotation-sub {
+  fill: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.ng-hover-guide {
+  stroke: var(--text-muted);
+  stroke-dasharray: 2 3;
+  stroke-width: 1;
+  opacity: 0.55;
+}
+.ng-hover-dot {
+  fill: var(--accent);
+  stroke: var(--bg-card);
+  stroke-width: 2;
+}
+
+/* Overlay layer */
+.ng-overlay-chart-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.ng-overlay-band { rx: 2; }
+.ng-overlay-line { transition: opacity 200ms ease, stroke-width 200ms ease; }
+
+.ng-multiples {
+  display: flex;
+  gap: 5px;
+  flex-wrap: nowrap;
+  height: 88px;
+  padding-top: 4px;
+}
+.ng-multiples-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.ng-mult-cell {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 2px 3px;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+.ng-mult-cell:hover,
+.ng-mult-cell.is-active {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border);
+}
+.ng-mult-year {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-weight: 600;
+}
+.ng-mult-cell:hover .ng-mult-year,
+.ng-mult-cell.is-active .ng-mult-year {
+  color: var(--text-primary);
+}
+.ng-mult-spark {
+  flex: 1;
+  min-height: 0;
+}
+.ng-mult-line { transition: stroke 200ms ease; }
+
+/* Weekly-shapes layer (Step 8) */
+.ng-weekly-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.01em;
+  margin: 6px 0 12px;
+  padding-left: 4px;
+}
+.ng-weekly-panels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+.ng-weekly-cell {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.ng-weekly-cell-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+.ng-weekly-cell-range {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+.ng-weekly-cell-mean {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+.ng-weekly-cell-chart {
+  flex: 1;
+  min-height: 80px;
+  margin-top: 6px;
+  min-width: 0;
+}
+
+/* ARIA summary — visually hidden but read by screen readers */
+.ng-aria-summary {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+}
+
+/* FHV pre-2019 footnote — always visible at the foot of the graphic frame */
+.ng-footnote {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 0.01em;
+  padding-top: 4px;
+  text-align: right;
+  pointer-events: none;
+}
+
+/* Narrative tooltip — separate from the dashboard `.tooltip` so we never
+   collide with V1-V5's. */
+.ng-tooltip {
+  position: absolute;
+  background: rgba(13, 17, 23, 0.96);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  pointer-events: none;
+  z-index: 50;
+  white-space: nowrap;
+  box-shadow: var(--shadow-card);
+  transition: opacity 0.15s ease;
+}
+.ng-tt-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--text-secondary);
+}
+.ng-tt-row {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+.ng-tt-row span  { color: var(--text-muted); }
+.ng-tt-row strong { color: var(--text-primary); font-weight: 700; }
+
+/* Storyline accent text classes — keyed to the same palette
+   tokens as the dashboard. */
+.accent-jul    { color: var(--color-policy); }
+.accent-dec    { color: var(--color-disruption); }
+.accent-covid  { color: var(--color-disruption); }
+
+/* Annotation box variants — storyline-colored left borders */
+.annotation-box.accent-jul-box   { border-left: 3px solid var(--color-policy);     padding: 4px 0 4px 14px; background: transparent; border-radius: 0; }
+.annotation-box.accent-dec-box   { border-left: 3px solid var(--color-disruption); padding: 4px 0 4px 14px; background: transparent; border-radius: 0; }
+.annotation-box.accent-covid-box { border-left: 3px solid var(--color-disruption); padding: 4px 0 4px 14px; background: transparent; border-radius: 0; }
+
+/* Reduced-motion: kill all narrative transitions/animations. The JS side
+   reads the same media query and uses zero-duration d3 transitions; this
+   covers the CSS-driven layer cross-fade and dot resize. */
+@media (prefers-reduced-motion: reduce) {
+  .ng-layer,
+  .ng-overlay-line,
+  .ng-mult-line,
+  .narrative-progress__dot,
+  .ng-tooltip {
+    transition: none !important;
+  }
+}
+
+/* Narrow viewports: drop the sidebar layout and let steps stack under the
+   graphic. Below 760px the sticky graphic still appears at the top of each
+   step; this preserves the basic feel without overhauling the layout. */
+@media (max-width: 760px) {
+  .narrative-section { flex-direction: column; }
+  .narrative-section .sticky-graphic {
+    width: 100%;
+    height: 60vh;
+  }
+  .narrative-steps { padding: 24px 16px; }
+  .narrative-progress { top: 16px; right: 16px; transform: none; flex-direction: row; }
 }

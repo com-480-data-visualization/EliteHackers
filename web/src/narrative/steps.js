@@ -1,53 +1,106 @@
 /**
- * Story step handlers — called by scrollama_setup.js on step enter/exit.
+ * 9-step narrative — each entry's `enter()` sets the COMPLETE graphic state
+ * for that beat. There is no `exit()` — scrolling up or down always lands on
+ * a correct frame because every step is self-sufficient.
  *
- * Invariant: every step's `exit` fully reverses its `enter`, so scrolling in
- * either direction never leaves residual state from another step.
+ * Visual / copy mapping mirrors AGENT.md §1.5:
+ *
+ *   1  timeline          full 2015-2024, no annotation
+ *   2  overlay           all years grey, no highlight
+ *   3  overlay + mults   highlight 'jul'
+ *   4  overlay + mults   highlight 'dec'
+ *   5  overlay + mults   highlight 'both'
+ *   6  timeline          zoom toward 2020, ghost 2019
+ *   7  timeline          zoom 2020, ghost 2019, -97% trough annotation
+ *   8  weekly            three Mon-Sun mini-charts
+ *   9  timeline          zoom 2020-2022 recovery
  */
 
-import { update } from '../state/filterBus.js';
-import {
-  brushTo,
-  clearBrush,
-  highlightBand,
-  clearHighlightBand,
-} from '../views/v1_stackedArea.js';
+const D = s => new Date(s); // tiny alias for readability
 
-const TAXI_ALL = new Set(['yellow', 'green', 'fhv']);
-const BASELINE_2019 = { d0: new Date('2019-01-01'), d1: new Date('2019-12-31') };
-const COVID_2020    = { d0: new Date('2020-01-01'), d1: new Date('2020-12-31') };
+const ZOOM_2020       = { d0: D('2020-01-01'), d1: D('2020-12-31') };
+const ZOOM_RECOVERY   = { d0: D('2020-01-01'), d1: D('2022-12-31') };
+const ZOOM_LATE_2019_2020 = { d0: D('2019-10-01'), d1: D('2020-12-31') };
+const GHOST_2019 = { year: 2019, d0: ZOOM_2020.d0, d1: ZOOM_2020.d1 };
+const GHOST_2019_LATE = { year: 2019, d0: ZOOM_LATE_2019_2020.d0, d1: ZOOM_LATE_2019_2020.d1 };
 
-export const steps = {
-  1: {
-    enter() {
-      clearHighlightBand();
-      clearBrush();
-      update({ dateRange: null, taxiTypes: TAXI_ALL });
-    },
-    exit() {},
-  },
+/**
+ * @param {Object} graphic  return value of `createNarrativeGraphic`
+ * @param {Object} stats    return value of `buildNarrativeStats`
+ *                          (used to pass live numbers like covidTroughPct
+ *                          into the trough annotation)
+ */
+export function buildSteps(graphic, stats) {
+  const troughPct = stats.covidTroughPct ?? 0;
 
-  2: {
-    enter() {
-      document.getElementById('step2-annotation').style.display = 'block';
-      highlightBand(BASELINE_2019.d0, BASELINE_2019.d1, '2019 baseline');
-    },
-    exit() {
-      document.getElementById('step2-annotation').style.display = 'none';
-      clearHighlightBand();
-    },
-  },
+  return {
+    1: { enter: () => graphic.setStep({
+      view: 'timeline',
+      zoom: null,
+      ghost: null,
+      annotateTrough: false,
+      troughPct,
+      aria: 'Timeline of daily taxi trips, 2015 to 2024. A continuous pulse with annual rhythms and a deep collapse in spring 2020.',
+    }) },
 
-  3: {
-    enter() {
-      brushTo(COVID_2020.d0, COVID_2020.d1);
-      update({ dateRange: [COVID_2020.d0, COVID_2020.d1] });
-      document.getElementById('step3-annotation').style.display = 'block';
-    },
-    exit() {
-      document.getElementById('step3-annotation').style.display = 'none';
-      clearBrush();
-      update({ dateRange: null });
-    },
-  },
-};
+    2: { enter: () => graphic.setStep({
+      view: 'overlay',
+      highlight: null,
+      multiplesVisible: false,
+      aria: 'Year overlay: ten yearly curves overlaid on a shared January-to-December axis.',
+    }) },
+
+    3: { enter: () => graphic.setStep({
+      view: 'overlay',
+      highlight: 'jul',
+      multiplesVisible: true,
+      aria: 'July 4th window highlighted across all ten years.',
+    }) },
+
+    4: { enter: () => graphic.setStep({
+      view: 'overlay',
+      highlight: 'dec',
+      multiplesVisible: true,
+      aria: 'Year-end holiday window highlighted across all ten years.',
+    }) },
+
+    5: { enter: () => graphic.setStep({
+      view: 'overlay',
+      highlight: 'both',
+      multiplesVisible: true,
+      aria: 'Both recurring dip windows highlighted across all ten years.',
+    }) },
+
+    6: { enter: () => graphic.setStep({
+      view: 'timeline',
+      zoom: ZOOM_LATE_2019_2020,
+      ghost: GHOST_2019_LATE,
+      annotateTrough: false,
+      troughPct,
+      aria: 'Timeline zooming toward 2020 with the 2019 trajectory ghosted in as a counterfactual.',
+    }) },
+
+    7: { enter: () => graphic.setStep({
+      view: 'timeline',
+      zoom: ZOOM_2020,
+      ghost: GHOST_2019,
+      annotateTrough: true,
+      troughPct,
+      aria: `Timeline zoomed to 2020 with a minus ${Math.round(troughPct)} percent annotation pinned to the April trough.`,
+    }) },
+
+    8: { enter: () => graphic.setStep({
+      view: 'weekly',
+      aria: 'Three small line charts comparing average daily trips by day of week, before, during and after the PAUSE order.',
+    }) },
+
+    9: { enter: () => graphic.setStep({
+      view: 'timeline',
+      zoom: ZOOM_RECOVERY,
+      ghost: null,
+      annotateTrough: false,
+      troughPct,
+      aria: 'Timeline zoomed to 2020-2022 showing a long, uneven climb back from the trough.',
+    }) },
+  };
+}

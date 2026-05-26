@@ -97,7 +97,7 @@ To enable scalable analysis, we developed a data pipeline to automatically downl
 
 Our analysis focuses on **three taxi categories**: Yellow Taxis, Green Taxis, and For-Hire Vehicles (FHVs). High-Volume FHVs were excluded due to their significantly larger storage footprint (*≈450 MB* per file per month), which would substantially increase computational overhead.
 
-**Data Pipeline and Preprocessing:** The pipeline ([nyc-tlc-pipeline](nyc-tlc-pipeline)) performs the following steps:
+**Data Pipeline and Preprocessing:** The pipeline ([nyc-tlc-pipeline](../nyc-tlc-pipeline)) performs the following steps:
 
 1. Automated ingestion of monthly Parquet files
 2. Schema validation to ensure consistency across time
@@ -105,7 +105,7 @@ Our analysis focuses on **three taxi categories**: Yellow Taxis, Green Taxis, an
 4. Schema harmonization across taxi types. For example, aligning different datetime fields (`tpep_pickup_datetime`, `lpep_pickup_datetime`) into a unified `pickup_datetime`
 5. Standardization of column names and formats for downstream analysis
 
-A preview of the cleaned data is available for [Yellow Taxi (Jan 2015)](nyc-tlc-pipeline/data/preview/yellow_tripdata_2015-01_clean_preview.csv), and the full processed dataset is publicly hosted on [HuggingFace](https://huggingface.co/datasets/sibasmarakp/nyc-tlc-processed/tree/main/data).
+A preview of the cleaned data is available for [Yellow Taxi (Jan 2015)](../nyc-tlc-pipeline/data/preview/yellow_tripdata_2015-01_clean_preview.csv), and the full processed dataset is publicly hosted on [HuggingFace](https://huggingface.co/datasets/sibasmarakp/nyc-tlc-processed/tree/main/data).
 
 **Aggregation Strategy:** Given the scale of the dataset, we perform aggregation-based EDA to make exploration tractable. The processed data is summarized into CSV files, capturing key dimensions:
 
@@ -115,7 +115,7 @@ A preview of the cleaned data is available for [Yellow Taxi (Jan 2015)](nyc-tlc-
 - *Behavioral signals*: payment method usage
 - *Spatial activity*: pickup and dropoff counts across taxi zones
 
-These aggregated views for EDA are visualized using interactive dashboards built with `D3.js` ([nyc-tlc-viz](nyc-tlc-viz)).
+These aggregated views for EDA are visualized using interactive dashboards built with `D3.js` ([nyc-tlc-viz](../nyc-tlc-viz)).
 
 **Key Observations:** The dataset spans approximately 1.37 billion trips over 10 years and covers 123 taxi zones. The distribution across taxi types includes 786M trips for *Yellow taxis*, 520M trips for *FHV*, and 67M trips for *Green taxis*.
 
@@ -125,7 +125,7 @@ Several high-level patterns emerge:
 - *A sharp and sustained decline* in trip volume corresponding to the COVID-19 pandemic, pronounced between April and June 2020.
 - *Clear daily and weekly usage cycles*, indicating commuting and leisure-driven mobility patterns.
 
-> Note: EDA visualizations are available in the [dashboard](nyc-tlc-viz/dashboard.md).
+> Note: EDA visualizations are available in the [dashboard](../nyc-tlc-viz/dashboard.md).
 
 **Data Quality Insights:** While overall data quality is high, several limitations must be accounted for. Missing values in key fields include 22.8% for shared ride indicators, 9.6% for pickup zone IDs, 3.4% for dropoff zone IDs, and 2.4% for airport fees. These gaps are not uniformly distributed and may introduce bias in specific analyses (e.g., spatial or shared mobility trends). As a result, careful filtering or imputation strategies are required depending on the task.
 
@@ -178,14 +178,14 @@ These sources influenced our focus on clean design, progressive disclosure of in
 
 **10% of the final grade**
 
-- The project goal description, along with visualizations, tools, are available in [milestone2.pdf](milestone2/milestone2.pdf) file.   
-- The details of the status of each visualization and remaining work for Milestone 3 are available in [web/README.md](web/README.md) file.
+- The project goal description, along with visualizations, tools, are available in [milestone2.pdf](../milestone2/milestone2.pdf) file.   
+- The details of the status of each visualization and remaining work for Milestone 3 are available in [web/README.md](../web/README.md) file.
 
 ### Functional Prototype — NYC Taxi Mobility Dashboard
 
 **Live deploy:** [https://elitehackers-six.vercel.app](https://elitehackers-six.vercel.app)
 
-**Source:** [web/](web/) — Vite + D3.js + Scrollama
+**Source:** [web/](../web/) — Vite + D3.js + Scrollama
 
 ## Milestone 3 (29th May, 5pm)
 
