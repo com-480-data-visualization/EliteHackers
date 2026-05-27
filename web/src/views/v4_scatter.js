@@ -163,9 +163,7 @@ export function init(container, tripSample) {
       .attr('y1', d => yScale(d)).attr('y2', d => yScale(d))
       .attr('stroke', '#2d3748').attr('stroke-dasharray', '2,4');
 
-    // Points — sub-sample if very many to keep rendering fast
-    const MAX_DRAW = 4000;
-    const draw = pts.length > MAX_DRAW ? d3.shuffle(pts.slice()).slice(0, MAX_DRAW) : pts;
+    const draw = pts;
 
     g.selectAll('circle')
       .data(draw)
