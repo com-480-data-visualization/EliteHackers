@@ -20,13 +20,35 @@ const AXES = {
   total_amount:   { label: 'Fare (USD)',          fmt: v => '$' + v.toFixed(2) },
   tip_pct:        { label: 'Tip (%)',             fmt: v => (v*100).toFixed(0) + '%' },
   duration_min:   { label: 'Duration (min)',      fmt: v => v.toFixed(0) },
-  passenger_count:{ label: 'Passengers',          fmt: v => v.toFixed(0) },
 };
 
 const DEFAULT_X = 'distance_miles';
 const DEFAULT_Y = 'total_amount';
 
 const HOUR_COLOR = d3.scaleSequential().domain([0, 23]).interpolator(d3.interpolateWarm);
+
+function linReg(pts, xKey, yKey) {
+  const n = pts.length;
+  if (n < 2) return null;
+  let sx = 0, sy = 0, sxy = 0, sx2 = 0;
+  for (const d of pts) {
+    const x = +d[xKey], y = +d[yKey];
+    sx += x; sy += y; sxy += x * y; sx2 += x * x;
+  }
+  const denom = n * sx2 - sx * sx;
+  if (Math.abs(denom) < 1e-10) return null;
+  const slope     = (n * sxy - sx * sy) / denom;
+  const intercept = (sy - slope * sx) / n;
+  const yMean = sy / n;
+  let ssTot = 0, ssRes = 0;
+  for (const d of pts) {
+    const x = +d[xKey], y = +d[yKey];
+    ssTot += (y - yMean) ** 2;
+    ssRes += (y - (slope * x + intercept)) ** 2;
+  }
+  const r2 = ssTot > 0 ? 1 - ssRes / ssTot : 1;
+  return { slope, intercept, r2, r: Math.sign(slope) * Math.sqrt(Math.max(0, r2)) };
+}
 
 export function init(container, tripSample) {
   if (!tripSample?.length) {
@@ -128,6 +150,10 @@ export function init(container, tripSample) {
     const svg = d3.select(chartEl).append('svg')
       .attr('width', W).attr('height', H);
 
+    const clipId = 'v4-clip';
+    svg.append('defs').append('clipPath').attr('id', clipId)
+      .append('rect').attr('width', iw).attr('height', ih);
+
     const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
 
     // Grid
@@ -171,6 +197,30 @@ export function init(container, tripSample) {
           d3.select(this).attr('r', 3.5).attr('opacity', 0.65);
           tooltip.style('opacity', 0);
         });
+
+    // Regression line (computed on all filtered pts for accuracy)
+    const reg = linReg(pts, xKey, yKey);
+    if (reg) {
+      const [x0, x1] = xScale.domain();
+      const ry0 = reg.slope * x0 + reg.intercept;
+      const ry1 = reg.slope * x1 + reg.intercept;
+      g.append('line')
+        .attr('clip-path', `url(#${clipId})`)
+        .attr('x1', xScale(x0)).attr('y1', yScale(ry0))
+        .attr('x2', xScale(x1)).attr('y2', yScale(ry1))
+        .attr('stroke', 'rgba(255,255,255,0.75)')
+        .attr('stroke-width', 1.5)
+        .attr('stroke-dasharray', '6,3')
+        .attr('pointer-events', 'none');
+      g.append('text')
+        .attr('x', iw - 200).attr('y', 6)
+        .attr('text-anchor', 'end')
+        .attr('fill', 'rgba(255,255,255,0.8)')
+        .attr('font-size', 28)
+        .attr('font-weight', 600)
+        .attr('font-family', 'var(--font-sans, system-ui)')
+        .text(`R² = ${reg.r2.toFixed(2)}`);
+    }
 
     // Axes
     g.append('g').attr('transform', `translate(0,${ih})`)
@@ -229,18 +279,6 @@ export function init(container, tripSample) {
       .attr('fill', '#586069').attr('font-size', 9)
       .attr('font-family', 'var(--font-sans, system-ui)').text('Hour of day');
 
-    // Sample count note
-    if (draw.length < pts.length) {
-      g.append('text').attr('x', iw).attr('y', -4).attr('text-anchor', 'end')
-        .attr('fill', '#586069').attr('font-size', 9)
-        .attr('font-family', 'var(--font-sans, system-ui)')
-        .text(`Showing ${draw.length.toLocaleString()} of ${pts.length.toLocaleString()} trips`);
-    } else {
-      g.append('text').attr('x', iw).attr('y', -4).attr('text-anchor', 'end')
-        .attr('fill', '#586069').attr('font-size', 9)
-        .attr('font-family', 'var(--font-sans, system-ui)')
-        .text(`${pts.length.toLocaleString()} trips`);
-    }
   }
 
   // ── filterBus subscription ────────────────────────────────────────────────
