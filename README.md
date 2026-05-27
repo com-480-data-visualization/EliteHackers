@@ -9,7 +9,7 @@ Interactive exploration of 1.2 billion NYC taxi trips (2015–2024) across Yello
 | Student's name | SCIPER | Affiliation | Contact |
 | :---: | :---: | :---: | :---: |
 | [Paola Biocchi](https://people.epfl.ch/paola.biocchi) | 340437 | Master of Neuro-X, EPFL | [paola.biocchi@epfl.ch](mailto:paola.biocchi@epfl.ch) |
-| [Siba Smarak Panigrahi](https://people.epfl.ch/siba.panigrahi) | 352339 | PhD, EDIC, EPFL | [siba.panigrahi@epfl.ch](mailto:siba.panigrahi@epfl.ch) |
+| [Siba Smarak Panigrahi](https://people.epfl.ch/siba.panigrahi) | 352339 | PhD, ?, EPFL | [siba.panigrahi@epfl.ch](mailto:siba.panigrahi@epfl.ch) |
 
 ## Final Deliverables
 
