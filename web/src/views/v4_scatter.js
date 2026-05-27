@@ -163,38 +163,47 @@ export function init(container, tripSample) {
       .attr('y1', d => yScale(d)).attr('y2', d => yScale(d))
       .attr('stroke', '#2d3748').attr('stroke-dasharray', '2,4');
 
-    const draw = pts;
+    // Group points by hour — lets hover dim/highlight 24 groups instead of 50k circles
+    const byHour = d3.group(pts, d => d.pickup_hour);
+    const hourGroups = new Map();
 
-    g.selectAll('circle')
-      .data(draw)
-      .join('circle')
-        .attr('cx', d => xScale(+d[xKey]))
-        .attr('cy', d => yScale(+d[yKey]))
-        .attr('r', 3.5)
-        .attr('fill', d => HOUR_COLOR(d.pickup_hour))
-        .attr('opacity', 0.65)
-        .on('mouseover', function(event, d) {
-          d3.select(this).attr('r', 6).attr('opacity', 1);
-          tooltip.style('opacity', 1)
-            .html(`<span class="tooltip-title">${d.type.charAt(0).toUpperCase()+d.type.slice(1)} · ${d.date}</span>
-                   <div class="tooltip-row">Hour: <strong>${d.pickup_hour}:00</strong></div>
-                   <div class="tooltip-row">${AXES.distance_miles.label}: <strong>${AXES.distance_miles.fmt(+d.distance_miles)}</strong></div>
-                   <div class="tooltip-row">${AXES.total_amount.label}: <strong>${AXES.total_amount.fmt(+d.total_amount)}</strong></div>
-                   <div class="tooltip-row">${AXES.duration_min.label}: <strong>${AXES.duration_min.fmt(+d.duration_min)}</strong></div>
-                   <div class="tooltip-row">${AXES.tip_pct.label}: <strong>${AXES.tip_pct.fmt(+d.tip_pct)}</strong></div>`);
-          const r = container.getBoundingClientRect();
-          tooltip.style('left', (event.clientX - r.left + 14) + 'px')
-                 .style('top',  (event.clientY - r.top  - 44) + 'px');
-        })
-        .on('mousemove', function(event) {
-          const r = container.getBoundingClientRect();
-          tooltip.style('left', (event.clientX - r.left + 14) + 'px')
-                 .style('top',  (event.clientY - r.top  - 44) + 'px');
-        })
-        .on('mouseout', function() {
-          d3.select(this).attr('r', 3.5).attr('opacity', 0.65);
-          tooltip.style('opacity', 0);
-        });
+    for (let h = 0; h <= 23; h++) {
+      const grp = g.append('g').attr('class', 'v4-hg').attr('opacity', 0.65);
+      hourGroups.set(h, grp);
+
+      grp.selectAll('circle')
+        .data(byHour.get(h) || [])
+        .join('circle')
+          .attr('cx', d => xScale(+d[xKey]))
+          .attr('cy', d => yScale(+d[yKey]))
+          .attr('r', 3.5)
+          .attr('fill', HOUR_COLOR(h))
+          .on('mouseover', function(event, d) {
+            g.selectAll('.v4-hg').attr('opacity', 0.06);
+            hourGroups.get(d.pickup_hour).attr('opacity', 1);
+            d3.select(this).attr('r', 6);
+            tooltip.style('opacity', 1)
+              .html(`<span class="tooltip-title">${d.type.charAt(0).toUpperCase()+d.type.slice(1)} · ${d.date}</span>
+                     <div class="tooltip-row">Hour: <strong>${d.pickup_hour}:00</strong></div>
+                     <div class="tooltip-row">${AXES.distance_miles.label}: <strong>${AXES.distance_miles.fmt(+d.distance_miles)}</strong></div>
+                     <div class="tooltip-row">${AXES.total_amount.label}: <strong>${AXES.total_amount.fmt(+d.total_amount)}</strong></div>
+                     <div class="tooltip-row">${AXES.duration_min.label}: <strong>${AXES.duration_min.fmt(+d.duration_min)}</strong></div>
+                     <div class="tooltip-row">${AXES.tip_pct.label}: <strong>${AXES.tip_pct.fmt(+d.tip_pct)}</strong></div>`);
+            const r = container.getBoundingClientRect();
+            tooltip.style('left', (event.clientX - r.left + 14) + 'px')
+                   .style('top',  (event.clientY - r.top  - 44) + 'px');
+          })
+          .on('mousemove', function(event) {
+            const r = container.getBoundingClientRect();
+            tooltip.style('left', (event.clientX - r.left + 14) + 'px')
+                   .style('top',  (event.clientY - r.top  - 44) + 'px');
+          })
+          .on('mouseout', function() {
+            g.selectAll('.v4-hg').attr('opacity', 0.65);
+            d3.select(this).attr('r', 3.5);
+            tooltip.style('opacity', 0);
+          });
+    }
 
     // Regression line (computed on all filtered pts for accuracy)
     const reg = linReg(pts, xKey, yKey);
