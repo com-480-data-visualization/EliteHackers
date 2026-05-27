@@ -82,6 +82,28 @@ export function yearEndDips(byYearAligned) {
 }
 
 /**
+ * Per-year September rebound percentage — a *lift*, not a dip.
+ *
+ * Window: Sep 8-16, the data-verified peak of the post-summer return. Every
+ * year (including 2020) lifts vs. an August-trough baseline (Aug 10-25). Use
+ * raw aligned data (no smoothing) to match `julyDips` / `yearEndDips`.
+ *
+ * Returns Map<year, { liftPct, win, baseline }>. `liftPct` is positive when
+ * the September window sits above the August baseline (i.e. a real rebound).
+ */
+export function septemberLifts(byYearAligned) {
+  const out = new Map();
+  for (const [year, rows] of byYearAligned) {
+    const win = _meanInRange(rows, '09-08', '09-16');
+    const baseline = _meanInRange(rows, '08-10', '08-25');
+    if (win == null || baseline == null || baseline === 0) continue;
+    const liftPct = (win / baseline - 1) * 100;
+    out.set(year, { liftPct, win, baseline });
+  }
+  return out;
+}
+
+/**
  * COVID trough percentage: April-2020 mean daily volume vs. April-2019 mean.
  *
  * Uses the raw (un-smoothed) per-year aligned series — we want the actual
@@ -109,14 +131,15 @@ function _meanOf(arr) {
 
 /**
  * Cross-year averages for headline copy. Returns:
- *   { julyDipMean, yearEndDipMean }
+ *   { julyDipMean, yearEndDipMean, septemberLiftMean }
  *
  * Rounded sensibly by the caller (no false precision).
  */
-export function crossYearAverages({ julyDipsMap, yearEndDipsMap }) {
+export function crossYearAverages({ julyDipsMap, yearEndDipsMap, septemberLiftsMap }) {
   return {
     julyDipMean: _meanOf([...julyDipsMap.values()].map(v => v.dropPct)),
     yearEndDipMean: _meanOf([...yearEndDipsMap.values()].map(v => v.dropPct)),
+    septemberLiftMean: _meanOf([...septemberLiftsMap.values()].map(v => v.liftPct)),
   };
 }
 
@@ -128,14 +151,17 @@ export function buildNarrativeStats(narrativeData) {
   const { byYearAligned } = narrativeData;
   const julyDipsMap = julyDips(byYearAligned);
   const yearEndDipsMap = yearEndDips(byYearAligned);
+  const septemberLiftsMap = septemberLifts(byYearAligned);
   const trough = covidTrough(byYearAligned);
-  const cross = crossYearAverages({ julyDipsMap, yearEndDipsMap });
+  const cross = crossYearAverages({ julyDipsMap, yearEndDipsMap, septemberLiftsMap });
   return {
     julyDipsMap,
     yearEndDipsMap,
+    septemberLiftsMap,
     covidTroughPct: trough ? trough.dropPct : null,
     covidTroughDetail: trough,
     julyDipMean: cross.julyDipMean,
     yearEndDipMean: cross.yearEndDipMean,
+    septemberLiftMean: cross.septemberLiftMean,
   };
 }

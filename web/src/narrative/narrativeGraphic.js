@@ -29,6 +29,10 @@ const COLOR_NEUTRAL    = '#e6edf3';   // matches --text-primary
 const COLOR_GREY_LINE  = '#586069';   // matches --text-muted (dim overlay lines)
 const COLOR_JUL        = '#f5a623';   // matches --color-policy (amber)
 const COLOR_DEC        = '#e05252';   // matches --color-disruption (red)
+const COLOR_SEP        = '#52b788';   // matches --color-recovery (green) — used
+                                      // for the September rebound. Distinct from
+                                      // the dip accents so a *rise* reads as
+                                      // recovery, not loss.
 const COLOR_COVID      = '#e05252';
 const COLOR_GHOST      = '#4da6ff';   // matches --accent
 
@@ -37,11 +41,21 @@ const MARGIN_OVERLAY  = { top: 24, right: 28, bottom: 28, left: 56 };
 const MARGIN_THUMB    = { top: 6,  right: 4,  bottom: 6,  left: 4 };
 const MARGIN_WEEKLY   = { top: 32, right: 16, bottom: 46, left: 44 };
 
+// Each window carries a `kind` so the tooltip + accent colour can be decided
+// without re-deriving from index position. `sep` is a *lift* not a dip; the
+// tooltip uses positive "+X%" formatting and looks up `septemberLiftsMap`.
 const HIGHLIGHT_WINDOWS = {
-  jul:  [{ from: '07-01', to: '07-08' }],
-  dec:  [{ from: '12-22', to: '12-31' }, { from: '01-01', to: '01-02' }],
-  both: [{ from: '07-01', to: '07-08' }, { from: '12-22', to: '12-31' }, { from: '01-01', to: '01-02' }],
+  jul: [{ from: '07-01', to: '07-08', kind: 'jul' }],
+  sep: [{ from: '09-01', to: '09-10', kind: 'sep' }],
+  dec: [{ from: '12-22', to: '12-31', kind: 'dec' }, { from: '01-01', to: '01-02', kind: 'dec' }],
+  all: [
+    { from: '07-01', to: '07-08', kind: 'jul' },
+    { from: '09-01', to: '09-10', kind: 'sep' },
+    { from: '12-22', to: '12-31', kind: 'dec' },
+    { from: '01-01', to: '01-02', kind: 'dec' },
+  ],
 };
+const ACCENT_BY_KIND = { jul: COLOR_JUL, sep: COLOR_SEP, dec: COLOR_DEC };
 
 /**
  * `prefers-reduced-motion` is read once at construction. If the user toggles
@@ -555,13 +569,8 @@ function _buildOverlay(layer, data, stats, tooltip) {
   }
 
   function _windowAccent(mode, index) {
-    if (mode === 'jul') return COLOR_JUL;
-    if (mode === 'dec') return COLOR_DEC;
-    if (mode === 'both') {
-      // window 0 = Jul (amber); windows 1, 2 = year-end (red).
-      return index === 0 ? COLOR_JUL : COLOR_DEC;
-    }
-    return COLOR_GREY_LINE;
+    const win = HIGHLIGHT_WINDOWS[mode]?.[index];
+    return win ? ACCENT_BY_KIND[win.kind] : COLOR_GREY_LINE;
   }
 
   /* Multiples strip */
@@ -638,14 +647,76 @@ function _buildOverlay(layer, data, stats, tooltip) {
       .attr('stroke-width', d => (year != null && d[0] === year) ? 1.7 : 1);
   }
 
-  /* Overlay hover — tooltip near highlighted dips */
+  /* Overlay hover — generic anywhere, plus kind-aware tooltips inside bands.
+   *
+   * Two stacked hit layers inside `hoverGroup`:
+   *   1) a base full-area capture (appended first → underneath) that shows
+   *      a per-year date+value tooltip wherever the cursor is. This is what
+   *      makes Thanksgiving / Memorial-Day / Presidents'-Day dips discoverable
+   *      without a dedicated band, per the spec.
+   *   2) per-band hit-rects (appended after → on top) that fire a richer
+   *      "dip / lift" tooltip with the runtime % from the matching stats map.
+   */
   function _attachOverlayHover() {
     hoverGroup.selectAll('*').remove();
+
+    const _placeTooltip = (event) => {
+      const [mx] = d3.pointer(event, gMain.node());
+      tooltip
+        .style('left', `${mx + MARGIN_OVERLAY.left + 12}px`)
+        .style('top',  `${event.offsetY + 4}px`);
+    };
+    const _clearTooltip = () => {
+      tooltip.style('opacity', 0);
+      _highlightYearOnly(_hoverYear);
+    };
+
+    /* 1) Generic per-year tooltip anywhere on the overlay */
+    hoverGroup.append('rect')
+      .attr('class', 'ng-overlay-base-capture')
+      .attr('width', _innerW).attr('height', _innerH)
+      .attr('fill', 'transparent')
+      .attr('pointer-events', 'all')
+      .on('mousemove', (event) => {
+        const [mx, my] = d3.pointer(event, gMain.node());
+        const cursorDate = _x.invert(mx);
+        const dayKey =
+          `${String(cursorDate.getUTCMonth() + 1).padStart(2, '0')}-` +
+          `${String(cursorDate.getUTCDate()).padStart(2, '0')}`;
+
+        // Prefer the year a thumbnail is being hovered; otherwise pick the
+        // year whose smoothed curve at this dayKey is closest to the cursor.
+        let pickedYear = null, pickedRow = null;
+        if (_hoverYear != null) {
+          const r = data.byYearSmoothed.get(_hoverYear)?.find(x => x.dayKey === dayKey);
+          if (r) { pickedYear = _hoverYear; pickedRow = r; }
+        }
+        if (pickedYear == null) {
+          const yVal = _y.invert(my);
+          let bestDist = Infinity;
+          for (const [year, rows] of data.byYearSmoothed) {
+            const r = rows.find(x => x.dayKey === dayKey);
+            if (!r) continue;
+            const d = Math.abs(r.total - yVal);
+            if (d < bestDist) { bestDist = d; pickedYear = year; pickedRow = r; }
+          }
+        }
+        if (pickedYear == null) return;
+        tooltip
+          .style('opacity', 1)
+          .html(
+            `<div class="ng-tt-title">${d3.utcFormat('%b %d')(cursorDate)} \u00b7 ${pickedYear}</div>` +
+            `<div class="ng-tt-row"><span>Avg. daily trips</span><strong>${_fmtTrips(pickedRow.total)}</strong></div>`,
+          );
+        _placeTooltip(event);
+        _highlightYearOnly(pickedYear);
+      })
+      .on('mouseleave', _clearTooltip);
+
+    /* 2) Per-band, kind-aware tooltip (dip / lift) */
     if (!_state.highlight) return;
     const windows = HIGHLIGHT_WINDOWS[_state.highlight];
 
-    // One hit-strip per window — only inside the highlighted regions we
-    // expose tooltips, so casual mouse-overs elsewhere don't trigger noise.
     for (let wi = 0; wi < windows.length; wi++) {
       const win = windows[wi];
       const x1 = _x(_refDate(win.from));
@@ -657,37 +728,45 @@ function _buildOverlay(layer, data, stats, tooltip) {
         .attr('fill', 'transparent')
         .attr('pointer-events', 'all')
         .on('mousemove', (event) => {
-          const [mx] = d3.pointer(event, gMain.node());
-          // Pick the year whose dip at the hovered window is the *deepest*.
-          // That's almost always what the reader is asking about — "look at
-          // how big this drop is". When a thumbnail is already being hovered,
-          // prefer that year so the tooltip and the visual stay coherent.
-          const isJul = _windowAccent(_state.highlight, wi) === COLOR_JUL;
-          const dipsMap = isJul ? stats.julyDipsMap : stats.yearEndDipsMap;
+          const isLift = win.kind === 'sep';
+          const map =
+            win.kind === 'jul' ? stats.julyDipsMap :
+            win.kind === 'sep' ? stats.septemberLiftsMap :
+            stats.yearEndDipsMap;
+          const accent = ACCENT_BY_KIND[win.kind];
+          const valueOf = (info) => isLift ? info.liftPct : info.dropPct;
+
+          // Prefer the hovered thumbnail's year; otherwise pick the year with
+          // the most extreme effect (deepest dip / biggest lift).
           let pickedYear = _hoverYear;
-          if (pickedYear == null || !dipsMap.has(pickedYear)) {
-            let bestDrop = -Infinity;
-            for (const [year, info] of dipsMap) {
-              if (info.dropPct > bestDrop) { bestDrop = info.dropPct; pickedYear = year; }
+          if (pickedYear == null || !map.has(pickedYear)) {
+            let bestMag = -Infinity;
+            for (const [year, info] of map) {
+              const mag = valueOf(info);
+              if (mag > bestMag) { bestMag = mag; pickedYear = year; }
             }
           }
           if (pickedYear == null) return;
-          const info = dipsMap.get(pickedYear);
+          const info = map.get(pickedYear);
+          if (!info) return;
+
+          const value = valueOf(info);
+          const sign  = isLift ? '+' : '\u2212';
+          const title = isLift ? 'September rebound'
+                               : (win.kind === 'jul' ? 'July 4th dip' : 'Year-end dip');
+          const subline = isLift ? 'Lift vs. August baseline' : 'Drop vs. baseline';
+
           tooltip
             .style('opacity', 1)
             .html(
-              `<div class="ng-tt-title">${isJul ? 'July 4th' : 'Year-end'} dip</div>` +
+              `<div class="ng-tt-title">${title}</div>` +
               `<div class="ng-tt-row"><span>Year</span><strong>${pickedYear}</strong></div>` +
-              `<div class="ng-tt-row"><span>Drop vs. baseline</span><strong style="color:${isJul ? COLOR_JUL : COLOR_DEC}">-${info.dropPct.toFixed(0)}%</strong></div>`,
-            )
-            .style('left', `${mx + MARGIN_OVERLAY.left + 12}px`)
-            .style('top', `${event.offsetY + 4}px`);
+              `<div class="ng-tt-row"><span>${subline}</span><strong style="color:${accent}">${sign}${Math.abs(value).toFixed(0)}%</strong></div>`,
+            );
+          _placeTooltip(event);
           _highlightYearOnly(pickedYear);
         })
-        .on('mouseleave', () => {
-          tooltip.style('opacity', 0);
-          _highlightYearOnly(_hoverYear);
-        });
+        .on('mouseleave', _clearTooltip);
     }
   }
 

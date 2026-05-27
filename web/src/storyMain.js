@@ -79,10 +79,11 @@ function injectStats(stats, dailyTotal) {
       el.textContent = text;
     });
   };
-  if (stats.julyDipMean    != null) set('julDipMean',     `${Math.round(stats.julyDipMean)}%`);
-  if (stats.yearEndDipMean != null) set('decDipMean',     `${Math.round(stats.yearEndDipMean)}%`);
-  if (stats.covidTroughPct != null) set('covidTrough',    `${Math.round(stats.covidTroughPct)}%`);
-  if (dailyTotal != null)            set('totalBillions',  formatBillions(dailyTotal));
+  if (stats.julyDipMean       != null) set('julDipMean',    `${Math.round(stats.julyDipMean)}%`);
+  if (stats.yearEndDipMean    != null) set('decDipMean',    `${Math.round(stats.yearEndDipMean)}%`);
+  if (stats.septemberLiftMean != null) set('sepLiftMean',   `+${Math.round(stats.septemberLiftMean)}%`);
+  if (stats.covidTroughPct    != null) set('covidTrough',   `${Math.round(stats.covidTroughPct)}%`);
+  if (dailyTotal != null)              set('totalBillions', formatBillions(dailyTotal));
 }
 
 function formatBillions(n) {

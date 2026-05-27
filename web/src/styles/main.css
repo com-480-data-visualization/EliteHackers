@@ -1480,11 +1480,13 @@ span.nav__link {
    tokens as the dashboard. */
 .accent-jul    { color: var(--color-policy); }
 .accent-dec    { color: var(--color-disruption); }
+.accent-sep    { color: var(--color-recovery); }
 .accent-covid  { color: var(--color-disruption); }
 
 /* Annotation box variants — storyline-colored left borders */
 .annotation-box.accent-jul-box   { border-left: 3px solid var(--color-policy);     padding: 4px 0 4px 14px; background: transparent; border-radius: 0; }
 .annotation-box.accent-dec-box   { border-left: 3px solid var(--color-disruption); padding: 4px 0 4px 14px; background: transparent; border-radius: 0; }
+.annotation-box.accent-sep-box   { border-left: 3px solid var(--color-recovery);   padding: 4px 0 4px 14px; background: transparent; border-radius: 0; }
 .annotation-box.accent-covid-box { border-left: 3px solid var(--color-disruption); padding: 4px 0 4px 14px; background: transparent; border-radius: 0; }
 
 /* Reduced-motion: kill all narrative transitions/animations. The JS side
