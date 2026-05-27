@@ -1509,6 +1509,32 @@ span.nav__link {
   }
 }
 
+/* Story hero — inside step 1, fades with the step */
+.narrative-step[data-step="1"] {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding-top: 48px;
+  gap: 32px;
+}
+
+.story-hero__title {
+  font-size: clamp(3.2rem, 6vw, 5.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.story-hero__subtitle {
+  font-size: clamp(0.85rem, 1.4vw, 1.1rem);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
 /* Narrow viewports: drop the sidebar layout and let steps stack under the
    graphic. Below 760px the sticky graphic still appears at the top of each
    step; this preserves the basic feel without overhauling the layout. */
