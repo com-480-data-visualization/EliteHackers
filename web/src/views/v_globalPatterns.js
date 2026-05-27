@@ -46,6 +46,7 @@ export function init(container, data) {
     <div class="gp-local-bar">
       <label class="gp-normalize-label">
         <input type="checkbox" id="gp-normalize"> Normalize columns
+        <span class="gp-normalize-hint">: compare day-of-week patterns within each hour, independent of overall volume</span>
       </label>
     </div>
     <div id="gp-heatmap"></div>

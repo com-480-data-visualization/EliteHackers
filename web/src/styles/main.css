@@ -919,7 +919,7 @@ span.nav__link {
 /* Thin local bar inside V2 for the normalize toggle only */
 .gp-local-bar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   padding: 10px 24px 0;
 }
 
@@ -927,10 +927,17 @@ span.nav__link {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  font-size: 1rem;
+  color: var(--text-primary);
   cursor: pointer;
-  white-space: nowrap;
+  flex-wrap: wrap;
+}
+
+.gp-normalize-hint {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  white-space: normal;
 }
 
 .gp-normalize-label input[type=checkbox] {

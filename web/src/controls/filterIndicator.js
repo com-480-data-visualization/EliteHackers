@@ -51,7 +51,7 @@ function formatBoroughs(selectedBoroughs) {
 
 // ── Build the indicator HTML ───────────────────────────────────────────────
 
-function buildHtml(state) {
+function buildHtml(state, noBorough = false) {
   const parts = [];
 
   // Taxi types — always show; dim if all-default to reduce visual noise
@@ -83,7 +83,7 @@ function buildHtml(state) {
 
   // Boroughs
   const borStr = formatBoroughs(state.selectedBoroughs);
-  if (borStr) {
+  if (borStr && !noBorough) {
     parts.push(`<span class="fi-sep">·</span><span class="fi-chip fi-chip--area">${borStr}</span>`);
   }
 
@@ -104,8 +104,10 @@ export function init() {
   const resetBtns = [];
 
   for (const header of headers) {
+    const noBorough = header.hasAttribute('data-no-borough');
     const div = document.createElement('div');
     div.className = 'filter-indicator';
+    div.dataset.noBorough = noBorough ? '1' : '';
     header.appendChild(div);
     indicators.push(div);
 
@@ -121,9 +123,10 @@ export function init() {
   if (!indicators.length) return;
 
   function render(state) {
-    const html = buildHtml(state);
     const filtered = isFiltered(state);
-    for (const div of indicators) div.innerHTML = html;
+    for (const div of indicators) {
+      div.innerHTML = buildHtml(state, div.dataset.noBorough === '1');
+    }
     for (const btn of resetBtns) btn.style.display = filtered ? '' : 'none';
   }
 
