@@ -154,6 +154,7 @@ def make_daily_volume(yellow_files, green_files, fhv_files, out_path: Path):
         if not files:
             continue
         print(f"  Aggregating daily volume for {vehicle_type} ({len(files)} files)...")
+        dfs = []
         for f in files:
             try:
                 df = pl.read_parquet(f, columns=["pickup_date"])
@@ -163,18 +164,22 @@ def make_daily_volume(yellow_files, green_files, fhv_files, out_path: Path):
                     (pl.col("pickup_date") <= MAX_DATE)
                 )
                 dropped_total += before - df.height
-                agg = (df.group_by("pickup_date")
-                         .agg(pl.len().alias("trips"))
-                         .sort("pickup_date"))
-                for row in agg.iter_rows(named=True):
-                    d = row["pickup_date"]
-                    rows.append({
-                        "date": str(d),
-                        "type": vehicle_type,
-                        "trips": int(row["trips"])
-                    })
+                dfs.append(df)
             except Exception as e:
                 print(f"    Warning: could not read {f.name}: {e}")
+        if not dfs:
+            continue
+        combined = pl.concat(dfs)
+        agg = (combined.group_by("pickup_date")
+                       .agg(pl.len().alias("trips"))
+                       .sort("pickup_date"))
+        for row in agg.iter_rows(named=True):
+            d = row["pickup_date"]
+            rows.append({
+                "date": str(d),
+                "type": vehicle_type,
+                "trips": int(row["trips"])
+            })
 
     if dropped_total:
         print(f"  Dropped {dropped_total:,} rows outside {MIN_DATE}..{MAX_DATE}")
