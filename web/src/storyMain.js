@@ -1,15 +1,15 @@
 /**
  * Story page entry point.
  *
- * Phase 1 owns its own self-contained narrative graphic:
+ * Own self-contained narrative graphic:
  *   - imports NOTHING from `src/views/` or `src/state/`
  *   - reads only `daily_volume.json` + `events.json` from the static data dir
  *   - computes every displayed statistic at runtime (see `narrative/stats.js`)
  *
  * Layout responsibilities here:
- *   - render the cross-page nav + end-of-story CTA (both LANDING-driven)
+ *   - render the cross-page nav + end-of-story switch button
  *   - inject the live numbers into the step copy (`[data-stat]` placeholders)
- *   - build the `weeklyWindows` for Step 8 from `events.json`
+ *   - build the `weeklyWindows` from `events.json`
  *   - construct the narrative graphic and wire Scrollama to it
  */
 
@@ -32,11 +32,11 @@ async function loadData() {
 }
 
 /**
- * Derive the three Step-8 windows from `events.json`. The arithmetic mirrors
- * AGENT.md §1.6 exactly: D = length of the lockdown window, "before" is the
- * D days ending the day before the lockdown, "after" is the D days starting
- * at covid_phase1.date. Computed not hardcoded so a change to events.json
- * propagates automatically.
+ * Derive the windows for the day-wise average trips for a week
+ * Before: D days ending the day before the lockdown
+ * During: D days of the lockdown
+ * After: D days starting at the date of the first day of COVID re-opening
+ * D is the length of the lockdown window
  */
 function buildWeeklyWindows(events) {
   const _fmt = d3.utcFormat('%Y-%m-%d');
@@ -118,8 +118,7 @@ async function main() {
       { weeklyWindows },
     );
     // Initial measure after the layer is mounted but before the first
-    // scrollama trigger — guarantees the SVGs have non-zero dimensions when
-    // step 1's enter() draws.
+    // scrollama trigger — guarantees the SVGs have non-zero dimensions when step 1's enter() draws.
     graphic.resize();
 
     const steps = buildSteps(graphic, stats);

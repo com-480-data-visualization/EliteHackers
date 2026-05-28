@@ -22,14 +22,13 @@ Default `--out-dir` is `../../web/public/data`.
 ## Outputs
 
 
-| File                  | Description                      |
-| --------------------- | -------------------------------- |
-| `monthly_volume.json` | Monthly trips by type (331 rows) |
-| `daily_volume.json`   | Daily trips by type (~10k rows)  |
-| `weekly_heatmap.json` | Hour × Day of Week × type aggregation    |
-| `zones_volume.json`   | Pickup counts per zone           |
-| `trip_sample.json`    | Stub (will be added in Milestone 3) |
-| `events.json`         | Hand-curated annotation events (will be added in Milestone 3)  |
+| File                  | Description                             |
+| --------------------- | --------------------------------------- |
+| `monthly_volume.json` | Monthly trips by type                   |
+| `daily_volume.json`   | Daily trips by type                     |
+| `weekly_heatmap.json` | Hour × Day of Week × type aggregation   |
+| `zones_volume.json`   | Pickup counts per zone                  |
+| `trip_sample.json`    | sampled trips for trip anatomy explorer |
 
 
 ## Data rules applied

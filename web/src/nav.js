@@ -37,7 +37,7 @@ export function renderNavLinks(currentPage, container) {
 }
 
 /**
- * Fill the end-of-story call-to-action block (story page only).
+ * Fill the end-of-story call-to-action (CTA) block (story page only).
  * Wording flips with LANDING so the CTA always frames the dashboard as
  * either "now try it yourself" (story is home) or "back to the dashboard"
  * (dashboard is home, the user came from there).

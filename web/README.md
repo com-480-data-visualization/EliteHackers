@@ -1,73 +1,44 @@
-# NYC Taxi Mobility: High-level overview and Milestone 2 Status
+# NYC Taxi Mobility: High-level overview
 
 **Live URL:** [https://elitehackers-six.vercel.app](https://elitehackers-six.vercel.app)
 
 ## Run locally
 
 ```bash
-cd web
-npm install
-npm run dev   # opens http://localhost:3001
+cd web && npm install && npm run build
+npx vercel dev   # (we avoid npm run dev since it won't work for ``Explain this day" feature) 
 ```
 
 ## Pages
 
 The site is split into two pages with native Vite multi-page support:
 
-- `story.html` — scrollytelling narrative
-- `dashboard.html` — V1–V5 interactive dashboard
-
-### Story page — 9-step scrollytelling narrative
-
-The story page renders a self-contained scrollytelling narrative built on
-`daily_volume.json`. The graphic lives in `src/narrative/narrativeGraphic.js`
-and imports nothing from `src/views/` or `src/state/` — it is fully decoupled
-from the dashboard half of the codebase. Every displayed statistic (July
-dip %, year-end dip %, COVID trough %) is computed at runtime in
-`src/narrative/stats.js`; nothing is hardcoded.
-
-Note: the AGENT.md spec mentions a "~-97%" COVID trough, which is the
-yellow-taxi-only figure. The narrative graphic shows the total across all
-active taxi types (per AGENT.md §1.7: "April-2020 mean daily volume vs.
-April-2019 mean"), which lands around **-92%** with the current
-`daily_volume.json`. The annotation is computed and pinned to the actual
-minimum data point — it is not a hardcoded number.
-
-### Switching the landing page
-
-Which page is served at `/` is controlled by a single constant in
-[`src/siteConfig.js`](src/siteConfig.js):
-
-```js
-export const LANDING = 'story'; // or 'dashboard'
-```
-
-To make the dashboard the landing page, set `LANDING = 'dashboard'` in
-`src/siteConfig.js` and rebuild — that one change flips the `/` route
-(via a regenerated `vercel.json`), the cross-page nav ordering, and the
-end-of-story call-to-action wording. No other code change required.
+- `story.html` — scrollytelling narrative (built on `daily_volume.json` , fully decoupled from dashboard, the graphic lives in `src/narrative/narrativeGraphic.js`) and all statistical values are computed at runtime in `src/narrative/stats.js` )
+- `dashboard.html` — Five linked interactive visualizations, namely `Annotated Event Timeline`, `Trip Volume Over Time` , `Weekly Pulse Heatmap` , `NYC Zone Choropleth` , `Trip Anatomy Explorer` (built on JSON aggregations of processed NYC TLC Monthly Parquet data files)
 
 ## Regenerate JSON aggregations
 
 ```bash
 pip install polars
-python nyc-tlc-pipeline/aggregations/make_milestone2_aggregations.py \
-  --data-dir nyc-tlc-pipeline/data/processed \
-  --out-dir   web/public/data
+python nyc-tlc-pipeline/aggregations/make_milestone2_aggregations.py
+python nyc-tlc-pipeline/aggregations/make_global_patterns.py
 ```
 
 The script reads cleaned parquet files (output of `nyc-tlc-pipeline/pipeline/preprocess.py`) and produces the JSON files committed in `web/public/data/`.
 
 #### Data aggregations
 
-Pre-aggregated JSON files in `[web/public/data/](web/public/data/)`:
+Pre-aggregated JSON files in `[public/data/](public/data/)`:
 
-- `monthly_volume.json` — 331 rows (Yellow/Green 2015–2024, FHV 2017-06–2024-12)
-- `daily_volume.json` — ~10k rows
-- `events.json` — 12 curated annotation events
-- `taxi_zones.topojson` — 460 KB simplified TopoJSON
+- `daily_volume.json` 
+- `global_patterns.json`
+- `monthly_volume.json`
+- `taxi_zones.topojson`
+- `trip_sample.json`
+- `weekly_heatmap.json`
+- `zones_volume.json`
 
-## High-level Architecture
+## High-level Architecture of Central Filter
 
 ```
                         ┌─────────────┐
@@ -77,9 +48,9 @@ Pre-aggregated JSON files in `[web/public/data/](web/public/data/)`:
               ┌────────────────┼────────────────┐
               ▼                ▼                ▼
        ┌─────────┐      ┌─────────┐      ┌─────────┐
-       │   V1    │      │   V5    │      │Controls │
-       │ stacked │      │timeline │      │toggle / │
-       │  area   │      │+ events │      │ slider  │
+       │   V1    │      │   V5    │      │Global   │
+       │ stacked │      │timeline │      │controls │
+       │  area   │      │+ events │      │(slider) │
        └─────────┘      └─────────┘      └─────────┘
        (brush → bus)    (click → bus)    (input → bus)
 
@@ -87,14 +58,12 @@ Pre-aggregated JSON files in `[web/public/data/](web/public/data/)`:
        │  V2 ☐   │  │  V3 ☐   │  │  V4 ☐   │
        │heatmap  │  │choropleth│  │ scatter │
        └─────────┘  └─────────┘  └─────────┘
-         (stubs, will be added in Milestone 3)
+       (Read from the bus only, no write allowed)
 ```
 
-## Data scope
+## Old Milestone 2 Content Below (Not relevant for Milestone 3)
 
-This dashboard visualises NYC TLC Yellow taxi, Green taxi, and traditional FHV (For-Hire Vehicle) data. HVFHV (high-volume rideshare — Uber, Lyft, Via) is excluded. Yellow and Green cover 2015–2024. FHV is shown from February 2019 onward, when the TLC separated high-volume rideshare (Uber, Lyft, Via) into a distinct HVFHV category. Pre-Feb-2019 FHV data included rideshare and would mix two fundamentally different service types in one series.
-
-## Milestone 2 status
+## Milestone 2 Status
 
 
 | View                    | Status         | Notes                                                                                                                                                                     |

@@ -2,14 +2,7 @@
  * Site-wide configuration.
  *
  * `LANDING` is the single source of truth for which page lives at `/`.
- * Flipping the whole site is a one-word change here followed by a rebuild
- * (`npm run build`) — the Vite plugin in `vite.config.js` regenerates
- * `vercel.json` from this value, the dev server's `/` middleware reads it,
- * and `src/nav.js` reads it at runtime to order the cross-page nav links
- * and choose the story page's call-to-action wording.
- *
- *   'story'     -> '/' serves story.html;     dashboard.html is second  (DEFAULT)
- *   'dashboard' -> '/' serves dashboard.html; story.html     is second
+ * (`npm run build`) — the Vite plugin in `vite.config.js` regenerates vercel.json from this value
  */
 export const LANDING = 'story';
 

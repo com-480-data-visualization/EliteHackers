@@ -1,26 +1,16 @@
 /**
- * Vercel serverless function — Gemini proxy for V5's "Explain this day" button.
+ * Vercel serverless function — Gemini proxy for "Explain this day" button.
  *
  * The browser POSTs `{ date: "YYYY-MM-DD", impact?: {...} }` (or GETs
  * `?date=YYYY-MM-DD`). We read the Gemini API key from
  * `process.env.GEMINI_API_KEY` (server-side ONLY — never returned to the
  * client, never logged), build the prompt here, and call
- * `generativelanguage.googleapis.com` with the built-in `fetch` (Node 18+ on
- * Vercel ships it; no SDK / no extra deps).
+ * `generativelanguage.googleapis.com` with the built-in `fetch`
  *
  * Grounding: the request enables the Google Search tool, so Gemini searches
  * the live web before answering. This sharply reduces date-specific
- * hallucination (a plain generateContent call has no web access and will
- * confidently invent plausible-sounding events). NOTE: with grounding enabled
- * the project is billed per search query the model issues.
- *
- * Contract:
- *   - 200 → `{ explanation: "<text>" }`
- *   - 4xx → `{ error: "<short message>" }`  (invalid date, bad method, …)
- *   - 5xx → `{ error: "<short message>" }`  (missing key, upstream failure, …)
- *
- * Everything is wrapped in try/catch so the function never throws uncaught.
- * The key is never echoed in responses or log lines.
+ * hallucination (a plain generateContent call has no web access and
+ * confidently invents plausible-sounding events).
  */
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -151,17 +141,13 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         // Google Search grounding — lets Gemini search the live web before
-        // answering, instead of relying on (and hallucinating from) its
-        // training data. `google_search` is the current tool name for all
-        // current models.
+        // answering, instead of relying on (and hallucinating from) its training data.
         tools: [{ google_search: {} }],
         generationConfig: { temperature: 0.2, maxOutputTokens: 512 },
       }),
     });
 
     if (!upstream.ok) {
-      // Surface a generic message — do NOT forward upstream body verbatim to
-      // avoid leaking key-related details (e.g. quota hints) to the client.
       return jsonResponse(res, 502, { error: 'Gemini request failed' });
     }
 

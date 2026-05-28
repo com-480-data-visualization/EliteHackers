@@ -48,7 +48,6 @@ pip install -r requirements.txt
 
 # Edit config.py to set your desired date range and vehicle types
 # Default: 2015-01 to 2025-11, vehicle types: yellow, green, fhv
-# We ignore FHVHV data (Uber/Lyft) by default due to its large size (~460 MB/month, 20M+ rows/month).
 
 # Run the full pipeline
 ./run_pipeline.sh
@@ -92,8 +91,6 @@ The dashboard will open at `http://localhost:3000`. Ensure the `nyc-tlc-pipeline
 | Yellow | Medallion taxis | pickup/dropoff datetime, distance, fare, tip, payment type, passenger count |
 | Green | Boro taxis (outer boroughs) | Same as yellow with green-specific datetime columns |
 | FHV | For-hire vehicles (base-dispatched) | dispatching_base_num, pickup/dropoff datetime, location IDs |
-
-**Note:** FHVHV (Uber/Lyft) data is excluded by default due to its large size (~460 MB/month, 20M+ rows/month). To include it, add `"fhvhv"` to `VEHICLE_TYPES` in `config.py` and add `"fhvhv"` to `FARE_TYPES`, but be prepared for significantly longer processing times and higher memory requirements.
 
 **Schema note:** Starting in 2025, HVFHV files include a `cbd_congestion_fee` column for the NYC congestion pricing program.
 
@@ -171,5 +168,4 @@ The dashboard will open at `http://localhost:3000`. Ensure the `nyc-tlc-pipeline
 - **Sample size vs. full dataset:** With the default 2015–2025 range, the pipeline processes hundreds of millions of trips, but earlier years may have different data quality standards.
 - **FHV has less fare data:** For-hire vehicle records include only pickup/dropoff locations and times, not fare or tip information. Fare-related charts show only yellow and green taxis.
 - **Passenger count nulls:** Newer yellow/green taxi data (2019+) has significantly higher null rates in the `passenger_count` field due to privacy changes.
-- **CORS:** If serving the dashboard and CSV files from different origins, configure CORS headers appropriately. The default Vite dev server serves everything from the same origin.
 

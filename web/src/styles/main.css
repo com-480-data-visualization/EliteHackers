@@ -1174,18 +1174,9 @@ span.nav__link {
 .story-cta__btn:hover { background: var(--accent-hover); }
 
 /* ============================================================
-   Phase 1 — Narrative scrollytelling rework
+   Narrative scrollytelling rework
    ============================================================
-   Append-only block per AGENT.md §1.2: all new narrative CSS lives here
-   so the page-split CSS and the dashboard CSS above are untouched.
-   Selectors are namespaced with `ng-` (narrative graphic) or
-   `narrative-` so they cannot collide with the dashboard's V1-V5.
-   ============================================================ */
-
-/* Sticky-graphic root needs to be a positioning context for the absolutely
-   stacked layers and the floating progress rail. The pre-existing
-   `.sticky-graphic` rule provides flex centering; we relax it so the layers
-   can fill the area. */
+ */
 .narrative-section .sticky-graphic {
   align-items: stretch;
   justify-content: stretch;

@@ -330,9 +330,7 @@ function _createInstance(container, { monthly, daily }) {
       _brushEl.call(_brush.move, null); // clear brush visually
     }
 
-    // Mirror V5's event selection as a labelled band on V1. The narrative Step 2
-    // band shares this slot but is reset on entering the dashboard, so a single
-    // `_band` slot is fine here (per AGENT.md scope note).
+    // Mirror V5's event selection as a labelled band on V1.
     const ev = state.selectedEvent;
     if (ev) {
       const evParse = d3.timeParse('%Y-%m-%d');
