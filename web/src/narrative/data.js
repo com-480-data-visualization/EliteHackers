@@ -16,12 +16,6 @@
  *   • `byYearSmoothed` — `byYearAligned` with a 7-day CENTERED rolling mean
  *                    applied to `total`. Used by the overlay view; raw daily
  *                    sawtooth obscures the holiday dips at overlay scale.
- *
- * Data caveats acknowledged (not hidden):
- *   • FHV data only exists from 2019-02 onward. Pre-2019 totals are
- *     Yellow + Green only, so pre-2019 series sit lower in the overlay. The
- *     narrative copy flags this; here we simply compute `total` as the sum
- *     of whichever types are present on each row.
  */
 
 import * as d3 from 'd3';
@@ -35,14 +29,6 @@ const SMOOTH_WINDOW = 7; // 7-day centered rolling mean for overlay
 // across machines.
 const _parseDate = d3.utcParse('%Y-%m-%d');
 
-/**
- * Sum daily_volume rows into a single dense daily series.
- *
- * The source file may contain multiple rows for the same (date, type) — for
- * example separate sub-aggregates for different fare classes that share the
- * same taxi-type label. We add them rather than overwrite, otherwise only the
- * last row wins and per-day totals come out artificially low.
- */
 function _toDaily(raw) {
   const byDate = new Map();
   for (const r of raw) {
@@ -89,12 +75,6 @@ function _toByYear(daily) {
   return m;
 }
 
-/**
- * Centered 7-day rolling mean of `total` within a single per-year series.
- * Window shrinks symmetrically near the boundaries so the first/last few
- * days still produce values; this matches what readers expect from a
- * "smoothed" daily series and avoids gaps at year edges.
- */
 function _smoothYear(rows) {
   const half = Math.floor(SMOOTH_WINDOW / 2);
   const n = rows.length;
@@ -107,10 +87,6 @@ function _smoothYear(rows) {
   });
 }
 
-/**
- * Build the narrative data bundle from the raw daily_volume.json array.
- * Computed once at app boot; downstream views just consume it.
- */
 export function buildNarrativeData(raw) {
   const daily = _toDaily(raw);
   const byYear = _toByYear(daily);

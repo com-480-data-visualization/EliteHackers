@@ -31,17 +31,14 @@ export function init(container, data) {
     return;
   }
 
-  // ── Local state (view-internal only) ────────────────────────────────────────
   let selectedDay = null;   // null or dow index 0–6
   let normalize   = false;
 
-  // ── Derived from filterBus (read-only) ──────────────────────────────────────
   const initial = getState();
   let [yearLo, yearHi]  = yearRangeFromDateRange(initial.dateRange);
   let activeTaxiTypes   = new Set(initial.taxiTypes);
   let activeBoroughs    = initial.selectedBoroughs; // null = all; Set<string> = specific
 
-  // ── Scaffold ─────────────────────────────────────────────────────────────────
   container.innerHTML = `
     <div class="gp-local-bar">
       <label class="gp-normalize-label">
@@ -70,15 +67,12 @@ export function init(container, data) {
     renderHeatmap(computeGrid());
   });
 
-  // ── filterBus subscription (read-only) ──────────────────────────────────────
   subscribe(state => {
     [yearLo, yearHi] = yearRangeFromDateRange(state.dateRange);
     activeTaxiTypes  = new Set(state.taxiTypes);
     activeBoroughs   = state.selectedBoroughs;
     update();
   });
-
-  // ── Data computation ─────────────────────────────────────────────────────────
 
   function computeGrid() {
     const byBorough = activeBoroughs !== null;
@@ -147,8 +141,6 @@ export function init(container, data) {
 
     return { byType: typeMap };
   }
-
-  // ── Render: heatmap ──────────────────────────────────────────────────────────
 
   function renderHeatmap(grid) {
     const el = container.querySelector('#gp-heatmap');
@@ -263,8 +255,6 @@ export function init(container, data) {
       .attr('font-family', 'var(--font-sans, system-ui)').text('High');
   }
 
-  // ── Render: detail line chart ────────────────────────────────────────────────
-
   function renderDetail(dow) {
     const detailEl = container.querySelector('#gp-detail');
     const titleEl  = container.querySelector('#gp-detail-title');
@@ -371,8 +361,6 @@ export function init(container, data) {
       })
       .on('mouseleave', () => { crossLine.attr('opacity', 0); tip.style('opacity', 0); });
   }
-
-  // ── Main update ──────────────────────────────────────────────────────────────
 
   function update() {
     const grid = computeGrid();

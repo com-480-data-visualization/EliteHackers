@@ -25,12 +25,6 @@ const ZOOM_LATE_2019_2020 = { d0: D('2019-10-01'), d1: D('2020-12-31') };
 const GHOST_2019 = { year: 2019, d0: ZOOM_2020.d0, d1: ZOOM_2020.d1 };
 const GHOST_2019_LATE = { year: 2019, d0: ZOOM_LATE_2019_2020.d0, d1: ZOOM_LATE_2019_2020.d1 };
 
-/**
- * @param {Object} graphic  return value of `createNarrativeGraphic`
- * @param {Object} stats    return value of `buildNarrativeStats`
- *                          (used to pass live numbers like covidTroughPct
- *                          into the trough annotation)
- */
 export function buildSteps(graphic, stats) {
   const troughPct = stats.covidTroughPct ?? 0;
 

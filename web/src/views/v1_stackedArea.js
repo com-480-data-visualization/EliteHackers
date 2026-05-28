@@ -31,8 +31,6 @@ const APP_RANGE = [new Date('2015-01-01'), new Date('2024-12-31')];
 let _primaryInstance = null;
 const _allInstances = [];
 
-// ─── Public module API ────────────────────────────────────────────────────────
-
 export function init(container, { monthly, daily }, { primary = true } = {}) {
   const inst = _createInstance(container, { monthly, daily });
   if (primary) _primaryInstance = inst;
@@ -51,10 +49,7 @@ export function clearHighlightBand() {
   for (const inst of _allInstances) inst.clearHighlightBand();
 }
 
-// ─── Instance factory ─────────────────────────────────────────────────────────
-
 function _createInstance(container, { monthly, daily }) {
-  // All mutable state is closed over — no module-level globals leaking between instances.
   let _wideMonthly, _wideDaily, _xDomain, _iw, _ih;
   let _xScale, _yScale, _xAxisG;
   let _areaGroup, _bandGroup, _fhvMarkGroup, _weekGridGroup, _clipId, _brushEl, _brush;
@@ -64,11 +59,6 @@ function _createInstance(container, { monthly, daily }) {
   // so it always probes the right resolution.
   let _activeWide = null;
 
-  // ── Parse raw data once ──────────────────────────────────────────────────────
-  // Builds two parallel wide arrays — one keyed by month, one keyed by day —
-  // both shaped `{ month: Date, yellow, green, fhv }` so the rest of the
-  // rendering code (`_makeArea`, stacking, tooltip bisector) works unchanged
-  // regardless of which resolution is active.
   function _parse() {
     // Monthly
     const parsedMonthly = monthly.map(d => ({
@@ -111,9 +101,6 @@ function _createInstance(container, { monthly, daily }) {
     }
   }
 
-  // ── Resolution selector ──────────────────────────────────────────────────────
-  // Picks 'daily' for short windows (~event zooms, tight brushes) and
-  // 'monthly' for wide windows (default 2015–2024 view).
   function _pickResolution(xDom) {
     const days = (xDom[1] - xDom[0]) / 86400000;
     return days <= DAILY_THRESHOLD_DAYS ? 'daily' : 'monthly';
@@ -123,16 +110,12 @@ function _createInstance(container, { monthly, daily }) {
     return _pickResolution(xDom) === 'daily' ? _wideDaily : _wideMonthly;
   }
 
-  // ── Re-stack helper ──────────────────────────────────────────────────────────
-  // Stacks whichever wide array is currently active (passed in by the caller
-  // so the choice is explicit at the render site).
   function _stack(activeTypes, wide) {
     return d3.stack()
       .keys(activeTypes)
       .value((d, k) => (k === 'fhv' && d.month < FHV_START) ? 0 : (d[k] ?? 0))(wide);
   }
 
-  // ── Area generator ───────────────────────────────────────────────────────────
   function _makeArea() {
     return d3.area()
       .x(d => _xScale(d.data.month))
@@ -141,7 +124,6 @@ function _createInstance(container, { monthly, daily }) {
       .curve(d3.curveMonotoneX);
   }
 
-  // ── Highlight band (used by narrative Step 2) ────────────────────────────────
   function _drawBand() {
     if (!_bandGroup) return;
     _bandGroup.selectAll('*').remove();
@@ -171,7 +153,6 @@ function _createInstance(container, { monthly, daily }) {
     }
   }
 
-  // ── FHV cutoff annotation (recomputed each render so it tracks x-scale) ────
   function _drawFhvMark(activeTypes) {
     if (!_fhvMarkGroup) return;
     _fhvMarkGroup.selectAll('*').remove();
@@ -198,11 +179,6 @@ function _createInstance(container, { monthly, daily }) {
       .text(FHV_LABEL);
   }
 
-  // ── X-axis ticks + format chosen by resolution ──────────────────────────────
-  // Daily mode picks day- or week-stepped ticks based on window width so labels
-  // don't crowd. Monthly mode adapts both the step and the label format to the
-  // visible time span: sub-yearly ranges show month names; multi-year ranges
-  // show year-only labels.
   function _xAxisSpec(xDom, resolution) {
     if (resolution === 'daily') {
       const days = (xDom[1] - xDom[0]) / 86400000;
@@ -232,10 +208,6 @@ function _createInstance(container, { monthly, daily }) {
     };
   }
 
-  // ── Week gridlines (daily resolution only) ──────────────────────────────────
-  // Faint Monday-aligned verticals across the visible x-domain. Cleared and
-  // recomputed each render so they always track the x-scale (mirrors
-  // `_drawFhvMark`). In monthly resolution this draws nothing.
   function _drawWeekGridlines(xDom, resolution) {
     if (!_weekGridGroup) return;
     _weekGridGroup.selectAll('*').remove();
@@ -250,7 +222,6 @@ function _createInstance(container, { monthly, daily }) {
         .attr('y1', 0).attr('y2', _ih);
   }
 
-  // ── Legend helper ────────────────────────────────────────────────────────────
   function _updateLegend(activeTypes) {
     const el = d3.select(container).select('.v1-legend');
     if (el.empty()) return;
@@ -263,7 +234,6 @@ function _createInstance(container, { monthly, daily }) {
     });
   }
 
-  // ── Subscriber — reacts to filterBus state changes ───────────────────────────
   function _onStateChange(state) {
     if (!_areaGroup) return;
 
@@ -344,7 +314,6 @@ function _createInstance(container, { monthly, daily }) {
     }
   }
 
-  // ── Initial build ────────────────────────────────────────────────────────────
   function _build(state) {
     const el = d3.select(container);
     el.selectAll('*').remove();

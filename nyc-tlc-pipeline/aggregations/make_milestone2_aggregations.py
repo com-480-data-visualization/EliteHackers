@@ -1,18 +1,4 @@
-"""
-Milestone 2 Aggregation Script — NYC TLC Taxi Data
-====================================================
-Produces pre-aggregated JSON files consumed by the web/ front end.
-
-Columns relied upon from the processed parquet files (output of preprocess.py):
-  pickup_datetime, pickup_date, vehicle_type, trip_distance, fare_amount, tip_amount,
-  tip_pct, pickup_hour, pickup_dow, PU_zone, PU_borough, DO_zone, DO_borough
-
-Usage:
-  python make_milestone2_aggregations.py --data-dir /path/to/nyc-tlc-pipeline/data/processed \
-                                          --out-dir /path/to/web/public/data
-
-The script reads Polars or DuckDB lazily — no 38 GB loaded into RAM at once.
-"""
+"""Produce pre-aggregated JSON files consumed by the web front end."""
 
 import argparse
 import json
@@ -21,10 +7,6 @@ import sys
 from pathlib import Path
 from datetime import date, timedelta
 import calendar
-
-# ---------------------------------------------------------------------------
-# File selection helpers
-# ---------------------------------------------------------------------------
 
 def select_files(dir_path: Path, vehicle_type: str,
                  min_year_month: tuple[int, int] | None = None,
@@ -43,10 +25,6 @@ def select_files(dir_path: Path, vehicle_type: str,
         out.append(f)
     return sorted(out)
 
-
-# ---------------------------------------------------------------------------
-# Sanity reporting
-# ---------------------------------------------------------------------------
 
 def sanity_report(yellow_files, green_files, fhv_files, data_dir):
     print("\n=== Sanity Report ===")
@@ -84,12 +62,7 @@ def sanity_report(yellow_files, green_files, fhv_files, data_dir):
     print("===================\n")
 
 
-# ---------------------------------------------------------------------------
-# Monthly volume (V1)
-# ---------------------------------------------------------------------------
-
 def make_monthly_volume(yellow_files, green_files, fhv_files, out_path: Path):
-    """Produce monthly_volume.json: [{month, type, trips}, ...]"""
     try:
         import polars as pl
     except ImportError:
@@ -117,7 +90,6 @@ def make_monthly_volume(yellow_files, green_files, fhv_files, out_path: Path):
 
     rows.sort(key=lambda r: (r["month"], r["type"]))
 
-    # Sanity check
     by_type = {}
     for r in rows:
         by_type.setdefault(r["type"], []).append(r)
@@ -129,12 +101,7 @@ def make_monthly_volume(yellow_files, green_files, fhv_files, out_path: Path):
     return True
 
 
-# ---------------------------------------------------------------------------
-# Daily volume (V5)
-# ---------------------------------------------------------------------------
-
 def make_daily_volume(yellow_files, green_files, fhv_files, out_path: Path):
-    """Produce daily_volume.json: [{date, type, trips}, ...]"""
     try:
         import polars as pl
     except ImportError:
@@ -190,12 +157,7 @@ def make_daily_volume(yellow_files, green_files, fhv_files, out_path: Path):
     return True
 
 
-# ---------------------------------------------------------------------------
-# Weekly heatmap (V2)
-# ---------------------------------------------------------------------------
-
 def make_weekly_heatmap(yellow_files, green_files, fhv_files, out_path: Path):
-    """Produce weekly_heatmap.json: [{dow, hour, trips, type}, ...]"""
     try:
         import polars as pl
     except ImportError:
@@ -233,12 +195,7 @@ def make_weekly_heatmap(yellow_files, green_files, fhv_files, out_path: Path):
     return True
 
 
-# ---------------------------------------------------------------------------
-# Zone volume (V3)
-# ---------------------------------------------------------------------------
-
 def make_zones_volume(yellow_files, green_files, fhv_files, out_path: Path):
-    """Produce zones_volume.json: [{zone_id, trips}, ...]"""
     try:
         import polars as pl
     except ImportError:
@@ -267,9 +224,107 @@ def make_zones_volume(yellow_files, green_files, fhv_files, out_path: Path):
     print(f"  Wrote {len(rows)} zones → {out_path}")
     return True
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
+def make_trip_sample(yellow_files, green_files, fhv_files, out_path: Path):
+    try:
+        import polars as pl
+    except ImportError:
+        out_path.write_text("[]")
+        return False
+
+    SAMPLE_PER_YEAR = 10_000
+    # Columns to read from parquet (must match preprocess.py output names).
+    WANTED = ["pickup_date", "vehicle_type", "pickup_hour", "trip_distance",
+              "fare_amount", "tip_pct", "duration_minutes", "passenger_count"]
+
+    # Group files by year: {year: [(vehicle_type, path), ...]}
+    by_year: dict[int, list] = {}
+    for vtype, files in [("yellow", yellow_files), ("green", green_files), ("fhv", fhv_files)]:
+        for f in files:
+            m = re.search(r"(\d{4})-(\d{2})", f.name)
+            if not m:
+                continue
+            year = int(m.group(1))
+            by_year.setdefault(year, []).append((vtype, f))
+
+    all_samples = []
+    for year in sorted(by_year):
+        entries = by_year[year]
+        print(f"  {year}: {len(entries)} files", end="", flush=True)
+
+        # Count rows per file using a single cheap column (metadata read in most parquets).
+        counts = []
+        for _, f in entries:
+            try:
+                counts.append(len(pl.read_parquet(f, columns=["pickup_hour"])))
+            except Exception:
+                counts.append(0)
+
+        total = sum(counts)
+        if total == 0:
+            print(" — no rows, skipping")
+            continue
+
+        year_dfs = []
+        for (vtype, f), count in zip(entries, counts):
+            if count == 0:
+                continue
+            n = max(1, round(SAMPLE_PER_YEAR * count / total))
+            try:
+                schema = pl.read_parquet_schema(f)
+                avail = [c for c in WANTED if c in schema]
+                df = pl.read_parquet(f, columns=avail).sample(n=min(n, count), seed=42)
+                # Inject vehicle_type when the parquet lacks it (some FHV files).
+                if "vehicle_type" not in df.columns:
+                    df = df.with_columns(pl.lit(vtype).alias("vehicle_type"))
+                year_dfs.append(df)
+            except Exception as e:
+                print(f"\n    Warning ({f.name}): {e}", end="")
+
+        if not year_dfs:
+            print()
+            continue
+
+        combined = pl.concat(year_dfs, how="diagonal")
+        if len(combined) > SAMPLE_PER_YEAR:
+            combined = combined.sample(n=SAMPLE_PER_YEAR, seed=42)
+        all_samples.append(combined)
+        print(f" → {len(combined):,} sampled")
+
+    if not all_samples:
+        out_path.write_text("[]")
+        return False
+
+    final = pl.concat(all_samples, how="diagonal")
+
+    # Rename to the schema V4 expects.
+    rename_map = {
+        "pickup_date":      "date",
+        "vehicle_type":     "type",
+        "trip_distance":    "distance_miles",
+        "fare_amount":      "total_amount",
+        "duration_minutes": "duration_min",
+    }
+    final = final.rename({k: v for k, v in rename_map.items() if k in final.columns})
+
+    # Drop rows where the two primary scatter axes are null.
+    drop_null_on = [c for c in ["distance_miles", "total_amount"] if c in final.columns]
+    if drop_null_on:
+        final = final.drop_nulls(subset=drop_null_on)
+
+    # Cast date to string for JSON serialisation.
+    if "date" in final.columns:
+        final = final.with_columns(pl.col("date").cast(pl.String))
+
+    # Round floats to 2 dp to keep file size reasonable.
+    float_cols = [c for c, dt in final.schema.items() if dt in (pl.Float32, pl.Float64)]
+    if float_cols:
+        final = final.with_columns([pl.col(c).round(2) for c in float_cols])
+
+    rows = final.to_dicts()
+    out_path.write_text(json.dumps(rows))
+    print(f"  Total: {len(rows):,} rows → {out_path}")
+    return True
+
 
 def main():
     parser = argparse.ArgumentParser(description="Produce Milestone 2 JSON aggregations")
@@ -283,6 +338,7 @@ def main():
     parser.add_argument("--skip-daily", action="store_true")
     parser.add_argument("--skip-heatmap", action="store_true")
     parser.add_argument("--skip-zones", action="store_true")
+    parser.add_argument("--skip-sample", action="store_true")
     args = parser.parse_args()
 
     data_dir = args.data_dir
@@ -296,15 +352,11 @@ def main():
 
     yellow_files = select_files(data_dir / "yellow", "yellow", max_year_month=MAX_YM)
     green_files  = select_files(data_dir / "green",  "green",  max_year_month=MAX_YM)
-    # FHV cutoff: Feb 2019. Before this, HVFHV (Uber/Lyft/Via) was included in
-    # the FHV files; starting 2019-02 the TLC reports HVFHV separately. Since this
-    # dashboard excludes HVFHV, using pre-2019-02 FHV mixes two service categories
-    # and shows a misleading 30M-to-1M cliff in V1.
+    # FHV before 2019-02 mixed HVFHV (Uber/Lyft) into the same file; exclude to avoid a misleading cliff.
     FHV_MIN_YM = (2019, 2)
     fhv_files    = select_files(data_dir / "fhv",    "fhv",
                                 min_year_month=FHV_MIN_YM, max_year_month=MAX_YM)
 
-    # If files are directly in data_dir (flat layout)
     if not yellow_files:
         yellow_files = select_files(data_dir, "yellow", max_year_month=MAX_YM)
         green_files  = select_files(data_dir, "green",  max_year_month=MAX_YM)
@@ -332,9 +384,11 @@ def main():
     else:
         (out_dir / "zones_volume.json").write_text("[]")
 
-    print("\n--- trip_sample.json (stub) ---")
-    (out_dir / "trip_sample.json").write_text("[]")
-    print(f"  Wrote stub [] → {out_dir / 'trip_sample.json'}")
+    print("\n--- trip_sample.json ---")
+    if not args.skip_sample:
+        make_trip_sample(yellow_files, green_files, fhv_files, out_dir / "trip_sample.json")
+    else:
+        (out_dir / "trip_sample.json").write_text("[]")
 
     print("\nDone. Output files:")
     for f in sorted(out_dir.glob("*.json")):

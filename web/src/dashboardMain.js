@@ -1,13 +1,4 @@
-/**
- * Dashboard page entry point — loads V1-V5 and the global controls.
- *
- * Functionally identical to the dashboard portion of the pre-split `main.js`:
- *   - same data fetches
- *   - same init order (controls, filter indicator, V5, V1, V2, V3, V4)
- *   - same filterBus contract
- *
- * Does NOT import Scrollama or any narrative module.
- */
+/** Dashboard entry point — loads all views and controls. */
 
 import { init as initV1 } from './views/v1_stackedArea.js';
 import { init as initV5 } from './views/v5_timeline.js';

@@ -38,16 +38,13 @@ export function init(container, { zonesVolume, topoData }) {
     zoneProps.set(p.LocationID, { zone: p.zone || '', borough: p.borough || '' });
   }
 
-  // ── Derived from filterBus ─────────────────────────────────────────────────
   const initial = getState();
   let activeTaxiTypes = new Set(initial.taxiTypes);
   let dateRange       = initial.dateRange;
   let activeBoroughs  = initial.selectedBoroughs;
 
-  // ── Local state ────────────────────────────────────────────────────────────
   let selectedZoneId = null;
 
-  // ── Scaffold: map container + side panel ──────────────────────────────────
   container.innerHTML = `
     <div class="v3-wrap">
       <div class="v3-map" id="v3-map"></div>
@@ -70,7 +67,6 @@ export function init(container, { zonesVolume, topoData }) {
     render();
   });
 
-  // ── Aggregate trips per zone for current filter state ─────────────────────
   function computeZoneTotals() {
     const bounds = dateRangeToMonthBounds(dateRange);
     const totals = new Map();
@@ -83,7 +79,6 @@ export function init(container, { zonesVolume, topoData }) {
     return totals;
   }
 
-  // ── Compute simple per-zone stats (for the side panel) ────────────────────
   function computeZoneStats(lid) {
     const bounds = dateRangeToMonthBounds(dateRange);
     const byType = {};
@@ -102,7 +97,6 @@ export function init(container, { zonesVolume, topoData }) {
     return { byType, peakMonth: MONTH_NAMES[peakMonthIdx] };
   }
 
-  // ── CartoDB Dark Matter tile background ───────────────────────────────────
   function renderTiles(svg, projection, W, H) {
     const tau   = 2 * Math.PI;
     const z     = Math.round(Math.log2(projection.scale() * tau / 256));
@@ -144,7 +138,6 @@ export function init(container, { zonesVolume, topoData }) {
     }
   }
 
-  // ── Main render ───────────────────────────────────────────────────────────
   function render() {
     const mapEl = container.querySelector('#v3-map');
     mapEl.innerHTML = '';
@@ -270,7 +263,6 @@ export function init(container, { zonesVolume, topoData }) {
       .attr('font-family', 'var(--font-sans, system-ui)').text('High pickups');
   }
 
-  // ── Side panel ────────────────────────────────────────────────────────────
   const TAXI_COLORS = { yellow: '#f5c542', green: '#2ecc71', fhv: '#9b6ff5' };
   const TAXI_LABELS = { yellow: 'Yellow', green: 'Green', fhv: 'FHV' };
 
@@ -310,7 +302,6 @@ export function init(container, { zonesVolume, topoData }) {
     `;
   }
 
-  // ── filterBus subscription ────────────────────────────────────────────────
   subscribe(s => {
     activeTaxiTypes = new Set(s.taxiTypes);
     dateRange       = s.dateRange;

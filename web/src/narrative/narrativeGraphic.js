@@ -1,8 +1,5 @@
 /**
- * Phase-1 narrative graphic — self-contained, scroll-driven module.
- *
- * Imports NOTHING from `src/views/` or `src/state/` (the dashboard half of
- * the codebase). Owns its own SVG roots and never touches filterBus.
+ * Self-contained scroll-driven narrative graphic.
  *
  * Architecture: one root container with three stacked "layers" (timeline,
  * year-overlay-plus-multiples, weekly-shapes). Each scroll step calls
@@ -104,32 +101,22 @@ export function createNarrativeGraphic(container, data, stats, opts = {}) {
   const root = d3.select(container).classed('narrative-graphic-root', true);
   root.attr('role', 'group');
 
-  // ARIA summary — read by screen readers as the accessible static
-  // fallback. Refreshed by `setStep` so it always describes the current beat.
   const ariaSummary = root
     .append('div')
     .attr('class', 'ng-aria-summary')
     .attr('role', 'status')
     .attr('aria-live', 'polite');
 
-  // FHV footnote — surfaces the pre-2019 data gap on views where it's
-  // actually relevant (the timeline and the 10-year overlay both span the
-  // gap). Hidden on the weekly-shapes step, which is entirely about 2020
-  // and where the footnote was colliding with the panel-group title.
   const footnote = root
     .append('div')
     .attr('class', 'ng-footnote')
     .text('Pre-Feb 2019 totals are Yellow + Green only; FHV reporting began Feb 2019.');
 
-  // Tooltip — one DOM node reused across layers.
   const tooltip = root
     .append('div')
     .attr('class', 'ng-tooltip')
     .style('opacity', 0);
 
-  // Layers. Each is its own absolutely-positioned <div>; switching views is a
-  // CSS opacity cross-fade. Within a layer, normal d3 transitions handle the
-  // smaller updates (highlight, zoom, ghost).
   const timelineLayer = root.append('div').attr('class', 'ng-layer ng-layer--timeline').style('opacity', 0);
   const overlayLayer  = root.append('div').attr('class', 'ng-layer ng-layer--overlay').style('opacity', 0);
   const weeklyLayer   = root.append('div').attr('class', 'ng-layer ng-layer--weekly').style('opacity', 0);

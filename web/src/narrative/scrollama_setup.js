@@ -1,18 +1,7 @@
-/**
- * Phase-1 Scrollama wiring.
- *
- * Each `.narrative-step` div fires `steps[N].enter()`; the step handler sets
- * the complete graphic state (see steps.js). We also build a progress rail
- * (one dot per step) on the sticky graphic edge and keep its active dot in
- * sync with the current step.
- */
+/** Scrollama wiring for the narrative steps. */
 
 import scrollama from 'scrollama';
 
-/**
- * @param {Object} steps   `{ 1: { enter() }, … 9: { enter() } }`
- * @param {HTMLElement} progressContainer  the empty `.narrative-progress` div
- */
 export function initScrollama(steps, progressContainer) {
   const stepEls = [...document.querySelectorAll('.narrative-step')];
 

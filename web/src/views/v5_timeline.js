@@ -88,8 +88,6 @@ export function init(container, { dailyData, events }) {
   });
 }
 
-// ─── Impact calculation: three-prong per-taxi stats engine ─────────────────────
-
 /**
  * Compute three-prong (before / during / after), per-taxi-type statistics for
  * an event. All three windows have equal length `D` — the event's own duration
@@ -98,17 +96,8 @@ export function init(container, { dailyData, events }) {
  * types daily trips) is also returned so the caller can drive a single
  * natural-language headline (see `describeAggregateTrend`).
  *
- * Pure and total: missing/empty windows return `hasData: false` with `null`
- * stat values rather than throwing. Callers render `—` for null cells.
- *
- * Returns:
- *   {
- *     durationDays: D,
- *     before: { aggregateLevel, hasData, perType: { <type>: { level, volatility } } },
- *     during: { ...same shape... },
- *     after:  { ...same shape... },
- *   }
- * `perType` only contains types in `activeTypes`.
+ * Missing/empty windows return `hasData: false` with `null` stat values rather
+ * than throwing. Callers render `—` for null cells.
  */
 export function computeEventImpact(ev, dailyData, activeTypes) {
   const types = Array.isArray(activeTypes) ? activeTypes.slice() : [];
@@ -241,28 +230,12 @@ export function computeEventImpact(ev, dailyData, activeTypes) {
   };
 }
 
-// ─── Aggregate-level trend description ─────────────────────────────────────────
-
 /**
- * Convert the aggregate-level triple (before → during → after) of an impact
- * result into a short human-readable headline. The natural-language phrase is
- * derived from the aggregate mean daily trips ALONE — per-type levels and
- * volatility never influence the prose (they appear only in the grid).
+ * Convert the aggregate-level triple (before → during → after) into a short
+ * human-readable headline. `isCustom` switches to day-inspection wording
+ * ("on the selected day") instead of event language ("during the event").
  *
- * `isCustom` switches the wording from event language ("during the event") to
- * day-inspection language ("on the selected day"), since a synthetic single-day
- * selection is not an "event".
- *
- * Logic:
- *  - DURING vs BEFORE → the shock ("fell 69%" / "rose 22%").
- *  - AFTER vs BEFORE → the lasting effect ("recovered to within X%",
- *    "remained X% below baseline", …).
- *  - |change| < 5% on a comparison ⇒ that comparison reads as "roughly flat".
- *  - Both comparisons flat ⇒ a single "changed little" sentence.
- *  - Missing AFTER data is acknowledged rather than invented.
- *
- * Returns { html, direction } where `direction` is 'drop' | 'spike' | 'flat'
- * for the headline's colored emphasis class.
+ * Returns { html, direction } where `direction` is 'drop' | 'spike' | 'flat'.
  */
 function describeAggregateTrend(impact, isCustom) {
   const beforeLvl = impact.before.aggregateLevel;
