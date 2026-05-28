@@ -564,6 +564,10 @@ span.nav__link {
   position: relative;
 }
 
+#v1-container {
+  position: relative;
+}
+
 /* V5 line-hover focus (Feature A). Visual only — pointer-events disabled so
    the elements never intercept clicks or mousemove events on the underlying
    `.v5-click-surface`. The focus dot uses the same accent color as the trip
@@ -1347,7 +1351,7 @@ span.nav__link {
 }
 .ng-multiples-label {
   font-size: 0.72rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-top: 4px;
@@ -1491,10 +1495,10 @@ span.nav__link {
 .accent-covid  { color: var(--color-disruption); }
 
 /* Annotation box variants — storyline-colored left borders */
-.annotation-box.accent-jul-box   { border-left: 3px solid var(--color-policy);     padding: 4px 0 4px 14px; background: transparent; border-radius: 0; }
-.annotation-box.accent-dec-box   { border-left: 3px solid var(--color-disruption); padding: 4px 0 4px 14px; background: transparent; border-radius: 0; }
-.annotation-box.accent-sep-box   { border-left: 3px solid var(--color-recovery);   padding: 4px 0 4px 14px; background: transparent; border-radius: 0; }
-.annotation-box.accent-covid-box { border-left: 3px solid var(--color-disruption); padding: 4px 0 4px 14px; background: transparent; border-radius: 0; }
+.annotation-box.accent-jul-box   { border: none; border-left: 3px solid var(--color-policy);     padding: 4px 14px; background: transparent; border-radius: 0; }
+.annotation-box.accent-dec-box   { border: none; border-left: 3px solid var(--color-disruption); padding: 4px 14px; background: transparent; border-radius: 0; }
+.annotation-box.accent-sep-box   { border: none; border-left: 3px solid var(--color-recovery);   padding: 4px 14px; background: transparent; border-radius: 0; }
+.annotation-box.accent-covid-box { border: none; border-left: 3px solid var(--color-disruption); padding: 4px 14px; background: transparent; border-radius: 0; }
 
 /* Reduced-motion: kill all narrative transitions/animations. The JS side
    reads the same media query and uses zero-duration d3 transitions; this

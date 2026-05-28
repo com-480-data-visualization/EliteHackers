@@ -403,8 +403,18 @@ function _buildTimeline(layer, data, tooltip) {
         .html(
           `<div class="ng-tt-title">${d3.utcFormat('%b %d, %Y')(row.date)}</div>` +
           `<div class="ng-tt-row"><span>Total trips</span><strong>${_fmtTrips(row.total)}</strong></div>`,
-        )
-        .style('left', `${cx + MARGIN_TIMELINE.left + 14}px`)
+        );
+      // Flip the tooltip to the left of the cursor when right-side placement
+      // would overflow the chart's inner width (#narrative-chart has
+      // overflow:hidden, so an off-right tooltip is visually clipped).
+      // Width must be measured after `.html(...)` to reflect current content.
+      const ttW = tooltip.node().getBoundingClientRect().width;
+      const wantsRight = (cx + 14 + ttW) <= _innerW;
+      const ttLeft = wantsRight
+        ? (cx + MARGIN_TIMELINE.left + 14)
+        : (cx + MARGIN_TIMELINE.left - 14 - ttW);
+      tooltip
+        .style('left', `${ttLeft}px`)
         .style('top',  `${cy + MARGIN_TIMELINE.top - 8}px`);
     });
     captureRect.on('mouseleave', () => {
@@ -512,17 +522,17 @@ function _buildOverlay(layer, data, stats, tooltip) {
         .attr('class', 'ng-overlay-line')
         .attr('fill', 'none')
         .attr('stroke', COLOR_GREY_LINE)
-        .attr('stroke-width', 1)
-        .style('opacity', 0.32)
+        .attr('stroke-width', 1.2)
+        .style('opacity', 0.58)
         .attr('d', ([, rows]) => line(rows)),
       update => update
         .style('opacity', d => {
           if (_hoverYear != null && d[0] === _hoverYear) return 0.95;
           if (_hoverYear != null) return 0.10;
-          return 0.32;
+          return 0.58;
         })
         .attr('stroke', d => (_hoverYear != null && d[0] === _hoverYear) ? COLOR_NEUTRAL : COLOR_GREY_LINE)
-        .attr('stroke-width', d => (_hoverYear != null && d[0] === _hoverYear) ? 1.6 : 1)
+        .attr('stroke-width', d => (_hoverYear != null && d[0] === _hoverYear) ? 1.8 : 1.2)
         .attr('d', ([, rows]) => line(rows)),
       exit => exit.remove(),
     );
@@ -640,11 +650,11 @@ function _buildOverlay(layer, data, stats, tooltip) {
   function _highlightYearOnly(year) {
     greyLinesGroup.selectAll('path.ng-overlay-line')
       .style('opacity', d => {
-        if (year == null) return 0.32;
-        return d[0] === year ? 0.95 : 0.08;
+        if (year == null) return 0.6;
+        return d[0] === year ? 0.95 : 0.6;
       })
       .attr('stroke', d => (year != null && d[0] === year) ? COLOR_NEUTRAL : COLOR_GREY_LINE)
-      .attr('stroke-width', d => (year != null && d[0] === year) ? 1.7 : 1);
+      .attr('stroke-width', d => (year != null && d[0] === year) ? 1.8 : 1.2);
   }
 
   /* Overlay hover — generic anywhere, plus kind-aware tooltips inside bands.
@@ -662,8 +672,18 @@ function _buildOverlay(layer, data, stats, tooltip) {
 
     const _placeTooltip = (event) => {
       const [mx] = d3.pointer(event, gMain.node());
+      // Flip to the left of the cursor when right-side placement would
+      // overflow the chart's inner width (#narrative-chart has
+      // overflow:hidden, so an off-right tooltip is visually clipped).
+      // Callers set `.html(...)` before invoking this, so the measured
+      // width reflects the current tooltip content.
+      const ttW = tooltip.node().getBoundingClientRect().width;
+      const wantsRight = (mx + 12 + ttW) <= _innerW;
+      const left = wantsRight
+        ? (mx + MARGIN_OVERLAY.left + 12)
+        : (mx + MARGIN_OVERLAY.left - 12 - ttW);
       tooltip
-        .style('left', `${mx + MARGIN_OVERLAY.left + 12}px`)
+        .style('left', `${left}px`)
         .style('top',  `${event.offsetY + 4}px`);
     };
     const _clearTooltip = () => {
@@ -706,7 +726,7 @@ function _buildOverlay(layer, data, stats, tooltip) {
           .style('opacity', 1)
           .html(
             `<div class="ng-tt-title">${d3.utcFormat('%b %d')(cursorDate)} \u00b7 ${pickedYear}</div>` +
-            `<div class="ng-tt-row"><span>Avg. daily trips</span><strong>${_fmtTrips(pickedRow.total)}</strong></div>`,
+            `<div class="ng-tt-row"><span>Total daily trips</span><strong>${_fmtTrips(pickedRow.total)}</strong></div>`,
           );
         _placeTooltip(event);
         _highlightYearOnly(pickedYear);

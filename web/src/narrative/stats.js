@@ -95,7 +95,7 @@ export function septemberLifts(byYearAligned) {
   const out = new Map();
   for (const [year, rows] of byYearAligned) {
     const win = _meanInRange(rows, '09-08', '09-16');
-    const baseline = _meanInRange(rows, '08-10', '08-25');
+    const baseline = _meanInRange(rows, '08-30', '09-07');
     if (win == null || baseline == null || baseline === 0) continue;
     const liftPct = (win / baseline - 1) * 100;
     out.set(year, { liftPct, win, baseline });

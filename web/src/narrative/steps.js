@@ -82,7 +82,7 @@ export function buildSteps(graphic, stats) {
     7: { enter: () => graphic.setStep({
       view: 'timeline',
       zoom: ZOOM_LATE_2019_2020,
-      ghost: GHOST_2019_LATE,
+      ghost: null,
       annotateTrough: false,
       troughPct,
       aria: 'Timeline zooming toward 2020 with the 2019 trajectory ghosted in as a counterfactual.',
