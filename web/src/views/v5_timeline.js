@@ -813,9 +813,7 @@ function _drawHolidayBands(g, xScale, xDomain, ih) {
 /**
  * Ask the server-side Gemini proxy for a short, human-readable explanation of
  * what happened in NYC on `dateStr` (`YYYY-MM-DD`) that could plausibly move
- * the taxi-trip volume. Does no DOM work — Task 2's click handler renders the
- * result. Always returns a string on success or throws a caught `Error` whose
- * `.message` is suitable for showing to the user.
+ * the taxi-trip volume.
  *
  * `impact` is the computeEventImpact result for the selected day. We forward
  * the observed before/during levels and % change so the server prompt can
@@ -823,9 +821,6 @@ function _drawHolidayBands(g, xScale, xDomain, ih) {
  * model can get the direction backwards (claiming a surge on a day trips
  * actually fell).
  *
- * Security: the Gemini key is NEVER read here. The browser only ever talks to
- * the same-origin `/api/explain` proxy; the key lives only in
- * `process.env.GEMINI_API_KEY` server-side.
  */
 async function _explainDay(dateStr, impact) {
   // Derive the observed change from the aggregate before/during levels the
@@ -933,7 +928,7 @@ function _renderPanel(state) {
     ? `<p class="event-panel__description">${_escape(ev.description)}</p>`
     : '';
 
-  // "Explain this day" UI (Feature B) — ONLY for synthetic day selections,
+  // "Explain this day" UI — ONLY for synthetic day selections,
   // never for curated events (those already carry a human-written
   // description). The button and result container are emitted together so the
   // panel layout doesn't shift between idle and post-click states; the

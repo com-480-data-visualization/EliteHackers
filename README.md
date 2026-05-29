@@ -18,7 +18,7 @@ Interactive exploration of 900 million NYC taxi trips (2015–2024) across Yello
 ## Final Deliverables
 
 - [Website](https://elitehackers-six.vercel.app)
-- [Process Book](milestone3/process_book.pdf)
+- [Process Book](milestone3/ProcessBook.pdf)
 - [Screen Cast](https://www.youtube.com/watch?v=yVMu4vhhtss)
 
 Earlier milestones: [Milestone 1](milestone1/Milestone1_intro.md) · [Milestone 2](milestone2/milestone2.pdf)
@@ -45,7 +45,7 @@ Earlier milestones: [Milestone 1](milestone1/Milestone1_intro.md) · [Milestone 
 ```bash
 cd web
 npm install && npm run build
-npx vercel dev  # (we avoid `npm run dev` since it won't work for ``Explain this day" feature as Vite serves only static frontend) 
+npx vercel dev  # (see the website locally, we avoid `npm run dev` since it won't work for ``Explain this day" feature as Vite serves only static frontend) 
 ```
 
 ### Download processed data from Huggingface (optional)
@@ -77,7 +77,8 @@ pip install -r requirements.txt
 
 bash run_pipeline.sh # full pipeline (several hours, preprocessed data already present in HuggingFace)
 
-# or generate only the web JSON after creating (or fetching) the preprocessed data:
+# generate only the web JSON after creating (or fetching) the preprocessed data:
+pip install polars
 python aggregations/make_milestone2_aggregations.py
 python aggregations/make_global_patterns.py
 ```

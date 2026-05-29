@@ -24,8 +24,7 @@ const TRANSITION_MS = 400;
 // short or shorter (≈4 months). Above this width, monthly aggregation reads
 // better and keeps render cost low.
 const DAILY_THRESHOLD_DAYS = 120;
-// App-wide valid range. daily_volume.json carries a few stray dates from raw
-// TLC parser leftovers — clamp here (mirrors V5's APP_RANGE clamp).
+// App-wide valid range.
 const APP_RANGE = [new Date('2015-01-01'), new Date('2024-12-31')];
 
 let _primaryInstance = null;
@@ -55,8 +54,7 @@ function _createInstance(container, { monthly, daily }) {
   let _areaGroup, _bandGroup, _fhvMarkGroup, _weekGridGroup, _clipId, _brushEl, _brush;
   let _currentTypes = new Set(TYPES);
   let _band = null; // { d0, d1, label } when active, else null
-  // Active wide array for the current render — read by the tooltip bisector
-  // so it always probes the right resolution.
+  // Active wide array for the current render
   let _activeWide = null;
 
   function _parse() {
@@ -81,8 +79,7 @@ function _createInstance(container, { monthly, daily }) {
     // `dateRange` is set. Must remain constant across resolution switches.
     _xDomain = d3.extent(_wideMonthly, d => d.month);
 
-    // Daily — same shape, keyed by day. Clamp to APP_RANGE to drop stray
-    // dates the parser left behind in raw TLC files (mirrors V5).
+    // Daily — same shape, keyed by day.
     const parsedDaily = (daily || []).map(d => ({
       month: d3.timeParse('%Y-%m-%d')(d.date),
       type:  d.type,
