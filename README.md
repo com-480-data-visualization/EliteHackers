@@ -5,7 +5,7 @@ COM-480 Data Visualization · Spring 2026
 Interactive exploration of 900 million NYC taxi trips (2015–2024) across Yellow, Green, and FHV vehicle types.
 
 <p align="center">
-  <img src="readme_image.jpg" alt="NYC taxis at night" width="100%">
+  <img src="readme_image.png" alt="NYC taxis at night" width="100%">
 </p>
 
 ## 👥 Students
