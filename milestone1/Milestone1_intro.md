@@ -3,7 +3,6 @@
 
 | Student's name        | SCIPER |
 | --------------------- | ------ |
-| Debajyoti Dasgupta    | 416472 |
 | Paola Biocchi         | 340437 |
 | Siba Smarak Panigrahi | 352339 |
 
